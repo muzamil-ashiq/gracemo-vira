@@ -1,0 +1,48 @@
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Databases & Runtime State (Keep clean)
+*.db
+*.db-wal
+*.db-shm
+*.db.bak
+*.sock
+*.log
+
+# Audio & Temporary Media
+*.wav
+*.mp3
+*.pcm
+
+# Machine Learning & Model Weights (Downloaded on demand)
+models/
+*.pt
+*.onnx
+*.engine
+*.bin
+*.safetensors
+
+# ROS 2 Colcon Artifacts
+install/
+log/
+COLCON_IGNORE
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
