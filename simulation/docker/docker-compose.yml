@@ -1,0 +1,18 @@
+services:
+  ros2-sim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gracemo-sim
+    runtime: nvidia
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_QPA_PLATFORM=xcb
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ../..:/workspace/gracemo-vira
+    devices:
+      - /dev/dri:/dev/dri
+    network_mode: host
+    ipc: host
+    command: bash

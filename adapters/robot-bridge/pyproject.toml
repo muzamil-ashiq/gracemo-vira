@@ -1,0 +1,9 @@
+[project]
+name = "gracemo-bridge"
+version = "0.1.0"
+description = "ROS2 / Robot Hardware Bridge Adapter for GRaCEmo Kernel"
+requires-python = ">=3.10"
+dependencies = [
+    "gracemo-sdk",
+    "rclpy",
+]

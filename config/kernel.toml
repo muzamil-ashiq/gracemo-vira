@@ -1,0 +1,24 @@
+[daemon]
+instance_name = "gracemo-main"
+tick_interval_ms = 1000
+
+[event_bus]
+capacity = 2048
+
+[network]
+http_bind = "127.0.0.1:7780"
+rate_limit_per_conn = 100
+rate_limit_global = 2000
+
+[storage]
+db_path = "~/.gracemo/ledger.db"
+graph_path = "~/.gracemo/graph.db"
+retention_days = 30
+
+[filters]
+high_priority_events = [
+    "ErrorDetected",
+    "ObstacleDetected",
+    "ActionRequested",
+    "VoiceDetected",
+]

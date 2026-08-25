@@ -1,0 +1,19 @@
+[project]
+name = "gracemo-adapters"
+version = "0.1.0"
+description = "Workspace for GRaCEmo ViRa Python Adapters"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "sdk",
+    "robot-bridge",
+    "vision",
+    "voice",
+    "brain",
+]
+
+[tool.uv.sources]
+gracemo-sdk = { workspace = true }
