@@ -1,6 +1,6 @@
 [project]
 name = "gracemo-voice"
-version = "0.1.0"
+version = "0.0.1"
 description = "Voice Speech-to-Text & Text-to-Speech Adapter for GRaCEmo Kernel"
 requires-python = ">=3.10"
 dependencies = [

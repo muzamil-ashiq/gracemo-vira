@@ -1,6 +1,6 @@
 [project]
 name = "gracemo-adapters"
-version = "0.1.0"
+version = "0.0.1"
 description = "Workspace for GRaCEmo ViRa Python Adapters"
 readme = "README.md"
 requires-python = ">=3.10"

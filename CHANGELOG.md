@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - 2026-08-25 (Project Skeleton & Architecture Baseline) 🏗️
+## [0.0.1] - 2026-08-25 (Project Skeleton & Architecture Baseline) 🏗️
 
 ### Added
 - **Core Repository Skeleton**: Established modular layout separating `kernel/` (Rust), `adapters/` (Python), `simulation/` (ROS2/Gazebo), and `config/`.
