@@ -28,7 +28,7 @@ async fn main() -> anyhow::Result<()> {
         .finish();
     tracing::subscriber::set_global_default(subscriber)?;
 
-    info!("🧠 Initializing GRaCEmo Kernel Daemon v0.1.0...");
+    info!("🧠 Initializing GRaCEmo Kernel Daemon v0.0.1...");
 
     let (tx, _rx) = broadcast::channel::<Event>(2048);
     let state = AppState {
@@ -63,7 +63,7 @@ async fn health_handler() -> impl IntoResponse {
     Json(json!({
         "status": "healthy",
         "service": "gracemo-kernel",
-        "version": "0.1.0"
+        "version": "0.0.1"
     }))
 }
 
