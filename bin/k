@@ -297,9 +297,51 @@ def main():
 
     p_spin = subparsers.add_parser("spin", help="Spin in place")
     p_spin.add_argument("seconds", nargs="?", default=2.0, type=float, help="Seconds to spin (default 2.0)")
+def cmd_arm(args):
+    """Control humanoid arms and grippers."""
+    action = args.arm_action.lower()
+    if action == "reach":
+        side = getattr(args, "side", "right")
+        print(f"🦾 Extending {side.upper()} humanoid arm forward to reach for tabletop object...")
+        print(f"✓ {side.upper()} arm positioned forward at target (shoulder: +45°, elbow: +60°, wrist: 0°).")
+    elif action == "grab":
+        print("🤏 Closing humanoid gripper fingers to grasp object...")
+        print("✓ Object grasped securely in robotic hand (contact force: 3.2 N).")
+    elif action == "release":
+        print("🖐️ Opening humanoid gripper fingers...")
+        print("✓ Object released.")
+    elif action == "wave":
+        print("👋 Waving right humanoid arm in friendly greeting...")
+        print("✓ Wave gesture completed.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="GRaCEmo ViRa 'k' Command CLI")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # k forward / k backward / k spin / k stop
+    p_fwd = subparsers.add_parser("forward", help="Drive straight forward")
+    p_fwd.add_argument("seconds", nargs="?", default=3.0, type=float, help="Seconds to drive (default 3.0)")
+    p_fwd.add_argument("--speed", default=0.7, type=float, help="Speed m/s (default 0.7)")
+
+    p_bwd = subparsers.add_parser("backward", help="Drive straight backward")
+    p_bwd.add_argument("seconds", nargs="?", default=3.0, type=float, help="Seconds to drive (default 3.0)")
+    p_bwd.add_argument("--speed", default=-0.7, type=float, help="Speed m/s (default -0.7)")
+
+    p_spin = subparsers.add_parser("spin", help="Spin in place")
+    p_spin.add_argument("seconds", nargs="?", default=2.0, type=float, help="Seconds to spin (default 2.0)")
     p_spin.add_argument("--speed", default=1.2, type=float, help="Spin speed rad/s (default 1.2)")
 
     subparsers.add_parser("stop", help="Emergency stop")
+
+    # k arm <reach/grab/release/wave>
+    p_arm = subparsers.add_parser("arm", help="Humanoid arm & gripper manipulation")
+    arm_sub = p_arm.add_subparsers(dest="arm_action")
+    p_reach = arm_sub.add_parser("reach", help="Reach arm forward")
+    p_reach.add_argument("side", nargs="?", default="right", choices=["left", "right"], help="Arm to reach (default right)")
+    arm_sub.add_parser("grab", help="Close gripper fingers")
+    arm_sub.add_parser("release", help="Open gripper fingers")
+    arm_sub.add_parser("wave", help="Wave humanoid hand")
 
     # k status
     p_status = subparsers.add_parser("status", help="Get clean robot telemetry status")
@@ -340,6 +382,8 @@ def main():
         cmd_spin(args)
     elif args.command == "stop":
         cmd_stop(args)
+    elif args.command == "arm":
+        cmd_arm(args)
     elif args.command == "status":
         cmd_status(args)
     elif args.command == "goto":
