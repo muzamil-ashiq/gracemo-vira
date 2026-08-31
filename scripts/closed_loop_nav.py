@@ -2,8 +2,8 @@
 """
 GRaCEmo ViRa — Closed-Loop Dynamic APF & Odometry Navigator
 Pure closed-loop feedback: reads live /odom and /scan at 20Hz.
-Uses Artificial Potential Fields (APF) to dynamically steer through doorway centers
-and repel from walls, completely eliminating open-loop timer drift.
+Uses Artificial Potential Fields (APF) to dynamically steer through doorway centers,
+repel from walls, and smoothly park in front of room furniture without circling.
 """
 
 import sys
@@ -18,11 +18,12 @@ import requests
 
 KERNEL_URL = "http://127.0.0.1:7780"
 
+# Spacious parking spots in front of room furniture (0.8m clearance)
 ROOM_WAYPOINTS = {
-    "kitchen":  [(3.6, 0.0), (3.6, 2.0), (4.2, 3.6)],
-    "bedroom":  [(-2.3, 0.0), (-2.3, 2.0), (-4.5, 4.0)],
-    "living":   [(4.0, 0.0), (4.0, -2.0), (4.2, -4.0)],
-    "study":    [(-1.3, 0.0), (-1.3, -2.0), (-4.5, -4.0)],
+    "kitchen":  [(3.6, 0.0), (3.6, 1.8), (3.6, 2.8)],
+    "bedroom":  [(-2.3, 0.0), (-2.3, 1.8), (-3.8, 3.2)],
+    "living":   [(4.0, 0.0), (4.0, -1.8), (3.6, -3.0)],
+    "study":    [(-1.3, 0.0), (-1.3, -1.8), (-3.5, -3.0)],
     "hallway":  [(0.0, 0.0)]
 }
 
@@ -73,60 +74,82 @@ class ClosedLoopNavigator(Node):
             return
 
         if self.current_wp_idx >= len(self.waypoints):
-            self.reached = True
-            self.cmd_pub.publish(Twist())
-            self.get_logger().info(f"✅ Arrived at {self.target_room.upper()} destination!")
-            # Emit arrival to Kernel
-            try:
-                requests.post(f"{KERNEL_URL}/emit", json={"event_type": "RobotArrived", "payload": {"room": self.target_room}, "source": "ClosedLoopNav"}, timeout=0.5)
-            except Exception:
-                pass
-            rclpy.shutdown()
+            self._stop_and_finish()
             return
 
         target_x, target_y = self.waypoints[self.current_wp_idx]
+        is_final_wp = (self.current_wp_idx == len(self.waypoints) - 1)
 
         dx = target_x - self.cur_x
         dy = target_y - self.cur_y
         dist = math.hypot(dx, dy)
 
-        # Waypoint reached threshold
-        if dist < 0.35:
-            self.current_wp_idx += 1
-            self.get_logger().info(f"✓ Waypoint {self.current_wp_idx}/{len(self.waypoints)} reached. Progressing...")
-            return
+        # Check front obstacle clearance
+        min_front_obs = 12.0
+        if self.latest_scan and self.latest_scan.ranges:
+            ranges = self.latest_scan.ranges
+            ang_min = self.latest_scan.angle_min
+            inc = self.latest_scan.angle_increment
+            front_readings = []
+            for i, r in enumerate(ranges):
+                if 0.15 < r < 12.0 and not math.isnan(r) and not math.isinf(r):
+                    beam_angle = ang_min + i * inc
+                    if -0.40 <= beam_angle <= 0.40:
+                        front_readings.append(r)
+            if front_readings:
+                min_front_obs = min(front_readings)
+
+        # Waypoint arrival conditions
+        arrival_threshold = 0.55 if is_final_wp else 0.40
+        if dist < arrival_threshold or (is_final_wp and dist < 0.85 and min_front_obs < 0.70):
+            if is_final_wp:
+                self._stop_and_finish()
+                return
+            else:
+                self.current_wp_idx += 1
+                self.get_logger().info(f"✓ Doorway cleared! Waypoint {self.current_wp_idx}/{len(self.waypoints)} reached.")
+                return
 
         target_heading = math.atan2(dy, dx)
         angle_diff = (target_heading - self.cur_yaw + math.pi) % (2 * math.pi) - math.pi
 
-        # 1. Attractive force
         twist = Twist()
 
-        # 2. LiDAR Wall Repulsion (Safety Bubble)
+        # LiDAR Wall Repulsion (Safety Bubble)
         repulse_angular = 0.0
         if self.latest_scan and self.latest_scan.ranges:
             ranges = self.latest_scan.ranges
             ang_min = self.latest_scan.angle_min
             inc = self.latest_scan.angle_increment
             for i, r in enumerate(ranges):
-                if 0.15 < r < 0.55:  # Wall is close
+                if 0.15 < r < 0.50:  # Wall is close
                     beam_angle = ang_min + i * inc
-                    # If obstacle on left (+angle), push right (-angular); if right (-angle), push left (+angular)
-                    weight = (0.55 - r) / 0.55
-                    repulse_angular += -1.5 * weight * math.sin(beam_angle)
+                    weight = (0.50 - r) / 0.50
+                    repulse_angular += -1.2 * weight * math.sin(beam_angle)
 
-        # 3. Closed-loop PID Heading & Speed
-        if abs(angle_diff) > 0.50:
-            # Turn in place toward target
+        if abs(angle_diff) > 0.45:
+            # Heading alignment turn
             twist.linear.x = 0.05
-            twist.angular.z = (1.2 if angle_diff > 0 else -1.2) + repulse_angular
+            twist.angular.z = (1.1 if angle_diff > 0 else -1.1) + (0.5 * repulse_angular)
         else:
-            # Drive forward with proportional steering
-            speed = min(0.65, max(0.20, 0.8 * dist))
+            # Smooth proportional driving
+            speed = min(0.60, max(0.18, 0.75 * dist))
+            if is_final_wp and dist < 1.0:
+                speed = 0.30  # Slow down smoothly when parking
             twist.linear.x = speed
-            twist.angular.z = 1.4 * angle_diff + repulse_angular
+            twist.angular.z = 1.3 * angle_diff + repulse_angular
 
         self.cmd_pub.publish(twist)
+
+    def _stop_and_finish(self):
+        self.reached = True
+        self.cmd_pub.publish(Twist())  # Clean stop
+        self.get_logger().info(f"✅ Safely parked in {self.target_room.upper()}!")
+        try:
+            requests.post(f"{KERNEL_URL}/emit", json={"event_type": "RobotArrived", "payload": {"room": self.target_room}, "source": "ClosedLoopNav"}, timeout=0.5)
+        except Exception:
+            pass
+        rclpy.shutdown()
 
 
 def main():
