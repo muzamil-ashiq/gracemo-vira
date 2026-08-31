@@ -7,21 +7,21 @@
 
   <gazebo>
     <!-- Scene Broadcaster (Required for rendering) -->
-    <plugin filename="ignition-gazebo-scene-broadcaster-system" name="ignition::gazebo::systems::SceneBroadcaster" />
+    <plugin filename="ignition-gazebo-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
 
     <!-- Sensor System (Required for Camera, Lidar, IMU) -->
-    <plugin filename="ignition-gazebo-sensors-system" name="ignition::gazebo::systems::Sensors">
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
 
     <!-- IMU System -->
-    <plugin filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu" />
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu" />
 
     <!-- Joint State Publisher System -->
-    <plugin filename="ignition-gazebo-joint-state-publisher-system" name="ignition::gazebo::systems::JointStatePublisher" />
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher" />
 
     <!-- Differential Drive System -->
-    <plugin filename="ignition-gazebo-diff-drive-system" name="ignition::gazebo::systems::DiffDrive">
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
       <wheel_separation>0.32</wheel_separation>
@@ -42,7 +42,7 @@
     </plugin>
 
     <!-- Left Shoulder Pitch Joint Position Controller -->
-    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
       <joint_name>left_shoulder_pitch_joint</joint_name>
       <topic>/left_arm/shoulder_cmd</topic>
       <p_gain>30.0</p_gain>
@@ -51,7 +51,7 @@
     </plugin>
 
     <!-- Right Shoulder Pitch Joint Position Controller -->
-    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
       <joint_name>right_shoulder_pitch_joint</joint_name>
       <topic>/right_arm/shoulder_cmd</topic>
       <p_gain>30.0</p_gain>
@@ -60,7 +60,7 @@
     </plugin>
 
     <!-- Left Elbow Joint Position Controller -->
-    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
       <joint_name>left_elbow_joint</joint_name>
       <topic>/left_arm/elbow_cmd</topic>
       <p_gain>20.0</p_gain>
@@ -69,7 +69,7 @@
     </plugin>
 
     <!-- Right Elbow Joint Position Controller -->
-    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
       <joint_name>right_elbow_joint</joint_name>
       <topic>/right_arm/elbow_cmd</topic>
       <p_gain>20.0</p_gain>
@@ -78,7 +78,7 @@
     </plugin>
 
     <!-- Head Pan & Tilt Position Controllers -->
-    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
       <joint_name>neck_pan_joint</joint_name>
       <topic>/head/pan_cmd</topic>
       <p_gain>15.0</p_gain>
@@ -86,7 +86,7 @@
       <d_gain>0.5</d_gain>
     </plugin>
 
-    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
       <joint_name>head_tilt_joint</joint_name>
       <topic>/head/tilt_cmd</topic>
       <p_gain>15.0</p_gain>
