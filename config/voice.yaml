@@ -1,0 +1,39 @@
+# ==============================================================================
+# GRaCEmo ViRa — Voice Interaction & Audio Engine Configuration
+# ==============================================================================
+
+wake_word:
+  enabled: true
+  engine: "openwakeword"         # Options: openwakeword | vosk
+  model: "hey_jarvis"            # Model: hey_jarvis | alexa | hey_mycroft | custom
+  threshold: 0.50                # Activation confidence threshold
+  vad_gated: true                # Use Silero VAD before wake word to reduce CPU
+
+stt:
+  engine: "faster-whisper"       # Options: faster-whisper | vosk | whisper.cpp
+  model_size: "tiny.en"          # Options: tiny.en (~80ms) | base.en | small.en
+  device: "cpu"                  # Options: cpu (int8) | cuda (float16)
+  compute_type: "int8"           # Options: int8 | float16
+  sample_rate: 16000             # Whisper native sample rate
+  no_speech_threshold: 0.60
+  beam_size: 1
+
+vad:
+  engine: "silero"               # Options: silero | webrtc | energy
+  enabled: true
+  threshold: 0.35                # Speech probability threshold (0.0 to 1.0)
+  min_silence_duration_ms: 300   # Silence ms before cutting sentence
+  speech_pad_ms: 30              # Padding ms around speech edges
+
+tts:
+  engine: "edge-tts"             # Options: kokoro (Local GPU <80ms) | edge-tts (Cloud Neural)
+  voice: "en-US-JennyNeural"     # Voice: en-US-JennyNeural, en-US-GuyNeural, af_sarah (kokoro)
+  rate: "+12%"                   # Natural brisk rate (+12%)
+  volume: "+0%"
+  pitch: "+0Hz"
+
+audio_io:
+  hw_sample_rate: 48000          # Hardware capture rate (48000Hz on laptop)
+  preferred_device_match: "sof-hda-dsp" # Device name filter for physical mic
+  chime_enabled: true
+  chime_volume: 0.10

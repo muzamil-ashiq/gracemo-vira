@@ -1,0 +1,21 @@
+# ==============================================================================
+# GRaCEmo ViRa — Brain & Reasoning Engine Configuration
+# ==============================================================================
+
+llm:
+  provider: "nvidia"             # Options: nvidia | gemini | ollama | vllm | mock
+  model: "google/diffusiongemma-26b-a4b-it"  # Active fast LLM model
+  base_url: "https://integrate.api.nvidia.com/v1"
+  api_key_env: "NVIDIA_API_KEY"
+  api_key: "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"
+  temperature: 0.2
+  max_tokens: 35
+  timeout_sec: 5.0
+
+memory:
+  dialogue_history_turns: 4      # Number of multi-turn conversation turns to retain
+  use_ledger_context: true       # Inject persistent SQLite ledger facts into prompt
+  user_name: "Muzamil"
+
+prompts:
+  system: "You are ViRa, an autonomous AI robot. Ground your replies in sensory state. Reply in 1 concise, direct spoken sentence."

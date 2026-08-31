@@ -37,6 +37,10 @@ models/
 # ROS 2 Colcon Artifacts
 install/
 log/
+build/
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
 COLCON_IGNORE
 
 # IDE & OS

@@ -29,8 +29,7 @@ class AdapterClient:
         try:
             resp = requests.post(f"{self.base_url}/emit", json=payload, timeout=2.0)
             return resp.status_code == 200
-        except Exception as e:
-            print(f"⚠️ [{self.adapter_name}] Failed to emit event: {e}")
+        except Exception:
             return False
 
     def get_snapshot(self) -> Optional[Dict[str, Any]]:
@@ -39,8 +38,8 @@ class AdapterClient:
             resp = requests.get(f"{self.base_url}/snapshot", timeout=2.0)
             if resp.status_code == 200:
                 return resp.json()
-        except Exception as e:
-            print(f"⚠️ [{self.adapter_name}] Failed to fetch snapshot: {e}")
+        except Exception:
+            pass
         return None
 
     def listen_actions(self) -> Generator[Dict[str, Any], None, None]:
@@ -61,5 +60,5 @@ class AdapterClient:
                         yield event_type.get("data", {})
                 except Exception:
                     continue
-        except Exception as e:
-            print(f"⚠️ [{self.adapter_name}] SSE connection lost: {e}")
+        except Exception:
+            pass

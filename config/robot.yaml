@@ -1,0 +1,28 @@
+# ==============================================================================
+# GRaCEmo ViRa — Physical Robot & Motor Control Configuration
+# ==============================================================================
+
+kinematics:
+  type: "differential_drive"
+  wheel_separation_m: 0.32       # Distance between left and right drive wheels in meters
+  wheel_radius_m: 0.065          # Drive wheel radius in meters
+  max_linear_velocity_mps: 0.8   # Max forward/backward speed (m/s)
+  max_angular_velocity_radps: 1.5 # Max turn speed (rad/s)
+
+head:
+  pan_range_deg: [-90, 90]
+  tilt_range_deg: [-30, 45]
+  default_pan_deg: 0
+  default_tilt_deg: 10
+
+hardware_interface:
+  type: "serial_microros"        # Options: serial_microros | mock | direct_serial
+  port: "/dev/ttyUSB0"
+  baudrate: 115200
+  timeout_sec: 1.0
+  watchdog_timeout_ms: 500
+
+safety:
+  emergency_stop_enabled: true
+  min_obstacle_distance_m: 0.25
+  low_battery_threshold_v: 10.5

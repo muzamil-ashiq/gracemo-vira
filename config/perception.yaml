@@ -1,0 +1,49 @@
+# ==============================================================================
+# GRaCEmo ViRa — Perception & Computer Vision Configuration
+# ==============================================================================
+
+camera:
+  source: 0                      # Camera device index (/dev/video0) or RTSP URL / test video path
+  width: 640                     # Input resolution width
+  height: 480                    # Input resolution height
+  fps: 30                        # Capture framerate
+  fallback_simulation: true      # If camera is blocked/unavailable, run simulated presence mode
+
+detector:
+  engine: "yolo"                 # Options: yolo | rt-detr | ssd
+  model: "yolo11n.pt"            # Swappable YOLO weights: yolo11n.pt, yolo11s.pt, yolo11m.pt
+  device: "cuda:0"               # Device: cuda:0 | cpu
+  confidence_threshold: 0.45     # Minimum object detection confidence
+  classes_of_interest:
+    - "person"
+    - "chair"
+    - "bottle"
+    - "cup"
+    - "cell phone"
+    - "laptop"
+    - "backpack"
+
+tracker:
+  enabled: true                  # Multi-object tracking (ByteTrack / BoT-SORT)
+  engine: "bytetrack"            # Options: bytetrack | botsort
+  track_thresh: 0.45             # Tracking confidence threshold
+  match_thresh: 0.80             # IOU association threshold
+  track_buffer_frames: 30        # Frames to keep lost track alive across occlusions
+
+face_recognition:
+  enabled: true
+  engine: "yunet"                # Options: yunet | arcface | insightface
+  model_path: "models/face_detection_yunet_2023mar.onnx"
+  database_path: "models/enrolled_faces.json"
+  default_user_name: "Muzamil"
+  match_threshold: 0.55          # Cosine distance / confidence threshold
+
+spatial:
+  estimate_3d: true              # Estimate real-world (X, Y, Z) distance in meters
+  camera_focal_length_px: 550.0  # Approx focal length for 640x480 webcam
+  reference_face_width_m: 0.15   # Average human face width in meters
+  min_distance_m: 0.3
+  max_distance_m: 5.0
+
+throttling:
+  min_emit_interval_sec: 0.3     # Throttling rate for event emission to Kernel

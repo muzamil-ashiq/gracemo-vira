@@ -14,6 +14,17 @@ pub enum EventSource {
     Custom(String),
 }
 
+/// Action types dispatched by the Kernel to actuators / adapters
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "action", content = "params")]
+pub enum RobotAction {
+    Speak { text: String },
+    NavigateTo { x: f64, y: f64 },
+    LookAt { x: f32, y: f32, z: f32 },
+    Express { emotion: String },
+    Stop,
+}
+
 /// Strongly-typed event payloads for physical awareness and reasoning
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", content = "data")]
@@ -62,9 +73,7 @@ pub enum EventType {
     },
 
     // ACTUATION: Actions Requested by Brain or Reflex Loops
-    ActionRequested {
-        action: RobotAction,
-    },
+    ActionRequested(RobotAction),
 
     // SYSTEM / LIFECYCLE
     AdapterConnected {
@@ -81,17 +90,6 @@ pub enum EventType {
         name: String,
         payload: serde_json::Value,
     },
-}
-
-/// Action types dispatched by the Kernel to actuators / adapters
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "action", content = "params")]
-pub enum RobotAction {
-    Speak { text: String },
-    NavigateTo { x: f64, y: f64 },
-    LookAt { x: f32, y: f32, z: f32 },
-    Express { emotion: String },
-    Stop,
 }
 
 /// Canonical Event Envelope passing through Tokio EventBus

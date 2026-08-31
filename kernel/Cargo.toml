@@ -28,3 +28,4 @@ axum = { version = "0.7", features = ["macros"] }
 tower-http = { version = "0.5", features = ["cors", "trace"] }
 reqwest = { version = "0.12", features = ["json"] }
 toml = "0.8"
+rusqlite = { version = "0.32", features = ["bundled"] }
