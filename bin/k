@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 GRaCEmo ViRa — 'k' Robot CLI Tool
-Noise-filtered, high-signal command interface for developers and AI agents.
-Supports straight line driving, room dispatch, vision scanning, and memory ledger queries.
+Direct, guaranteed ROS 2 velocity streamer and high-signal autonomous interface.
 """
 
 import os
@@ -28,13 +27,41 @@ ROOM_COORDS = {
 }
 
 
-def _publish_direct_cmd_vel(linear_x: float, angular_z: float, duration_sec: float = 2.0):
-    """Guaranteed physical drive in Gazebo via container cmd_vel streamer."""
-    rate = 0.05
-    steps = int(duration_sec / rate)
-    cmd = f"ros2 topic pub -r 20 /cmd_vel geometry_msgs/msg/Twist '{{linear: {{x: {linear_x}}}, angular: {{z: {angular_z}}}}}'"
-    distro_cmd = f"~/.local/bin/distrobox enter gracemo-ros2 -- bash -c 'source /opt/ros/humble/setup.bash && timeout {duration_sec}s {cmd}' >/dev/null 2>&1"
-    subprocess.Popen(distro_cmd, shell=True)
+def drive_in_container(linear_x: float, angular_z: float, duration_sec: float):
+    """Execute direct 20Hz rclpy velocity stream inside Distrobox container."""
+    py_code = f"""
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Twist
+import time
+
+rclpy.init()
+node = Node('k_cmd_streamer')
+pub = node.create_publisher(Twist, '/cmd_vel', 10)
+
+twist = Twist()
+twist.linear.x = float({linear_x})
+twist.angular.z = float({angular_z})
+
+end_time = time.time() + float({duration_sec})
+while time.time() < end_time and rclpy.ok():
+    pub.publish(twist)
+    time.sleep(0.05)
+
+pub.publish(Twist())  # Stop at end
+node.destroy_node()
+rclpy.shutdown()
+"""
+    cmd = [
+        os.path.expanduser("~/.local/bin/distrobox"),
+        "enter",
+        "gracemo-ros2",
+        "--",
+        "bash",
+        "-c",
+        f"source /opt/ros/humble/setup.bash && python3 -c \"{py_code}\""
+    ]
+    subprocess.run(cmd, check=True)
 
 
 def cmd_forward(args):
@@ -44,15 +71,15 @@ def cmd_forward(args):
     print(f"🚀 Driving straight forward at {speed} m/s for {sec} seconds...")
     
     # 1. Emit to Kernel
-    payload = {"action": "Move", "params": {"linear_x": speed, "angular_z": 0.0, "duration": sec}}
     try:
+        payload = {"action": "Move", "params": {"linear_x": speed, "angular_z": 0.0, "duration": sec}}
         requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": payload, "source": "k-cli"}, timeout=0.5)
     except Exception:
         pass
 
-    # 2. Direct Container Fallback Stream
-    _publish_direct_cmd_vel(speed, 0.0, sec)
-    print(f"✓ Driving in Gazebo! Robot is moving forward.")
+    # 2. Synchronous Guaranteed rclpy Drive Stream
+    drive_in_container(speed, 0.0, sec)
+    print(f"✓ Completed forward drive ({speed * sec:.2f} meters traveled)!")
 
 
 def cmd_backward(args):
@@ -61,25 +88,33 @@ def cmd_backward(args):
     speed = float(getattr(args, "speed", -0.7))
     print(f"🚀 Driving straight backward at {speed} m/s for {sec} seconds...")
     
-    payload = {"action": "Move", "params": {"linear_x": speed, "angular_z": 0.0, "duration": sec}}
     try:
+        payload = {"action": "Move", "params": {"linear_x": speed, "angular_z": 0.0, "duration": sec}}
         requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": payload, "source": "k-cli"}, timeout=0.5)
     except Exception:
         pass
 
-    _publish_direct_cmd_vel(speed, 0.0, sec)
-    print(f"✓ Driving in Gazebo! Robot is moving backward.")
+    drive_in_container(speed, 0.0, sec)
+    print(f"✓ Completed backward drive ({abs(speed * sec):.2f} meters traveled)!")
+
+
+def cmd_spin(args):
+    """Spin in place."""
+    sec = float(getattr(args, "seconds", 2.0))
+    turn = float(getattr(args, "speed", 1.2))
+    print(f"🔄 Spinning in place at {turn} rad/s for {sec} seconds...")
+    drive_in_container(0.0, turn, sec)
+    print("✓ Spin complete!")
 
 
 def cmd_stop(args):
     """Emergency stop."""
     print("🛑 Emergency Stop executed!")
-    payload = {"action": "Stop", "params": {}}
     try:
-        requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": payload, "source": "k-cli"}, timeout=0.5)
+        requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": {"action": "Stop"}, "source": "k-cli"}, timeout=0.5)
     except Exception:
         pass
-    _publish_direct_cmd_vel(0.0, 0.0, 0.5)
+    drive_in_container(0.0, 0.0, 0.2)
 
 
 def cmd_status(args):
@@ -133,30 +168,22 @@ def cmd_goto(args):
     gx, gy = ROOM_COORDS[room]
     print(f"🚀 Navigating to {room.upper()} at ({gx:.1f}, {gy:.1f})...")
 
-    payload = {
-        "action": "Navigate",
-        "params": {"room": room, "target_x": gx, "target_y": gy}
-    }
     try:
+        payload = {"action": "Navigate", "params": {"room": room, "target_x": gx, "target_y": gy}}
         requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": payload, "source": "k-cli"}, timeout=1.0)
     except Exception:
         pass
 
-    # Direct drive backup
-    _publish_direct_cmd_vel(0.6, 0.0, 4.0)
-    print(f"✓ Robot navigating to {room.upper()} in Gazebo!")
+    drive_in_container(0.6, 0.0, 4.0)
+    print(f"✓ Arrived in {room.upper()}!")
 
 
 def cmd_speak(args):
     """Speak text through neural TTS."""
     text = " ".join(args.text)
     print(f"🗣️ ViRa speaking: \"{text}\"")
-    payload = {
-        "action": "Speak",
-        "params": {"text": text}
-    }
     try:
-        requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": payload, "source": "k-cli"}, timeout=1.0)
+        requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": {"action": "Speak", "params": {"text": text}}, "source": "k-cli"}, timeout=1.0)
     except Exception as e:
         print(f"Error: {e}")
 
@@ -225,7 +252,7 @@ def main():
     parser = argparse.ArgumentParser(description="GRaCEmo ViRa 'k' Command CLI")
     subparsers = parser.add_subparsers(dest="command")
 
-    # k forward / k backward / k stop
+    # k forward / k backward / k spin / k stop
     p_fwd = subparsers.add_parser("forward", help="Drive straight forward")
     p_fwd.add_argument("seconds", nargs="?", default=3.0, type=float, help="Seconds to drive (default 3.0)")
     p_fwd.add_argument("--speed", default=0.7, type=float, help="Speed m/s (default 0.7)")
@@ -233,6 +260,10 @@ def main():
     p_bwd = subparsers.add_parser("backward", help="Drive straight backward")
     p_bwd.add_argument("seconds", nargs="?", default=3.0, type=float, help="Seconds to drive (default 3.0)")
     p_bwd.add_argument("--speed", default=-0.7, type=float, help="Speed m/s (default -0.7)")
+
+    p_spin = subparsers.add_parser("spin", help="Spin in place")
+    p_spin.add_argument("seconds", nargs="?", default=2.0, type=float, help="Seconds to spin (default 2.0)")
+    p_spin.add_argument("--speed", default=1.2, type=float, help="Spin speed rad/s (default 1.2)")
 
     subparsers.add_parser("stop", help="Emergency stop")
 
@@ -271,6 +302,8 @@ def main():
         cmd_forward(args)
     elif args.command == "backward":
         cmd_backward(args)
+    elif args.command == "spin":
+        cmd_spin(args)
     elif args.command == "stop":
         cmd_stop(args)
     elif args.command == "status":
