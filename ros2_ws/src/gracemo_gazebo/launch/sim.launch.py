@@ -65,6 +65,7 @@ def generate_launch_description():
             name="ros_gz_bridge",
             output="screen",
             arguments=[
+                "/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock",
                 "/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist",
                 "/odom@nav_msgs/msg/Odometry[ignition.msgs.Odometry",
                 "/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
