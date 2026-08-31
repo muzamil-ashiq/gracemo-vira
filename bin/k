@@ -192,6 +192,16 @@ def cmd_arm(args):
         print("✓ Wave gesture completed.")
 
 
+def cmd_reload(args):
+    """Hot reload robot URDF and configs without restarting Gazebo."""
+    print("⚡ Hot-reloading robot model, URDF, and configs into Gazebo...")
+    cmd = [
+        "bash",
+        str(Path(__file__).resolve().parent.parent / "scripts" / "reload.sh")
+    ]
+    subprocess.run(cmd)
+
+
 def cmd_status(args):
     """Return clean, noise-free robot state."""
     try:
@@ -365,6 +375,9 @@ def main():
     p_status = subparsers.add_parser("status", help="Get clean robot telemetry status")
     p_status.add_argument("--json", action="store_true", help="Output as raw JSON")
 
+    # k reload
+    subparsers.add_parser("reload", help="Hot reload robot model & configs in Gazebo without restart")
+
     # k goto <room>
     p_goto = subparsers.add_parser("goto", help="Navigate autonomously to a room through doorway waypoints")
     p_goto.add_argument("room", help="Target room (kitchen, bedroom, living, study, hallway)")
@@ -404,6 +417,8 @@ def main():
         cmd_arm(args)
     elif args.command == "status":
         cmd_status(args)
+    elif args.command == "reload":
+        cmd_reload(args)
     elif args.command == "goto":
         cmd_goto(args)
     elif args.command == "speak":
