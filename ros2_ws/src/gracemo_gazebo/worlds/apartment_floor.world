@@ -175,34 +175,12 @@
     <!-- 🛏️ ROOM 1: MASTER BEDROOM (Top-Left)                                 -->
     <!-- ==================================================================== -->
 
-    <!-- Realistic Double Bed with Headboard & Blue Comforter -->
-    <model name="master_bed">
-      <static>true</static>
+    <!-- Photorealistic OpenRobotics 3D Mesh Double Bed -->
+    <include>
+      <uri>model://bed</uri>
+      <name>master_bed_3d</name>
       <pose>-5.2 4.4 0 0 0 0</pose>
-      <!-- Wooden Bedframe -->
-      <link name="frame">
-        <pose>0 0 0.15 0 0 0</pose>
-        <collision name="c"><geometry><box><size>2.1 1.7 0.30</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>2.1 1.7 0.30</size></box></geometry><material><ambient>0.4 0.25 0.15 1</ambient><diffuse>0.45 0.3 0.2 1</diffuse></material></visual>
-      </link>
-      <!-- Mattress & Blue Sheet -->
-      <link name="mattress">
-        <pose>0 0 0.38 0 0 0</pose>
-        <collision name="c"><geometry><box><size>1.95 1.55 0.20</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>1.95 1.55 0.20</size></box></geometry><material><ambient>0.15 0.35 0.65 1</ambient><diffuse>0.2 0.4 0.7 1</diffuse></material></visual>
-      </link>
-      <!-- Headboard -->
-      <link name="headboard">
-        <pose>1.0 0 0.55 0 0 0</pose>
-        <collision name="c"><geometry><box><size>0.1 1.7 0.9</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>0.1 1.7 0.9</size></box></geometry><material><ambient>0.35 0.2 0.1 1</ambient><diffuse>0.4 0.25 0.15 1</diffuse></material></visual>
-      </link>
-      <!-- Pillows -->
-      <link name="pillows">
-        <pose>0.7 0 0.52 0 0 0</pose>
-        <visual name="v"><geometry><box><size>0.4 1.2 0.1</size></box></geometry><material><ambient>0.95 0.95 0.95 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material></visual>
-      </link>
-    </model>
+    </include>
 
     <!-- Bedroom Wardrobe Closet -->
     <model name="bedroom_wardrobe">
@@ -228,22 +206,31 @@
     <!-- 🍳 ROOM 2: KITCHEN & DINING (Top-Right)                              -->
     <!-- ==================================================================== -->
 
-    <!-- Dining Table with Chairs -->
-    <model name="dining_table_set">
-      <static>true</static>
+    <!-- Photorealistic OpenRobotics 3D Mesh Dining Table -->
+    <include>
+      <uri>model://table</uri>
+      <name>dining_table_3d</name>
       <pose>4.2 3.8 0 0 0 0</pose>
-      <!-- Wooden Table Top -->
-      <link name="table_top">
-        <pose>0 0 0.74 0 0 0</pose>
-        <collision name="c"><geometry><box><size>1.6 1.0 0.05</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>1.6 1.0 0.05</size></box></geometry><material><ambient>0.5 0.3 0.15 1</ambient><diffuse>0.6 0.38 0.2 1</diffuse></material></visual>
-      </link>
-      <!-- 4 Table Legs -->
-      <link name="leg1"><pose>0.7 0.4 0.36 0 0 0</pose><collision name="c"><geometry><cylinder radius="0.03" length="0.72"/></geometry></collision><visual name="v"><geometry><cylinder radius="0.03" length="0.72"/></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
-      <link name="leg2"><pose>-0.7 0.4 0.36 0 0 0</pose><collision name="c"><geometry><cylinder radius="0.03" length="0.72"/></geometry></collision><visual name="v"><geometry><cylinder radius="0.03" length="0.72"/></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
-      <link name="leg3"><pose>0.7 -0.4 0.36 0 0 0</pose><collision name="c"><geometry><cylinder radius="0.03" length="0.72"/></geometry></collision><visual name="v"><geometry><cylinder radius="0.03" length="0.72"/></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
-      <link name="leg4"><pose>-0.7 -0.4 0.36 0 0 0</pose><collision name="c"><geometry><cylinder radius="0.03" length="0.72"/></geometry></collision><visual name="v"><geometry><cylinder radius="0.03" length="0.72"/></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
-    </model>
+    </include>
+
+    <!-- Photorealistic OpenRobotics 3D Mesh Coke Can on Dining Table -->
+    <include>
+      <uri>model://coke_can</uri>
+      <name>coke_can_3d</name>
+      <pose>4.2 3.8 0.77 0 0 0</pose>
+    </include>
+
+    <!-- Photorealistic OpenRobotics 3D Dining Chairs around Table -->
+    <include>
+      <uri>model://chair</uri>
+      <name>dining_chair_1</name>
+      <pose>4.2 3.1 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://chair</uri>
+      <name>dining_chair_2</name>
+      <pose>4.2 4.5 0 0 0 3.14</pose>
+    </include>
 
     <!-- Grabbable Water Bottle & Soda Can on Dining Table -->
     <model name="table_bottle">
@@ -252,15 +239,6 @@
         <collision name="c"><geometry><cylinder radius="0.04" length="0.22"/></geometry></collision>
         <visual name="v"><geometry><cylinder radius="0.04" length="0.22"/></geometry><material><ambient>0.1 0.6 0.9 1</ambient><diffuse>0.1 0.7 1.0 1</diffuse></material></visual>
         <inertial><mass value="0.3"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
-      </link>
-    </model>
-
-    <model name="table_can">
-      <pose>4.4 3.9 0.80 0 0 0</pose>
-      <link name="link">
-        <collision name="c"><geometry><cylinder radius="0.035" length="0.13"/></geometry></collision>
-        <visual name="v"><geometry><cylinder radius="0.035" length="0.13"/></geometry><material><ambient>0.9 0.1 0.1 1</ambient><diffuse>1.0 0.1 0.1 1</diffuse></material></visual>
-        <inertial><mass value="0.2"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
       </link>
     </model>
 
@@ -274,40 +252,23 @@
       </link>
     </model>
 
-    <!-- Stainless Steel Refrigerator -->
-    <model name="refrigerator">
-      <static>true</static>
-      <pose>7.4 2.0 0.95 0 0 0</pose>
-      <link name="link">
-        <collision name="c"><geometry><box><size>0.8 0.8 1.9</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>0.8 0.8 1.9</size></box></geometry><material><ambient>0.7 0.72 0.75 1</ambient><diffuse>0.8 0.82 0.85 1</diffuse><specular>0.5 0.5 0.5 1</specular></material></visual>
-      </link>
-    </model>
+    <!-- Photorealistic OpenRobotics 3D Mesh Refrigerator -->
+    <include>
+      <uri>model://refrigerator</uri>
+      <name>real_fridge_3d</name>
+      <pose>7.4 2.0 0 0 0 0</pose>
+    </include>
 
     <!-- ==================================================================== -->
     <!-- 🛋️ ROOM 3: LIVING ROOM & TV (Bottom-Right)                            -->
     <!-- ==================================================================== -->
 
-    <!-- Sectional Sofa (3-Seater with Cushions) -->
-    <model name="living_sofa">
-      <static>true</static>
+    <!-- Photorealistic OpenRobotics 3D Mesh Sectional Sofa -->
+    <include>
+      <uri>model://sofa</uri>
+      <name>real_sofa_3d</name>
       <pose>4.2 -4.6 0 0 0 0</pose>
-      <!-- Base -->
-      <link name="base">
-        <pose>0 0 0.22 0 0 0</pose>
-        <collision name="c"><geometry><box><size>2.4 0.9 0.44</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>2.4 0.9 0.44</size></box></geometry><material><ambient>0.25 0.3 0.35 1</ambient><diffuse>0.3 0.35 0.4 1</diffuse></material></visual>
-      </link>
-      <!-- Backrest -->
-      <link name="backrest">
-        <pose>0 -0.4 0.55 0 0 0</pose>
-        <collision name="c"><geometry><box><size>2.4 0.25 0.55</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>2.4 0.25 0.55</size></box></geometry><material><ambient>0.25 0.3 0.35 1</ambient><diffuse>0.3 0.35 0.4 1</diffuse></material></visual>
-      </link>
-      <!-- Armrests -->
-      <link name="arm_left"><pose>1.15 0 0.42 0 0 0</pose><visual name="v"><geometry><box><size>0.18 0.9 0.4</size></box></geometry><material><ambient>0.2 0.25 0.3 1</ambient></material></visual></link>
-      <link name="arm_right"><pose>-1.15 0 0.42 0 0 0</pose><visual name="v"><geometry><box><size>0.18 0.9 0.4</size></box></geometry><material><ambient>0.2 0.25 0.3 1</ambient></material></visual></link>
-    </model>
+    </include>
 
     <!-- Coffee Table -->
     <model name="coffee_table">
@@ -364,15 +325,12 @@
       </link>
     </model>
 
-    <!-- Multi-Shelf Bookshelf with Books -->
-    <model name="study_bookshelf">
-      <static>true</static>
-      <pose>-7.4 -3.5 1.0 0 0 0</pose>
-      <link name="link">
-        <collision name="c"><geometry><box><size>0.4 1.8 2.0</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>0.4 1.8 2.0</size></box></geometry><material><ambient>0.4 0.25 0.15 1</ambient><diffuse>0.45 0.3 0.2 1</diffuse></material></visual>
-      </link>
-    </model>
+    <!-- Photorealistic OpenRobotics 3D Mesh Bookshelf -->
+    <include>
+      <uri>model://bookshelf</uri>
+      <name>real_bookshelf_3d</name>
+      <pose>-7.4 -3.5 0 0 0 0</pose>
+    </include>
 
   </world>
 </sdf>

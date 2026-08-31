@@ -32,5 +32,11 @@ echo "Launching Modern Gazebo 3D Simulation & Kernel Bridge..."
     source $WS_DIR/install/setup.bash
     export DISPLAY='${DISPLAY:-:0}'
     export QT_X11_NO_MITSHM=1
+    MODELS_DIR='$WS_DIR/install/gracemo_gazebo/share/gracemo_gazebo/models'
+    FUEL_CACHE=\$HOME/.ignition/fuel/fuel.gazebosim.org/openrobotics/models
+    export IGN_GAZEBO_RESOURCE_PATH=\$MODELS_DIR:\$FUEL_CACHE
+    export GZ_SIM_RESOURCE_PATH=\$MODELS_DIR:\$FUEL_CACHE
+    export SDF_PATH=\$MODELS_DIR:\$FUEL_CACHE
+    echo '📦 Model resource path: '\$IGN_GAZEBO_RESOURCE_PATH
     ros2 launch gracemo_gazebo sim.launch.py
 "
