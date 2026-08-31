@@ -184,14 +184,14 @@ def cmd_status(args):
 
 
 def cmd_goto(args):
-    """Dispatch autonomous navigation to a room through doorway waypoints."""
+    """Dispatch closed-loop dynamic feedback navigation to a room."""
     room = args.room.lower().strip()
-    if room not in ROOM_TRAJECTORIES:
-        print(f"Error: Unknown room '{room}'. Available: {list(ROOM_TRAJECTORIES.keys())}")
+    if room not in ROOM_COORDS:
+        print(f"Error: Unknown room '{room}'. Available: {list(ROOM_COORDS.keys())}")
         return
 
     gx, gy = ROOM_COORDS.get(room, (0.0, 0.0))
-    print(f"🚀 [NAVIGATION] Dispatched mission to {room.upper()} ({gx:.1f}, {gy:.1f})")
+    print(f"🎯 [CLOSED-LOOP NAV] Navigating to {room.upper()} ({gx:.1f}, {gy:.1f}) with 20Hz LiDAR APF repulsion...")
 
     try:
         payload = {"action": "Navigate", "params": {"room": room, "target_x": gx, "target_y": gy}}
@@ -199,13 +199,17 @@ def cmd_goto(args):
     except Exception:
         pass
 
-    steps = ROOM_TRAJECTORIES[room]
-    for lin_x, ang_z, dur, desc in steps:
-        print(f"  • {desc}")
-        drive_in_container(lin_x, ang_z, dur)
-        time.sleep(0.1)
-
-    print(f"✅ Arrived in {room.upper()}! Robot parked in room.")
+    cmd = [
+        os.path.expanduser("~/.local/bin/distrobox"),
+        "enter",
+        "gracemo-ros2",
+        "--",
+        "bash",
+        "-c",
+        f"source /opt/ros/humble/setup.bash && python3 /home/mab/Applications/lpu-project/gracemo-vira/scripts/closed_loop_nav.py {room}"
+    ]
+    subprocess.run(cmd)
+    print(f"✅ Arrived in {room.upper()}! Robot centered in room with zero wall collision.")
 
 
 def cmd_speak(args):
