@@ -13,7 +13,7 @@ echo "  GRaCEmo ViRa — Autonomous Robotics Simulation (Modern Gazebo) "
 echo "================================================================="
 
 # 1. Clean up stale processes
-~/.local/bin/distrobox enter gracemo-ros2 -- bash -c "killall -9 gz-sim ruby ign 2>/dev/null || true" >/dev/null 2>&1 || true
+~/.local/bin/distrobox enter gracemo-ros2 -- bash -c "killall -9 gz-sim ruby ign kernel_bridge 2>/dev/null || true" >/dev/null 2>&1 || true
 fuser -k 7780/tcp 2>/dev/null || true
 
 # 2. Ensure Kernel is running
@@ -25,7 +25,14 @@ fi
 
 echo "✓ Kernel is online at http://127.0.0.1:7780"
 
-# 3. Launch Modern Gazebo Sim inside Distrobox
+# 3. Start ROS 2 Kernel Bridge in background inside Distrobox
+~/.local/bin/distrobox enter gracemo-ros2 -- bash -c "
+    source /opt/ros/humble/setup.bash
+    source $WS_DIR/install/setup.bash
+    ros2 run gracemo_bridge kernel_bridge >/dev/null 2>&1 &
+" &
+
+# 4. Launch Modern Gazebo Sim inside Distrobox
 echo "Launching Modern Gazebo 3D Simulation..."
 ~/.local/bin/distrobox enter gracemo-ros2 -- bash -c "
     source /opt/ros/humble/setup.bash
