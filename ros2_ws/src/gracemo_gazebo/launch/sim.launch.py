@@ -65,6 +65,12 @@ def generate_launch_description():
             name="ros_gz_bridge",
             output="screen",
             arguments=[
+                "/left_arm/shoulder_cmd@std_msgs/msg/Float64]ignition.msgs.Double",
+                "/right_arm/shoulder_cmd@std_msgs/msg/Float64]ignition.msgs.Double",
+                "/left_arm/elbow_cmd@std_msgs/msg/Float64]ignition.msgs.Double",
+                "/right_arm/elbow_cmd@std_msgs/msg/Float64]ignition.msgs.Double",
+                "/head/pan_cmd@std_msgs/msg/Float64]ignition.msgs.Double",
+                "/head/tilt_cmd@std_msgs/msg/Float64]ignition.msgs.Double",
                 "/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock",
                 "/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist",
                 "/odom@nav_msgs/msg/Odometry[ignition.msgs.Odometry",

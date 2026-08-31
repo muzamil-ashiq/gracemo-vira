@@ -40,6 +40,59 @@
       <child_frame_id>base_footprint</child_frame_id>
       <odom_publish_frequency>50</odom_publish_frequency>
     </plugin>
+
+    <!-- Left Shoulder Pitch Joint Position Controller -->
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>left_shoulder_pitch_joint</joint_name>
+      <topic>/left_arm/shoulder_cmd</topic>
+      <p_gain>30.0</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>1.5</d_gain>
+    </plugin>
+
+    <!-- Right Shoulder Pitch Joint Position Controller -->
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>right_shoulder_pitch_joint</joint_name>
+      <topic>/right_arm/shoulder_cmd</topic>
+      <p_gain>30.0</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>1.5</d_gain>
+    </plugin>
+
+    <!-- Left Elbow Joint Position Controller -->
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>left_elbow_joint</joint_name>
+      <topic>/left_arm/elbow_cmd</topic>
+      <p_gain>20.0</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>1.0</d_gain>
+    </plugin>
+
+    <!-- Right Elbow Joint Position Controller -->
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>right_elbow_joint</joint_name>
+      <topic>/right_arm/elbow_cmd</topic>
+      <p_gain>20.0</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>1.0</d_gain>
+    </plugin>
+
+    <!-- Head Pan & Tilt Position Controllers -->
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>neck_pan_joint</joint_name>
+      <topic>/head/pan_cmd</topic>
+      <p_gain>15.0</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>0.5</d_gain>
+    </plugin>
+
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>head_tilt_joint</joint_name>
+      <topic>/head/tilt_cmd</topic>
+      <p_gain>15.0</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>0.5</d_gain>
+    </plugin>
   </gazebo>
 
   <!-- ======================================================================== -->

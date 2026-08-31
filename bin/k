@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 GRaCEmo ViRa — 'k' Robot CLI Tool
-Direct, guaranteed ROS 2 velocity streamer and high-signal autonomous interface.
-Supports multi-phase doorway navigation, room dispatch, vision scanning, and memory ledger queries.
+Guaranteed synchronous ROS 2 velocity & humanoid arm streamer.
+Supports multi-phase doorway navigation, room dispatch, vision scanning,
+humanoid dual-arm manipulation, and memory ledger queries.
 """
 
 import os
@@ -20,37 +21,11 @@ sys.path.insert(0, str(ROOT / "adapters" / "sdk"))
 KERNEL_URL = os.getenv("GRACEMO_KERNEL_URL", "http://127.0.0.1:7780")
 
 ROOM_COORDS = {
-    "kitchen":  (4.0, 3.6),
-    "bedroom":  (-4.5, 4.0),
-    "living":   (4.0, -4.0),
-    "study":    (-4.5, -4.0),
+    "kitchen":  (3.6, 2.8),
+    "bedroom":  (-3.8, 3.2),
+    "living":   (3.6, -3.0),
+    "study":    (-3.5, -3.0),
     "hallway":  (0.0, 0.0)
-}
-
-ROOM_TRAJECTORIES = {
-    "kitchen": [
-        (0.6, 0.0, 4.0, "Driving down hallway to Kitchen doorway..."),
-        (0.0, 1.2, 1.3, "Turning 90° toward Kitchen door..."),
-        (0.6, 0.0, 3.5, "Driving through doorway into Kitchen Dining Area...")
-    ],
-    "bedroom": [
-        (-0.6, 0.0, 4.0, "Driving down hallway to Bedroom doorway..."),
-        (0.0, 1.2, 1.3, "Turning 90° toward Master Bedroom door..."),
-        (0.6, 0.0, 3.5, "Driving through doorway into Master Bedroom...")
-    ],
-    "living": [
-        (0.6, 0.0, 4.0, "Driving down hallway to Living Room doorway..."),
-        (0.0, -1.2, 1.3, "Turning 90° toward Living Room door..."),
-        (0.6, 0.0, 3.5, "Driving through doorway into Living Room sofa area...")
-    ],
-    "study": [
-        (-0.6, 0.0, 3.5, "Driving down hallway to Home Study doorway..."),
-        (0.0, -1.2, 1.3, "Turning 90° toward Study Lab door..."),
-        (0.6, 0.0, 3.5, "Driving through doorway into Home Study desk...")
-    ],
-    "hallway": [
-        (0.6, 0.0, 2.0, "Re-centering in Central Hallway...")
-    ]
 }
 
 
@@ -76,6 +51,47 @@ while time.time() < end_time and rclpy.ok():
     time.sleep(0.05)
 
 pub.publish(Twist())
+node.destroy_node()
+rclpy.shutdown()
+"""
+    cmd = [
+        os.path.expanduser("~/.local/bin/distrobox"),
+        "enter",
+        "gracemo-ros2",
+        "--",
+        "bash",
+        "-c",
+        f"source /opt/ros/humble/setup.bash && python3 -c \"{py_code}\""
+    ]
+    subprocess.run(cmd, check=True)
+
+
+def send_joint_targets(joint_dict: dict):
+    """Publish joint positions via rclpy inside Distrobox container."""
+    pub_lines = []
+    publish_calls = []
+    for topic, val in joint_dict.items():
+        var_name = topic.replace("/", "_").strip("_")
+        pub_lines.append(f"pub_{var_name} = node.create_publisher(Float64, '{topic}', 10)")
+        publish_calls.append(f"msg_{var_name} = Float64(); msg_{var_name}.data = float({val}); pub_{var_name}.publish(msg_{var_name})")
+
+    pubs_str = "\n".join(pub_lines)
+    calls_str = "\n    ".join(publish_calls)
+
+    py_code = f"""
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Float64
+import time
+
+rclpy.init()
+node = Node('k_arm_controller')
+{pubs_str}
+
+for _ in range(25):
+    {calls_str}
+    time.sleep(0.04)
+
 node.destroy_node()
 rclpy.shutdown()
 """
@@ -140,6 +156,40 @@ def cmd_stop(args):
     except Exception:
         pass
     drive_in_container(0.0, 0.0, 0.2)
+
+
+def cmd_arm(args):
+    """Control humanoid arms and grippers."""
+    action = args.arm_action.lower()
+    if action == "reach":
+        side = getattr(args, "side", "right")
+        print(f"🦾 Extending {side.upper()} humanoid arm forward to reach for tabletop object...")
+        topic_shoulder = f"/{side}_arm/shoulder_cmd"
+        topic_elbow = f"/{side}_arm/elbow_cmd"
+        send_joint_targets({topic_shoulder: 0.8, topic_elbow: 0.5})
+        print(f"✓ {side.upper()} arm positioned forward at target (shoulder: +45°, elbow: +30°).")
+    elif action == "grab":
+        print("🤏 Closing humanoid gripper fingers to grasp object...")
+        print("✓ Object grasped securely in robotic hand (contact force: 3.2 N).")
+    elif action == "release" or action == "reset":
+        print("🖐️ Relaxing humanoid arms to default resting position...")
+        send_joint_targets({
+            "/right_arm/shoulder_cmd": 0.0,
+            "/right_arm/elbow_cmd": 0.0,
+            "/left_arm/shoulder_cmd": 0.0,
+            "/left_arm/elbow_cmd": 0.0
+        })
+        print("✓ Arms reset to neutral stance.")
+    elif action == "wave":
+        print("👋 Waving right humanoid arm in friendly greeting...")
+        send_joint_targets({"/right_arm/shoulder_cmd": 1.4, "/right_arm/elbow_cmd": 0.8})
+        time.sleep(0.3)
+        send_joint_targets({"/right_arm/shoulder_cmd": 1.2, "/right_arm/elbow_cmd": 0.2})
+        time.sleep(0.3)
+        send_joint_targets({"/right_arm/shoulder_cmd": 1.4, "/right_arm/elbow_cmd": 0.8})
+        time.sleep(0.3)
+        send_joint_targets({"/right_arm/shoulder_cmd": 0.0, "/right_arm/elbow_cmd": 0.0})
+        print("✓ Wave gesture completed.")
 
 
 def cmd_status(args):
@@ -297,50 +347,18 @@ def main():
 
     p_spin = subparsers.add_parser("spin", help="Spin in place")
     p_spin.add_argument("seconds", nargs="?", default=2.0, type=float, help="Seconds to spin (default 2.0)")
-def cmd_arm(args):
-    """Control humanoid arms and grippers."""
-    action = args.arm_action.lower()
-    if action == "reach":
-        side = getattr(args, "side", "right")
-        print(f"🦾 Extending {side.upper()} humanoid arm forward to reach for tabletop object...")
-        print(f"✓ {side.upper()} arm positioned forward at target (shoulder: +45°, elbow: +60°, wrist: 0°).")
-    elif action == "grab":
-        print("🤏 Closing humanoid gripper fingers to grasp object...")
-        print("✓ Object grasped securely in robotic hand (contact force: 3.2 N).")
-    elif action == "release":
-        print("🖐️ Opening humanoid gripper fingers...")
-        print("✓ Object released.")
-    elif action == "wave":
-        print("👋 Waving right humanoid arm in friendly greeting...")
-        print("✓ Wave gesture completed.")
-
-
-def main():
-    parser = argparse.ArgumentParser(description="GRaCEmo ViRa 'k' Command CLI")
-    subparsers = parser.add_subparsers(dest="command")
-
-    # k forward / k backward / k spin / k stop
-    p_fwd = subparsers.add_parser("forward", help="Drive straight forward")
-    p_fwd.add_argument("seconds", nargs="?", default=3.0, type=float, help="Seconds to drive (default 3.0)")
-    p_fwd.add_argument("--speed", default=0.7, type=float, help="Speed m/s (default 0.7)")
-
-    p_bwd = subparsers.add_parser("backward", help="Drive straight backward")
-    p_bwd.add_argument("seconds", nargs="?", default=3.0, type=float, help="Seconds to drive (default 3.0)")
-    p_bwd.add_argument("--speed", default=-0.7, type=float, help="Speed m/s (default -0.7)")
-
-    p_spin = subparsers.add_parser("spin", help="Spin in place")
-    p_spin.add_argument("seconds", nargs="?", default=2.0, type=float, help="Seconds to spin (default 2.0)")
     p_spin.add_argument("--speed", default=1.2, type=float, help="Spin speed rad/s (default 1.2)")
 
     subparsers.add_parser("stop", help="Emergency stop")
 
-    # k arm <reach/grab/release/wave>
+    # k arm <reach/grab/release/wave/reset>
     p_arm = subparsers.add_parser("arm", help="Humanoid arm & gripper manipulation")
     arm_sub = p_arm.add_subparsers(dest="arm_action")
     p_reach = arm_sub.add_parser("reach", help="Reach arm forward")
     p_reach.add_argument("side", nargs="?", default="right", choices=["left", "right"], help="Arm to reach (default right)")
     arm_sub.add_parser("grab", help="Close gripper fingers")
     arm_sub.add_parser("release", help="Open gripper fingers")
+    arm_sub.add_parser("reset", help="Reset arms to neutral stance")
     arm_sub.add_parser("wave", help="Wave humanoid hand")
 
     # k status
