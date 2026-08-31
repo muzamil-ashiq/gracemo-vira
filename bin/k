@@ -2,6 +2,7 @@
 """
 GRaCEmo ViRa — 'k' Robot CLI Tool
 Direct, guaranteed ROS 2 velocity streamer and high-signal autonomous interface.
+Supports multi-phase doorway navigation, room dispatch, vision scanning, and memory ledger queries.
 """
 
 import os
@@ -26,6 +27,32 @@ ROOM_COORDS = {
     "hallway":  (0.0, 0.0)
 }
 
+ROOM_TRAJECTORIES = {
+    "kitchen": [
+        (0.6, 0.0, 4.0, "Driving down hallway to Kitchen doorway..."),
+        (0.0, 1.2, 1.3, "Turning 90° toward Kitchen door..."),
+        (0.6, 0.0, 3.5, "Driving through doorway into Kitchen Dining Area...")
+    ],
+    "bedroom": [
+        (-0.6, 0.0, 4.0, "Driving down hallway to Bedroom doorway..."),
+        (0.0, 1.2, 1.3, "Turning 90° toward Master Bedroom door..."),
+        (0.6, 0.0, 3.5, "Driving through doorway into Master Bedroom...")
+    ],
+    "living": [
+        (0.6, 0.0, 4.0, "Driving down hallway to Living Room doorway..."),
+        (0.0, -1.2, 1.3, "Turning 90° toward Living Room door..."),
+        (0.6, 0.0, 3.5, "Driving through doorway into Living Room sofa area...")
+    ],
+    "study": [
+        (-0.6, 0.0, 3.5, "Driving down hallway to Home Study doorway..."),
+        (0.0, -1.2, 1.3, "Turning 90° toward Study Lab door..."),
+        (0.6, 0.0, 3.5, "Driving through doorway into Home Study desk...")
+    ],
+    "hallway": [
+        (0.6, 0.0, 2.0, "Re-centering in Central Hallway...")
+    ]
+}
+
 
 def drive_in_container(linear_x: float, angular_z: float, duration_sec: float):
     """Execute direct 20Hz rclpy velocity stream inside Distrobox container."""
@@ -48,7 +75,7 @@ while time.time() < end_time and rclpy.ok():
     pub.publish(twist)
     time.sleep(0.05)
 
-pub.publish(Twist())  # Stop at end
+pub.publish(Twist())
 node.destroy_node()
 rclpy.shutdown()
 """
@@ -70,14 +97,12 @@ def cmd_forward(args):
     speed = float(getattr(args, "speed", 0.7))
     print(f"🚀 Driving straight forward at {speed} m/s for {sec} seconds...")
     
-    # 1. Emit to Kernel
     try:
         payload = {"action": "Move", "params": {"linear_x": speed, "angular_z": 0.0, "duration": sec}}
         requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": payload, "source": "k-cli"}, timeout=0.5)
     except Exception:
         pass
 
-    # 2. Synchronous Guaranteed rclpy Drive Stream
     drive_in_container(speed, 0.0, sec)
     print(f"✓ Completed forward drive ({speed * sec:.2f} meters traveled)!")
 
@@ -159,14 +184,14 @@ def cmd_status(args):
 
 
 def cmd_goto(args):
-    """Dispatch autonomous navigation to a room."""
+    """Dispatch autonomous navigation to a room through doorway waypoints."""
     room = args.room.lower().strip()
-    if room not in ROOM_COORDS:
-        print(f"Error: Unknown room '{room}'. Available: {list(ROOM_COORDS.keys())}")
+    if room not in ROOM_TRAJECTORIES:
+        print(f"Error: Unknown room '{room}'. Available: {list(ROOM_TRAJECTORIES.keys())}")
         return
 
-    gx, gy = ROOM_COORDS[room]
-    print(f"🚀 Navigating to {room.upper()} at ({gx:.1f}, {gy:.1f})...")
+    gx, gy = ROOM_COORDS.get(room, (0.0, 0.0))
+    print(f"🚀 [NAVIGATION] Dispatched mission to {room.upper()} ({gx:.1f}, {gy:.1f})")
 
     try:
         payload = {"action": "Navigate", "params": {"room": room, "target_x": gx, "target_y": gy}}
@@ -174,8 +199,13 @@ def cmd_goto(args):
     except Exception:
         pass
 
-    drive_in_container(0.6, 0.0, 4.0)
-    print(f"✓ Arrived in {room.upper()}!")
+    steps = ROOM_TRAJECTORIES[room]
+    for lin_x, ang_z, dur, desc in steps:
+        print(f"  • {desc}")
+        drive_in_container(lin_x, ang_z, dur)
+        time.sleep(0.1)
+
+    print(f"✅ Arrived in {room.upper()}! Robot parked in room.")
 
 
 def cmd_speak(args):
@@ -272,7 +302,7 @@ def main():
     p_status.add_argument("--json", action="store_true", help="Output as raw JSON")
 
     # k goto <room>
-    p_goto = subparsers.add_parser("goto", help="Navigate autonomously to a room")
+    p_goto = subparsers.add_parser("goto", help="Navigate autonomously to a room through doorway waypoints")
     p_goto.add_argument("room", help="Target room (kitchen, bedroom, living, study, hallway)")
 
     # k speak <text>
