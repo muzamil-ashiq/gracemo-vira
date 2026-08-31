@@ -75,5 +75,16 @@ def generate_launch_description():
             parameters=[{
                 "use_sim_time": use_sim_time
             }]
+        ),
+
+        # 5. GRaCEmo Kernel Bridge (Routes 'k goto <room>' and Kernel events to Gazebo)
+        Node(
+            package="gracemo_bridge",
+            executable="kernel_bridge",
+            name="gracemo_kernel_bridge",
+            output="screen",
+            parameters=[{
+                "kernel_url": "http://127.0.0.1:7780"
+            }]
         )
     ])

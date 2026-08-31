@@ -25,15 +25,8 @@ fi
 
 echo "✓ Kernel is online at http://127.0.0.1:7780"
 
-# 3. Start ROS 2 Kernel Bridge in background inside Distrobox
-~/.local/bin/distrobox enter gracemo-ros2 -- bash -c "
-    source /opt/ros/humble/setup.bash
-    source $WS_DIR/install/setup.bash
-    ros2 run gracemo_bridge kernel_bridge >/dev/null 2>&1 &
-" &
-
-# 4. Launch Modern Gazebo Sim inside Distrobox
-echo "Launching Modern Gazebo 3D Simulation..."
+# 3. Launch Modern Gazebo Sim & Kernel Bridge inside Distrobox
+echo "Launching Modern Gazebo 3D Simulation & Kernel Bridge..."
 ~/.local/bin/distrobox enter gracemo-ros2 -- bash -c "
     source /opt/ros/humble/setup.bash
     source $WS_DIR/install/setup.bash
