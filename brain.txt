@@ -1,0 +1,333 @@
+================================================================================
+GRACEEMO BRAIN ARCHITECTURE — CURRENT PROGRESS ARTIFACT
+Last updated: 2026-09-01
+Refresh: read codebase + AUDIT_REPORT.md; regen Blender meshes via ./tools/regenerate_artifacts.sh
+================================================================================
+
+This file is the living progress artifact for the robot brain / control stack.
+(Blender .blend / .glb / preview PNGs are separate *design* artifacts in blender/.)
+
+CONTROL STACK STATUS
+--------------------
+  Layer              Status     What runs today
+  ─────────────────  ─────────  ─────────────────────────────────────────────
+  Cortex (LLM)       STUB       gracemo_brain/llm_node.py — Gemini if key set,
+                                else keyword heuristics. NOT in default twin launch.
+  Nervous system     PARTIAL    kernel/ Rust :7780 exists; planner_node is ROS-side
+                                substitute; not wired to default Command Center.
+  Cerebellum         DONE       /cmd_vel diff-drive, patrol/planner, safety mux
+                                (safety_servo_node.cpp when C++ built)
+  Wheels / body      DONE       virtual_space_node + run_digital_twin_studio.py;
+                                neck_yaw/pitch + left/right_hand in sim & URDF
+
+STRATEGY (Phase 1 — do not train walking)
+-----------------------------------------
+  • GRACEEMO-01 is a differential two-wheel base (0.12 m radius, 0.42 m sep).
+  • Locomotion = /cmd_vel only. No biped gait, no full-arm IK in Phase 1.
+  • Upper body = neck look-at + simple bilateral hand poses (wave / up / down).
+  • Product shell: white/black/cyan GRACEEMO-01 (~1.37 m). See blender/reference/.
+
+PHASE 1 LOCK — in scope vs out
+------------------------------
+  IN (implemented in code):
+    ✓ Wheeled drive (teleop, patrol, NL navigate in twin)
+    ✓ Neck look-at (look_home, look_at bearing)
+    ✓ Hand poses: hand_hi / hand_up / hand_down via BodyCommand
+    ✓ Sim LiDAR raycast, OpenCV cameras, geometric perception + track IDs (Mac twin)
+    ✓ Command Center :8888 with SIMULATION labels, E-STOP, 4-wheel HUD
+
+  OUT (fixes.txt / later phases):
+    ✗ Nav2 + SLAM in the live twin loop
+    ✗ Real YOLO/pose models on default dashboard path
+    ✗ Gazebo physics as Command Center backend
+    ✗ Rust kernel ↔ ROS twin unified loop
+    ✗ MCU / real hardware drivers
+
+HOW TO RUN (pick one path)
+--------------------------
+  A) Default digital twin (NO brain stack):
+       ros2 launch gracemo_bringup lpu_digital_twin.launch.py
+       → http://localhost:8888
+
+  B) Phase 1 ROS stack (brain + perception + voice + control):
+       ros2 launch gracemo_bringup simulation.launch.py
+
+  C) Standalone Mac twin (no ROS):
+       python3 tools/run_digital_twin_studio.py
+       → http://localhost:8888
+
+  D) Kernel + adapters (parallel, not integrated with twin):
+       cargo run -p gracemo-kernel   # :7780
+       python3 scripts/live_demo.py
+
+KEY FILES
+---------
+  Twin engine     graceemo_ws/.../virtual_space_node.py
+  Mac twin        tools/run_digital_twin_studio.py
+  Planner/cortex  graceemo_ws/.../planner_node.py, llm_node.py
+  Safety/body     graceemo_ws/.../safety_servo_node.cpp
+  Roadmap         fixes.txt
+  Audit           AUDIT_REPORT.md
+
+NEXT (brain artifact priorities)
+--------------------------------
+  1. Wire gracemo_brain into lpu_digital_twin OR document B as the brain demo path
+  2. Finish adapters/robot-bridge (ROS ↔ kernel)
+  3. Replace geometric perception with real detector_node on twin path
+  4. Optional Gazebo backend without breaking :8888 honesty labels
+
+================================================================================
+ARCHITECTURE DECISION RECORD (MNSE pattern vs traditional ROS2)
+================================================================================
+
+The Key Insight: The Robot Is an Adapter
+You said it perfectly. If LPU provides a prebuilt robot, then:
+
+
+MNSE TODAY:                              GRACEMO:
+                                         
+ Hyprland → events → KERNEL              Robot → events → BRAIN
+ Browser  → events → KERNEL              Camera → events → BRAIN  
+ VSCode   → events → KERNEL              Voice  → events → BRAIN
+                                         
+ KERNEL → speak → Kokoro TTS             BRAIN → move_to → Robot
+ KERNEL → look  → Servo                  BRAIN → speak   → TTS
+ KERNEL → type  → Wayland                BRAIN → look_at → Servos
+Same pattern. Different sensors. Different actuators.
+
+The robot is just another adapter that:
+
+Emits events: "obstacle 2m ahead", "person visible", "battery 73%", "reached waypoint"
+Receives actions: "navigate to kitchen", "stop", "turn left 90°", "say hello"
+What MNSE Actually Is (That Makes It Powerful)
+MNSE is NOT just an event logger. It's a real-time awareness system with three loops:
+
+
+LOOP 1 — PERCEPTION (Real-time, <10ms)
+  Adapter emits event → EventBus → InspectorState updates
+  "What is happening RIGHT NOW?"
+  
+LOOP 2 — MEMORY (Background, <100ms)  
+  Event → Ledger stores → Graph builds relationships
+  "What happened before? What's related?"
+LOOP 3 — REACTION (Event-driven, <500ms)
+  K behavior matches event pattern → triggers action
+  "When X happens, do Y"
+  
+  Example: 
+    on hear "navigate to *" → dispatch navigate_to($1)
+    on see "person:mab"     → dispatch speak("Hello Muzammil")
+    on feel "obstacle:<1m"  → dispatch emergency_stop()
+This three-loop architecture is exactly what an autonomous robot brain needs:
+
+Perception loop: Real-time sensor awareness
+Memory loop: Learning from experience
+Reaction loop: Autonomous behavior
+Two Architectures — Side by Side
+Option A: Traditional ROS2 Python
+
+┌─────────────────────────────────────────────┐
+│              ALL INSIDE ROS2                 │
+│                                              │
+│  /camera/image ──► yolo_node ──► /detections │
+│  /scan ──────────► slam_node ──► /map        │
+│  /mic ───────────► stt_node ──► /voice_cmd   │
+│                                              │
+│  /detections ─┐                              │
+│  /map ────────┼──► brain_node ──► /cmd_vel   │
+│  /voice_cmd ──┘                 ──► /speak    │
+│                                              │
+│  Everything is ROS2 topics.                  │
+│  Everything is Python (or C++).              │
+│  State lives in ROS2 parameter server.       │
+│  Memory = you build from scratch.            │
+│  Behaviors = you build from scratch.         │
+└─────────────────────────────────────────────┘
+Pros: Standard, mentor understands it, lots of tutorials Cons: No persistent memory architecture, no event ledger, no knowledge graph, no real-time awareness — you build ALL of that yourself in Python
+
+Option B: MNSE-like Kernel (Rust) + AI Adapters (Python)
+
+┌──────────────────────────────────────────────────────┐
+│                                                       │
+│  PREBUILT ROBOT (LPU)        PYTHON AI ADAPTERS       │
+│  ┌──────────────┐           ┌──────────────────┐     │
+│  │ Motors       │           │ Vision (YOLO)    │     │
+│  │ Sensors      │──ROS2──►  │ Voice (Whisper)  │     │
+│  │ Camera       │           │ Face (YuNet)     │     │
+│  │ LiDAR        │           │ LLM (Gemini)     │     │
+│  └──────┬───────┘           └────────┬─────────┘     │
+│         │                            │                │
+│         │  Robot Bridge    AI events  │                │
+│         │  Adapter (Py)   ┌──────────┘                │
+│         ▼                 ▼                           │
+│  ┌─────────────────────────────────────────────┐     │
+│  │          GRACEMO KERNEL (Rust)                │     │
+│  │                                               │     │
+│  │  ┌─────────┐  ┌──────────┐  ┌────────────┐  │     │
+│  │  │EventBus │  │ Ledger   │  │  Knowledge │  │     │
+│  │  │(tokio)  │  │ (SQLite) │  │  Graph     │  │     │
+│  │  └────┬────┘  └──────────┘  │  (SQLite)  │  │     │
+│  │       │                     └────────────┘  │     │
+│  │  ┌────▼────────────────────────────────┐    │     │
+│  │  │ InspectorState (live robot state)   │    │     │
+│  │  │ - position: {x, y, theta}           │    │     │
+│  │  │ - battery: 73%                      │    │     │
+│  │  │ - obstacle_ahead: true              │    │     │
+│  │  │ - person_visible: "mab"             │    │     │
+│  │  │ - current_task: "navigating"        │    │     │
+│  │  │ - last_voice_command: "go to lab"   │    │     │
+│  │  └────────────────────────────────────┘    │     │
+│  │                                               │     │
+│  │  ┌────────────────────────────────────┐      │     │
+│  │  │ Action Dispatcher                  │      │     │
+│  │  │ → navigate_to(x, y)               │      │     │
+│  │  │ → speak("Hello")                  │      │     │
+│  │  │ → look_at(person)                 │      │     │
+│  │  │ → stop()                          │      │     │
+│  │  │ → express(emotion)                │      │     │
+│  │  └────────────────────────────────────┘      │     │
+│  │                                               │     │
+│  │  HTTP API (:7780) + Unix Socket + SSE         │     │
+│  │  MCP Server (AI agents can query robot state)  │     │
+│  └───────────────────────────────────────────────┘     │
+│                                                       │
+└──────────────────────────────────────────────────────┘
+Pros:
+
+You already HAVE 80% of this kernel built (MNSE v0.0.53)
+Persistent memory, knowledge graph, vector search — done
+Event ledger with causality chains — done
+Action dispatch (speak, look, follow) — done
+MCP server for LLM integration — done
+Voice pipeline (Whisper + Kokoro) — done
+Vision pipeline (YuNet) — done
+Real-time awareness — done
+Privacy, redaction, config system — done
+Cons:
+
+Mentor might not understand the Rust kernel (need good docs/demo)
+Sam & Sameer need to understand the adapter pattern
+Need a ROS2 bridge adapter (new, ~200-300 lines Python)
+What You Actually Need to BUILD (Option B)
+If you take the MNSE pattern, here's what's already done vs needs building:
+
+Component	MNSE Has It?	For GRACEemo
+Event Bus (tokio::broadcast)	✅ Done	Reuse directly
+Ledger (SQLite, append-only)	✅ Done	Reuse directly
+Knowledge Graph (SQLite)	✅ Done	Add robot-specific node types
+Memory + Vector Search	✅ Done	Reuse directly
+HTTP API + Unix Socket	✅ Done	Reuse directly
+SSE Event Stream	✅ Done	Reuse directly
+MCP Server (7 tools)	✅ Done	Add robot-specific tools
+Config System (TOML)	✅ Done	Add robot configs
+Action Dispatcher	✅ Done	Extend with robot actions
+Vision Adapter (YuNet)	✅ Done	Extend with YOLO
+Voice Adapter (Whisper+Kokoro)	✅ Done	Reuse directly
+K Language behaviors	✅ Done	Write robot behaviors
+Robot Bridge Adapter	❌ New	Build: ROS2 ↔️ Kernel bridge
+Navigation Planner	❌ New	Build: Goal→waypoint logic
+Robot-specific EventTypes	❌ New	Build: Odometry, obstacle, etc.
+Robot-specific Actions	❌ New	Build: navigate_to, stop, etc.
+Behavior Trees	❌ New	Build: Task planning XML
+LLM Integration	🟡 Partial	Build: Gemini/local for task planning
+Gazebo Simulation	❌ New	Build: For demo without hardware
+New code needed: ~30%. The other 70% is MNSE reuse/extension.
+
+But Wait — Should It Be MNSE Itself or a New Thing?
+Two sub-options:
+
+B1: Fork MNSE → GRACEemo Kernel
+Copy MNSE codebase, strip desktop-specific stuff, add robot stuff
+Pro: Fastest path, everything works
+Con: Now you maintain two codebases that diverge
+B2: Make MNSE Pluggable → Robot Mode
+Add a "robot" module/profile to MNSE itself
+MNSE boots with mode = "robot" in kernel.toml → loads robot adapters instead of desktop adapters
+Pro: One codebase, MNSE becomes a "context kernel for anything"
+Con: Slightly more complex, but cleaner long-term
+B3: Build GraCemo Kernel Fresh (Inspired by MNSE)
+New Rust project, borrowing patterns from MNSE but clean-room
+Pro: Clean codebase, no MNSE baggage, can cite MNSE as "reference architecture" in the paper
+Con: Most work, rebuilds things that already work
+IMPORTANT
+
+B2 is the most interesting for your research paper. You can claim: "We extended our existing context kernel (MNSE) to support physical robot embodiment, demonstrating that the same event-driven architecture that handles digital context awareness can handle physical robot awareness."
+
+The Rust Question — Revisited
+With this new architecture, the Rust question has a completely different answer:
+
+Before (build everything in ROS2)	Now (MNSE-like kernel + adapters)
+❌ Rust doesn't help — rclrs is immature	✅ Kernel doesn't need rclrs at all
+❌ All code is AI/ML → Python	✅ Kernel is event routing + storage → Rust's sweet spot
+❌ Fighting the ROS2 ecosystem	✅ Working WITH ROS2 via a bridge adapter
+❌ Team can't learn Rust in time	✅ Only Muzammil writes Rust (kernel), Sam/Sameer write Python (adapters)
+Language Split
+
+Muzammil writes (Rust):
+├── GraCemo Kernel core (event bus, state, API)
+├── Ledger & Graph database layer  
+├── Action dispatcher
+├── Config system
+└── MCP server extensions
+Sam & Sameer write (Python):
+├── Robot Bridge Adapter (ROS2 ↔️ Kernel)
+├── Vision Adapter (YOLO detection)
+├── Voice Adapter (Whisper + TTS)
+├── LLM Brain Adapter (Gemini/local)
+├── Face Detection Adapter
+├── Gazebo simulation setup
+└── Launch scripts & demos
+This maps perfectly to the 3 team members and their likely skill sets.
+
+What the Prototype Demo Looks Like
+
+Terminal 1: $ gracemo-kernel --mode robot
+  ► Kernel v0.1.0 started
+  ► Ledger: /home/mab/.gracemo/ledger.db
+  ► Graph:  /home/mab/.gracemo/graph.db  
+  ► HTTP:   http://localhost:7780
+  ► Waiting for adapters...
+Terminal 2: $ python3 robot_bridge_adapter.py
+  ► Connected to kernel (gracemo-ros2 adapter)
+  ► Subscribing to ROS2 topics: /odom, /scan, /camera, /battery
+  ► Robot connected ✅
+Terminal 3: $ python3 vision_adapter.py
+  ► YOLOv11n loaded on cuda:0
+  ► Connected to kernel (vision adapter)
+  ► Detecting objects at 30 FPS ✅
+Terminal 4: $ python3 voice_adapter.py
+  ► Vosk wake-word loaded
+  ► Faster-Whisper small on cuda:0
+  ► Kokoro TTS ready
+  ► Listening for "Hey GraCemo" ✅
+YOU: "Hey GraCemo, what do you see?"
+  voice_adapter → kernel: VoiceDetected("what do you see")
+  kernel → LLM: get context + "what do you see"
+  LLM → kernel: ActionRequested(speak, "I see a person and a chair")
+  kernel → voice_adapter: speak("I see a person and a chair")
+  Kokoro TTS → Speaker: "I see a person and a chair"
+YOU: "Go to the door"
+  voice_adapter → kernel: VoiceDetected("go to the door")
+  kernel → LLM: plan action for "go to the door"  
+  LLM → kernel: ActionRequested(navigate_to, {location: "door"})
+  kernel → memory: recall("door" location)
+  kernel → robot_bridge: navigate_to(x=3.2, y=1.5)
+  robot_bridge → ROS2 /goal_pose → Robot moves
+  robot → robot_bridge → kernel: NavigationComplete
+  kernel → voice_adapter: speak("I've arrived at the door")
+❓ Questions to Decide
+B1 (fork MNSE), B2 (extend MNSE), or B3 (build fresh)?
+
+I lean toward B2 for research value, or B3 if you want a clean LPU submission
+Can you find out what robot LPU is providing?
+
+Model name, company, what interfaces it exposes
+This determines the bridge adapter complexity
+Are you comfortable being the sole Rust developer?
+
+Sam & Sameer only need to learn the adapter SDK (Python HTTP calls)
+They never touch Rust code
+How will you explain this to your mentor?
+
+"We built an event-driven context kernel that provides real-time awareness, persistent memory, and autonomous behavior planning for the robot"
+The demo speaks louder than the architecture diagram

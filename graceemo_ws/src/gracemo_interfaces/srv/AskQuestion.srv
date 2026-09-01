@@ -1,0 +1,8 @@
+# Ask the AI brain a question
+string question
+string context
+---
+string answer
+string intent
+float32 confidence
+string[] suggested_actions

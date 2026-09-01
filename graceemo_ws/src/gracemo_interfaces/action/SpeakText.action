@@ -1,0 +1,10 @@
+# Long-running text-to-speech action
+string text
+string voice_id
+float32 speed
+---
+bool success
+float32 duration_seconds
+---
+float32 progress
+string current_word

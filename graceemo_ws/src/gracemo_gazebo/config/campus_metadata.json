@@ -1,0 +1,354 @@
+{
+  "campus": {
+    "name": "Lovely Professional University",
+    "short_name": "LPU",
+    "location": "Phagwara, Punjab, India",
+    "approximate_area_acres": 600,
+    "simulation_scale": "200m x 200m representative area",
+    "coordinate_system": "ENU (East-North-Up), origin at campus center",
+    "data_sources": [
+      "https://www.lpude.in/about-us/tour-lpu.php",
+      "https://iviewd.com/lpu2/ (360 tour)",
+      "Official LPU infrastructure descriptions",
+      "Google Maps satellite imagery (approximate)"
+    ]
+  },
+  "buildings": [
+    {
+      "id": "block_34",
+      "model_name": "block_34",
+      "name": "Block 34",
+      "type": "academic",
+      "floors": 4,
+      "accessible": true,
+      "position": {"x": -40, "y": -40, "z": 0},
+      "dimensions": {"length": 40, "width": 20, "height": 12},
+      "entrances": [
+        {"id": "b34_entrance_n", "position": {"x": -40, "y": -30}, "facing": "north"},
+        {"id": "b34_entrance_s", "position": {"x": -40, "y": -50}, "facing": "south"}
+      ],
+      "facilities": ["classrooms", "lecture_theatres", "faculty_offices"],
+      "navigation_nodes": ["nav_b34_lobby", "nav_b34_corridor_g", "nav_b34_entrance_n", "nav_b34_entrance_s"],
+      "restricted_zones": [],
+      "geometry_source": "approximate",
+      "notes": "Dimensions estimated from satellite imagery"
+    },
+    {
+      "id": "block_35",
+      "model_name": "block_35",
+      "name": "Block 35",
+      "type": "academic",
+      "floors": 4,
+      "accessible": true,
+      "position": {"x": -40, "y": -10, "z": 0},
+      "dimensions": {"length": 35, "width": 18, "height": 12},
+      "entrances": [
+        {"id": "b35_entrance_n", "position": {"x": -40, "y": -1}, "facing": "north"},
+        {"id": "b35_entrance_s", "position": {"x": -40, "y": -19}, "facing": "south"}
+      ],
+      "facilities": ["classrooms", "computer_labs", "research_centres"],
+      "navigation_nodes": ["nav_b35_lobby", "nav_b35_corridor_g", "nav_b35_entrance_n", "nav_b35_entrance_s"],
+      "restricted_zones": ["server_room_b35"],
+      "geometry_source": "approximate",
+      "notes": "Contains multiple computer labs"
+    },
+    {
+      "id": "block_36",
+      "model_name": "block_36",
+      "name": "Block 36",
+      "type": "academic",
+      "floors": 5,
+      "accessible": true,
+      "position": {"x": -40, "y": 20, "z": 0},
+      "dimensions": {"length": 38, "width": 20, "height": 15},
+      "entrances": [
+        {"id": "b36_entrance_n", "position": {"x": -40, "y": 30}, "facing": "north"},
+        {"id": "b36_entrance_s", "position": {"x": -40, "y": 10}, "facing": "south"}
+      ],
+      "facilities": ["classrooms", "laboratories", "lecture_theatres"],
+      "navigation_nodes": ["nav_b36_lobby", "nav_b36_corridor_g"],
+      "restricted_zones": [],
+      "geometry_source": "approximate"
+    },
+    {
+      "id": "block_37",
+      "model_name": "block_37_central_library",
+      "name": "Block 37 — Central Library",
+      "type": "academic_library",
+      "floors": 5,
+      "accessible": true,
+      "has_elevator": true,
+      "position": {"x": -40, "y": 50, "z": 0},
+      "dimensions": {"length": 45, "width": 22, "height": 15},
+      "entrances": [
+        {"id": "b37_entrance_main", "position": {"x": -40, "y": 39}, "facing": "south"},
+        {"id": "b37_entrance_side", "position": {"x": -18, "y": 50}, "facing": "east"}
+      ],
+      "facilities": ["central_library", "reading_areas", "study_areas", "digital_library", "classrooms"],
+      "navigation_nodes": ["nav_b37_lobby", "nav_b37_library_entrance", "nav_b37_reading_hall", "nav_b37_elevator"],
+      "restricted_zones": ["library_archives", "staff_only_area"],
+      "geometry_source": "verified_partial",
+      "notes": "Central Library location in Block 37 is VERIFIED from official LPU sources. Internal layout approximate."
+    },
+    {
+      "id": "block_38",
+      "model_name": "block_38",
+      "name": "Block 38",
+      "type": "academic",
+      "floors": 4,
+      "accessible": true,
+      "position": {"x": 40, "y": -40, "z": 0},
+      "dimensions": {"length": 36, "width": 18, "height": 12},
+      "entrances": [
+        {"id": "b38_entrance_w", "position": {"x": 22, "y": -40}, "facing": "west"}
+      ],
+      "facilities": ["classrooms", "laboratories"],
+      "navigation_nodes": ["nav_b38_lobby", "nav_b38_entrance_w"],
+      "restricted_zones": [],
+      "geometry_source": "approximate"
+    },
+    {
+      "id": "block_39",
+      "model_name": "block_39",
+      "name": "Block 39",
+      "type": "academic_research",
+      "floors": 3,
+      "accessible": true,
+      "position": {"x": 40, "y": -10, "z": 0},
+      "dimensions": {"length": 32, "width": 16, "height": 9},
+      "entrances": [
+        {"id": "b39_entrance_w", "position": {"x": 24, "y": -10}, "facing": "west"}
+      ],
+      "facilities": ["research_labs", "faculty_offices"],
+      "navigation_nodes": ["nav_b39_lobby", "nav_b39_entrance_w"],
+      "restricted_zones": ["research_lab_secure"],
+      "geometry_source": "approximate"
+    },
+    {
+      "id": "block_40",
+      "model_name": "block_40",
+      "name": "Block 40",
+      "type": "academic",
+      "floors": 4,
+      "accessible": true,
+      "position": {"x": 40, "y": 20, "z": 0},
+      "dimensions": {"length": 34, "width": 18, "height": 12},
+      "entrances": [
+        {"id": "b40_entrance_w", "position": {"x": 23, "y": 20}, "facing": "west"}
+      ],
+      "facilities": ["classrooms", "lecture_theatres"],
+      "navigation_nodes": ["nav_b40_lobby"],
+      "restricted_zones": [],
+      "geometry_source": "approximate"
+    },
+    {
+      "id": "block_41",
+      "model_name": "block_41",
+      "name": "Block 41",
+      "type": "academic_labs",
+      "floors": 3,
+      "accessible": true,
+      "position": {"x": 40, "y": 50, "z": 0},
+      "dimensions": {"length": 30, "width": 16, "height": 9},
+      "entrances": [
+        {"id": "b41_entrance_w", "position": {"x": 25, "y": 50}, "facing": "west"}
+      ],
+      "facilities": ["laboratories", "computer_labs"],
+      "navigation_nodes": ["nav_b41_lobby"],
+      "restricted_zones": [],
+      "geometry_source": "approximate"
+    },
+    {
+      "id": "uni_mall",
+      "model_name": "uni_mall",
+      "name": "Uni-Mall",
+      "type": "commercial",
+      "floors": 2,
+      "accessible": true,
+      "position": {"x": 0, "y": 60, "z": 0},
+      "dimensions": {"length": 50, "width": 25, "height": 10},
+      "entrances": [
+        {"id": "mall_entrance_s", "position": {"x": 0, "y": 48}, "facing": "south"},
+        {"id": "mall_entrance_n", "position": {"x": 0, "y": 72}, "facing": "north"}
+      ],
+      "facilities": ["shops", "cafes", "food_court", "atm"],
+      "navigation_nodes": ["nav_mall_entrance", "nav_mall_food_court"],
+      "restricted_zones": [],
+      "geometry_source": "approximate",
+      "notes": "University shopping mall. Per LPU official sources."
+    },
+    {
+      "id": "uni_polis",
+      "model_name": "uni_polis",
+      "name": "Uni-Polis",
+      "type": "commercial_social",
+      "floors": 2,
+      "accessible": true,
+      "position": {"x": 70, "y": 60, "z": 0},
+      "dimensions": {"length": 30, "width": 20, "height": 8},
+      "entrances": [
+        {"id": "polis_entrance_w", "position": {"x": 55, "y": 60}, "facing": "west"}
+      ],
+      "facilities": ["restaurants", "recreational"],
+      "navigation_nodes": ["nav_polis_entrance"],
+      "restricted_zones": [],
+      "geometry_source": "approximate"
+    },
+    {
+      "id": "uni_hospital",
+      "model_name": "uni_hospital",
+      "name": "Uni-Hospital",
+      "type": "healthcare",
+      "floors": 4,
+      "accessible": true,
+      "has_elevator": true,
+      "position": {"x": -70, "y": 60, "z": 0},
+      "dimensions": {"length": 35, "width": 25, "height": 12},
+      "entrances": [
+        {"id": "hospital_entrance_main", "position": {"x": -70, "y": 48}, "facing": "south"},
+        {"id": "hospital_emergency", "position": {"x": -53, "y": 60}, "facing": "east"}
+      ],
+      "facilities": ["emergency", "outpatient", "pharmacy", "ambulance_bay"],
+      "navigation_nodes": ["nav_hospital_main", "nav_hospital_emergency"],
+      "restricted_zones": ["icu", "operation_theatre"],
+      "geometry_source": "approximate",
+      "notes": "Per LPU official campus info"
+    },
+    {
+      "id": "boys_hostel_1",
+      "model_name": "boys_hostel_1",
+      "name": "Boys Hostel Complex",
+      "type": "residential",
+      "floors": 5,
+      "accessible": true,
+      "position": {"x": -75, "y": -30, "z": 0},
+      "dimensions": {"length": 20, "width": 30, "height": 15},
+      "entrances": [
+        {"id": "bh1_entrance_e", "position": {"x": -65, "y": -30}, "facing": "east"}
+      ],
+      "facilities": ["rooms", "mess", "common_room"],
+      "navigation_nodes": ["nav_bh1_entrance"],
+      "restricted_zones": ["hostel_rooms"],
+      "geometry_source": "approximate"
+    },
+    {
+      "id": "girls_hostel_1",
+      "model_name": "girls_hostel_1",
+      "name": "Girls Hostel Complex",
+      "type": "residential",
+      "floors": 5,
+      "accessible": true,
+      "position": {"x": 75, "y": -30, "z": 0},
+      "dimensions": {"length": 20, "width": 30, "height": 15},
+      "entrances": [
+        {"id": "gh1_entrance_w", "position": {"x": 65, "y": -30}, "facing": "west"}
+      ],
+      "facilities": ["rooms", "mess", "common_room"],
+      "navigation_nodes": ["nav_gh1_entrance"],
+      "restricted_zones": ["hostel_rooms"],
+      "geometry_source": "approximate"
+    }
+  ],
+  "roads": [
+    {
+      "id": "main_road",
+      "name": "Main Campus Road",
+      "type": "vehicular",
+      "width": 8,
+      "segments": [{"from": {"x": 0, "y": -100}, "to": {"x": 0, "y": 100}}]
+    },
+    {
+      "id": "cross_road",
+      "name": "Cross Road (E-W)",
+      "type": "vehicular",
+      "width": 8,
+      "segments": [{"from": {"x": -100, "y": 20}, "to": {"x": 100, "y": 20}}]
+    }
+  ],
+  "pedestrian_paths": [
+    {"id": "path_west", "from": "block_34", "to": "block_37", "width": 3, "waypoints": [{"x": -30, "y": -40}, {"x": -30, "y": 50}]},
+    {"id": "path_east", "from": "block_38", "to": "block_41", "width": 3, "waypoints": [{"x": 30, "y": -40}, {"x": 30, "y": 50}]}
+  ],
+  "intersections": [
+    {"id": "main_intersection", "position": {"x": 0, "y": 0}, "type": "4way", "has_crossing": true},
+    {"id": "cross_intersection", "position": {"x": 0, "y": 20}, "type": "4way", "has_crossing": true}
+  ],
+  "parking_areas": [
+    {"id": "parking_main", "position": {"x": 0, "y": -92}, "capacity": 100, "type": "open"},
+    {"id": "parking_east", "position": {"x": 85, "y": 0}, "capacity": 50, "type": "open"}
+  ],
+  "gates": [
+    {"id": "main_gate", "name": "Main Gate (Gate 1)", "position": {"x": 0, "y": -100}, "type": "main_entrance"},
+    {"id": "gate_2", "name": "Gate 2", "position": {"x": 100, "y": 0}, "type": "secondary"}
+  ],
+  "sports_facilities": [
+    {"id": "sports_field", "name": "Football/Cricket Ground", "type": "outdoor", "position": {"x": 0, "y": -70}},
+    {"id": "indoor_sports", "name": "Indoor Sports Complex", "type": "indoor", "position": {"x": -50, "y": -75}, "facilities": ["badminton", "basketball", "fitness_centre"]},
+    {"id": "swimming_pool", "name": "Swimming Pool", "type": "outdoor", "position": {"x": 50, "y": -75}}
+  ],
+  "restricted_zones": [
+    {"id": "rz_server_room", "building": "block_35", "floor": 1, "type": "no_access"},
+    {"id": "rz_library_archives", "building": "block_37", "floor": 2, "type": "staff_only"},
+    {"id": "rz_hospital_icu", "building": "uni_hospital", "floor": 2, "type": "no_access"},
+    {"id": "rz_hostel_rooms", "building": "boys_hostel_1", "type": "residents_only"},
+    {"id": "rz_hostel_rooms_g", "building": "girls_hostel_1", "type": "residents_only"}
+  ],
+  "navigation_graph": {
+    "description": "Semantic navigation waypoints for robot destination resolution",
+    "nodes": [
+      {"id": "nav_main_gate", "position": {"x": 0, "y": -96}, "type": "entrance", "semantic_labels": ["main gate", "entrance", "gate 1"]},
+      {"id": "nav_main_intersection", "position": {"x": 0, "y": 0}, "type": "intersection", "semantic_labels": ["center", "main intersection"]},
+      {"id": "nav_b34_entrance_n", "position": {"x": -40, "y": -30}, "type": "building_entrance", "building": "block_34", "semantic_labels": ["block 34", "block34"]},
+      {"id": "nav_b35_entrance_n", "position": {"x": -40, "y": -1}, "type": "building_entrance", "building": "block_35", "semantic_labels": ["block 35", "block35"]},
+      {"id": "nav_b36_entrance_s", "position": {"x": -40, "y": 10}, "type": "building_entrance", "building": "block_36", "semantic_labels": ["block 36", "block36"]},
+      {"id": "nav_b37_library_entrance", "position": {"x": -40, "y": 39}, "type": "building_entrance", "building": "block_37", "semantic_labels": ["central library", "library", "block 37", "block37"]},
+      {"id": "nav_b38_entrance_w", "position": {"x": 22, "y": -40}, "type": "building_entrance", "building": "block_38", "semantic_labels": ["block 38", "block38"]},
+      {"id": "nav_b39_entrance_w", "position": {"x": 24, "y": -10}, "type": "building_entrance", "building": "block_39", "semantic_labels": ["block 39", "block39"]},
+      {"id": "nav_b40_entrance_w", "position": {"x": 23, "y": 20}, "type": "building_entrance", "building": "block_40", "semantic_labels": ["block 40", "block40"]},
+      {"id": "nav_b41_entrance_w", "position": {"x": 25, "y": 50}, "type": "building_entrance", "building": "block_41", "semantic_labels": ["block 41", "block41"]},
+      {"id": "nav_mall_entrance", "position": {"x": 0, "y": 48}, "type": "building_entrance", "building": "uni_mall", "semantic_labels": ["uni mall", "mall", "shopping", "food court", "cafeteria"]},
+      {"id": "nav_polis_entrance", "position": {"x": 55, "y": 60}, "type": "building_entrance", "building": "uni_polis", "semantic_labels": ["uni polis", "polis", "restaurant"]},
+      {"id": "nav_hospital_main", "position": {"x": -70, "y": 48}, "type": "building_entrance", "building": "uni_hospital", "semantic_labels": ["hospital", "uni hospital", "health center", "emergency"]},
+      {"id": "nav_bh1_entrance", "position": {"x": -65, "y": -30}, "type": "building_entrance", "building": "boys_hostel_1", "semantic_labels": ["boys hostel", "hostel", "residence"]},
+      {"id": "nav_gh1_entrance", "position": {"x": 65, "y": -30}, "type": "building_entrance", "building": "girls_hostel_1", "semantic_labels": ["girls hostel", "hostel"]},
+      {"id": "nav_sports_field", "position": {"x": 0, "y": -65}, "type": "facility", "semantic_labels": ["sports field", "football", "cricket", "ground"]},
+      {"id": "nav_parking_main", "position": {"x": 0, "y": -90}, "type": "parking", "semantic_labels": ["parking", "car park"]},
+      {"id": "nav_swimming_pool", "position": {"x": 50, "y": -72}, "type": "facility", "semantic_labels": ["swimming pool", "pool"]}
+    ],
+    "edges": [
+      {"from": "nav_main_gate", "to": "nav_parking_main", "distance": 6, "type": "road"},
+      {"from": "nav_parking_main", "to": "nav_sports_field", "distance": 25, "type": "road"},
+      {"from": "nav_sports_field", "to": "nav_main_intersection", "distance": 65, "type": "road"},
+      {"from": "nav_main_gate", "to": "nav_main_intersection", "distance": 96, "type": "road"},
+      {"from": "nav_main_intersection", "to": "nav_b34_entrance_n", "distance": 42, "type": "pathway"},
+      {"from": "nav_main_intersection", "to": "nav_b35_entrance_n", "distance": 40, "type": "pathway"},
+      {"from": "nav_b35_entrance_n", "to": "nav_b36_entrance_s", "distance": 11, "type": "pathway"},
+      {"from": "nav_b36_entrance_s", "to": "nav_b37_library_entrance", "distance": 29, "type": "pathway"},
+      {"from": "nav_main_intersection", "to": "nav_b38_entrance_w", "distance": 45, "type": "pathway"},
+      {"from": "nav_main_intersection", "to": "nav_b39_entrance_w", "distance": 26, "type": "pathway"},
+      {"from": "nav_b39_entrance_w", "to": "nav_b40_entrance_w", "distance": 30, "type": "pathway"},
+      {"from": "nav_b40_entrance_w", "to": "nav_b41_entrance_w", "distance": 30, "type": "pathway"},
+      {"from": "nav_main_intersection", "to": "nav_mall_entrance", "distance": 48, "type": "road"},
+      {"from": "nav_mall_entrance", "to": "nav_polis_entrance", "distance": 57, "type": "pathway"},
+      {"from": "nav_mall_entrance", "to": "nav_hospital_main", "distance": 70, "type": "road"},
+      {"from": "nav_main_intersection", "to": "nav_bh1_entrance", "distance": 72, "type": "pathway"},
+      {"from": "nav_main_intersection", "to": "nav_gh1_entrance", "distance": 72, "type": "pathway"},
+      {"from": "nav_sports_field", "to": "nav_swimming_pool", "distance": 50, "type": "pathway"},
+      {"from": "nav_b34_entrance_n", "to": "nav_b35_entrance_n", "distance": 29, "type": "pathway"}
+    ]
+  },
+  "weather_presets": {
+    "clear_day": {"lighting": "bright", "visibility": 1.0, "sensor_noise_factor": 1.0},
+    "rain": {"lighting": "dim", "visibility": 0.6, "sensor_noise_factor": 1.5},
+    "fog": {"lighting": "dim", "visibility": 0.3, "sensor_noise_factor": 2.0},
+    "night": {"lighting": "dark", "visibility": 0.5, "sensor_noise_factor": 1.8},
+    "overcast": {"lighting": "medium", "visibility": 0.8, "sensor_noise_factor": 1.2}
+  },
+  "scenario_presets": {
+    "normal_campus": {"crowd_density": "medium", "traffic_density": "low", "weather": "clear_day"},
+    "crowded_campus": {"crowd_density": "high", "traffic_density": "medium", "weather": "clear_day"},
+    "night_campus": {"crowd_density": "low", "traffic_density": "low", "weather": "night"},
+    "rainy_day": {"crowd_density": "low", "traffic_density": "low", "weather": "rain"},
+    "emergency": {"crowd_density": "high", "traffic_density": "high", "weather": "clear_day", "special": "emergency_vehicles"}
+  }
+}

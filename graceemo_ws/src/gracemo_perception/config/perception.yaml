@@ -1,0 +1,8 @@
+perception:
+  ros__parameters:
+    detector_model: 'yolo11n'
+    confidence_threshold: 0.45
+    device: 'cpu'
+    camera_topic: '/camera/image_raw'
+    publish_annotated: true
+    face_detection_enabled: true

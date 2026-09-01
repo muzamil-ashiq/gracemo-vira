@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraceEMO Digital Twin — LPU Command Center</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="cc">
+    <header class="cc-header">
+      <div class="brand">
+        <div class="lpu-mark">LPU</div>
+        <div>
+          <h1>GraceEMO Digital Twin</h1>
+          <p>AUTONOMOUS CAMPUS ROBOTICS COMMAND CENTER</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-chip sim-mode" id="mode-chip">🟣 SIMULATION</div>
+        <div class="stat-chip" id="conn-badge"><span class="dot"></span> <span id="conn-text">CONNECTING</span></div>
+        <div class="stat-chip">NET: <b id="net-mode-val">12ms</b></div>
+        <div class="stat-chip">AI GPU: <b id="gpu-val">SIM 48%</b></div>
+        <div class="stat-chip batt">BATTERY: <span class="batt-ico"></span> <b id="batt-val">98%</b></div>
+      </div>
+      <div class="header-right">
+        <time id="clock">—</time>
+        <button class="icon-btn" type="button" title="Alerts">🔔</button>
+        <button class="icon-btn" id="btn-header-settings" type="button" title="Settings">⚙</button>
+        <div class="avatar">SD</div>
+      </div>
+    </header>
+
+    <aside class="cc-nav">
+      <nav>
+        <button class="nav-item active" data-view="dashboard" type="button"><i>▣</i> Dashboard</button>
+        <button class="nav-item" data-view="map" type="button"><i>◎</i> Campus Map</button>
+        <button class="nav-item" data-view="robots" type="button"><i>◉</i> Robots</button>
+        <button class="nav-item" data-view="missions" type="button"><i>➤</i> Missions</button>
+        <button class="nav-item" data-view="sensors" type="button"><i>▦</i> Sensors</button>
+        <button class="nav-item" data-view="ai" type="button"><i>◇</i> AI &amp; Perception</button>
+        <button class="nav-item" data-view="server" type="button"><i>☁</i> Server &amp; Cloud</button>
+        <button class="nav-item" data-view="scenarios" type="button"><i>⟳</i> Scenarios</button>
+        <button class="nav-item" data-view="analytics" type="button"><i>▤</i> Analytics</button>
+        <button class="nav-item" data-view="logs" type="button"><i>☰</i> Logs</button>
+        <button class="nav-item" data-view="settings" type="button"><i>⚙</i> Settings</button>
+      </nav>
+      <div class="robot-card">
+        <div class="robot-card-top">
+          <span class="status-lbl">ROBOT STATUS</span>
+          <span class="online" id="robot-online">ONLINE</span>
+        </div>
+        <div class="kv"><span>Robot ID</span><b>GRACEEMO-01</b></div>
+        <div class="kv"><span>Mode</span><b id="mode-text">AUTONOMOUS</b></div>
+        <div class="kv"><span>Uptime</span><b id="uptime-val">00:00:00</b></div>
+        <div class="kv"><span>Wi-Fi</span><b id="wifi-val">SIMULATED · n/a</b></div>
+      </div>
+      <div class="nav-foot">v2.1.0 | GraceEMO OS</div>
+    </aside>
+
+    <section class="cc-center">
+      <div class="card world-card">
+        <div class="card-head">
+          <h2>LPU Campus 3D World <small>(200m × 200m simulation)</small></h2>
+          <div class="map-actions">
+            <button class="btn" id="btn-quick-lib" type="button">Library (B37)</button>
+            <button class="btn" id="btn-quick-mall" type="button">Uni-Mall</button>
+            <button class="btn" id="btn-quick-gate" type="button">Main Gate</button>
+            <button class="btn" id="btn-focus-robot" type="button">Focus robot</button>
+            <button class="btn danger" id="btn-estop" type="button">E-STOP</button>
+          </div>
+        </div>
+        <div class="world-wrap">
+          <canvas id="gazeboCanvas"></canvas>
+          <div class="map-tools">
+            <button type="button" id="tool-zoom-in" title="Zoom in">+</button>
+            <button type="button" id="tool-zoom-out" title="Zoom out">−</button>
+            <button type="button" id="tool-home" title="Home">⌂</button>
+          </div>
+          <div class="compass" id="compass">N</div>
+          <div class="pin" id="robot-pin">GRACEEMO-01</div>
+        </div>
+        <p class="hint">Left drag: Orbit · Scroll: Zoom · Right drag: Pan · Double-click: Focus</p>
+      </div>
+      <div class="card cam-card">
+        <div class="card-head"><h2>Multi-Camera Feeds</h2></div>
+        <div class="cam-row">
+          <div class="mini-cam"><span>FRONT · TWIN</span><canvas id="cam-front"></canvas></div>
+          <div class="mini-cam"><span>LEFT · TWIN</span><canvas id="cam-left"></canvas></div>
+          <div class="mini-cam"><span>RIGHT · TWIN</span><canvas id="cam-right"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cc-right">
+      <div class="card">
+        <div class="card-head">
+          <h2>Robot Perception &amp; HUD</h2>
+          <div class="badges">
+            <span class="tag live" id="cam-live-tag">TWIN CAM</span>
+            <span class="tag" id="hud-weather">CLEAR DAY</span>
+            <span class="tag" id="hud-estop">SAFE</span>
+          </div>
+        </div>
+        <div class="hud-tabs">
+          <button class="chip active" type="button" data-hud="sensors">Sensors</button>
+          <button class="chip" type="button" data-hud="robot">Robot</button>
+          <button class="chip" type="button" data-hud="safety">Safety</button>
+        </div>
+        <div id="hud-sensors">
+        <div class="hud-cam">
+          <canvas id="cameraFeed"></canvas>
+        </div>
+        <div class="sensor-grid">
+          <div class="sensor-tile"><span>LIDAR /scan</span><canvas id="lidarCanvas"></canvas></div>
+          <div class="sensor-tile"><span>DEPTH FROM SCAN</span><canvas id="depthFeed"></canvas></div>
+          <div class="sensor-tile"><span>DETECTIONS</span><canvas id="detFeed"></canvas></div>
+          <div class="sensor-tile"><span>LOCAL MAP</span><canvas id="localMap"></canvas></div>
+        </div>
+        <div class="telem">
+          <div><span>X</span><b id="val-x">0.00 m</b></div>
+          <div><span>Y</span><b id="val-y">0.00 m</b></div>
+          <div><span>YAW</span><b id="val-yaw">0.0°</b></div>
+          <div><span>SPEED</span><b id="val-speed">0.00 m/s</b></div>
+          <div><span>PROX</span><b id="val-prox">—</b></div>
+          <div><span>BUMPER</span><b id="val-bump">OPEN</b></div>
+        </div>
+        <div class="telem">
+          <div><span>FRONT</span><b id="obs-f">—</b></div>
+          <div><span>LEFT</span><b id="obs-l">—</b></div>
+          <div><span>RIGHT</span><b id="obs-r">—</b></div>
+          <div><span>REAR</span><b id="obs-b">—</b></div>
+        </div>
+        <div class="wheel-hud" style="margin-top:10px; background:rgba(15,23,42,0.85); padding:10px 12px; border-radius:8px; border:1px solid rgba(56,189,248,0.25);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:11px; font-weight:700; color:#94a3b8; letter-spacing:0.05em;">
+            <span>4-WHEEL DRIVE TELEMETRY</span>
+            <span id="wheels-overall-status" style="color:#22c55e; font-size:10px; font-weight:800;">● ALL WHEELS NOMINAL</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11px;">
+            <div style="background:rgba(0,0,0,0.35); padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between;">
+              <span style="color:#cbd5e1;">FL Wheel:</span> <b id="wheel-fl-val" style="color:#38bdf8; font-family:'JetBrains Mono',monospace;">0.0 RPM</b>
+            </div>
+            <div style="background:rgba(0,0,0,0.35); padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between;">
+              <span style="color:#cbd5e1;">FR Wheel:</span> <b id="wheel-fr-val" style="color:#38bdf8; font-family:'JetBrains Mono',monospace;">0.0 RPM</b>
+            </div>
+            <div style="background:rgba(0,0,0,0.35); padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between;">
+              <span style="color:#cbd5e1;">RL Wheel:</span> <b id="wheel-rl-val" style="color:#38bdf8; font-family:'JetBrains Mono',monospace;">0.0 RPM</b>
+            </div>
+            <div style="background:rgba(0,0,0,0.35); padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between;">
+              <span style="color:#cbd5e1;">RR Wheel:</span> <b id="wheel-rr-val" style="color:#38bdf8; font-family:'JetBrains Mono',monospace;">0.0 RPM</b>
+            </div>
+          </div>
+        </div>
+        </div>
+        <div id="hud-robot" hidden>
+          <div class="kv"><span>CG</span><b id="cg-xyz">0.62 m</b></div>
+          <div class="kv"><span>Stability</span><b id="cg-st">SAFE</b></div>
+          <div class="kv"><span>Tip margin</span><b id="cg-tip">—</b></div>
+          <div class="kv"><span>Neck yaw / pitch</span><b id="j-neck">0 / 0</b></div>
+          <div class="kv"><span>L shoulder / elbow</span><b id="j-left">—</b></div>
+          <div class="kv"><span>R shoulder / elbow</span><b id="j-right">—</b></div>
+          <p class="muted" style="margin:8px 0 4px">Wheels · SIMULATED kinematics</p>
+          <div class="kv"><span>FL</span><b id="w-fl">● NORMAL</b></div>
+          <div class="kv"><span>FR</span><b id="w-fr">● NORMAL</b></div>
+          <div class="kv"><span>RL</span><b id="w-rl">● NORMAL</b></div>
+          <div class="kv"><span>RR</span><b id="w-rr">● NORMAL</b></div>
+        </div>
+        <div id="hud-safety" hidden>
+          <p class="muted">Operator e-stop and proximity rules are twin logic, not MCU hardware.</p>
+          <div class="kv"><span>E-STOP</span><b id="safe-estop">CLEAR</b></div>
+          <div class="kv"><span>Charging dock</span><b id="safe-chg">NO</b></div>
+          <div class="kv"><span>Speed limit</span><b id="safe-lim">0.5 m/s</b></div>
+          <div class="chips">
+            <button class="chip" type="button" data-spd="0.2">0.2</button>
+            <button class="chip active" type="button" data-spd="0.5">0.5</button>
+            <button class="chip" type="button" data-spd="1.0">1.0</button>
+          </div>
+          <button class="btn" id="btn-estop-clear" type="button">Clear E-STOP</button>
+        </div>
+      </div>
+
+      <div class="card mission-card">
+        <div class="card-head">
+          <h2>Mission Planner &amp; NL Builder</h2>
+          <span class="tag orange" id="mission-status-badge">MODE: ESCORT</span>
+        </div>
+        <div class="mission-input">
+          <textarea id="nl-mission-input" rows="2" placeholder="e.g. Deliver documents to Central Library Block 37…"></textarea>
+          <button class="btn-primary" id="btn-dispatch-mission" type="button">Dispatch</button>
+        </div>
+        <div class="chips">
+          <button class="chip" type="button" data-cmd="Find the nearest person and follow them">Follow person</button>
+          <button class="chip" type="button" data-cmd="What is around me?">Scene query</button>
+          <button class="chip" type="button" data-cmd="Where is the library?">Where is library?</button>
+          <button class="chip" type="button" data-cmd="Deliver mail to Central Library Block 37">Library Delivery</button>
+          <button class="chip" type="button" data-cmd="Patrol around Uni-Mall and verify safety">Uni-Mall Patrol</button>
+          <button class="chip" type="button" data-cmd="Escort student from Block 35 to Uni-Hospital">Hospital Escort</button>
+          <button class="chip" type="button" data-cmd="Return to home charging station">Return Home</button>
+        </div>
+        <div class="tracker">
+          <div class="tracker-row">
+            <span id="tracker-desc">Waiting for next mission dispatch…</span>
+            <b id="tracker-pct">0%</b>
+          </div>
+          <div class="bar"><i id="tracker-bar"></i></div>
+          <ol id="mission-steps" class="mission-steps"></ol>
+          <div class="mission-btns">
+            <button class="btn" id="btn-m-pause" type="button">Pause</button>
+            <button class="btn" id="btn-m-resume" type="button">Resume</button>
+            <button class="btn danger" id="btn-m-abort" type="button">Abort</button>
+          </div>
+        </div>
+        <div class="dpad">
+          <button class="dpad-btn" id="btn-fwd" type="button">▲</button>
+          <div>
+            <button class="dpad-btn" id="btn-left" type="button">◀</button>
+            <button class="dpad-btn stop" id="btn-stop" type="button">■</button>
+            <button class="dpad-btn" id="btn-right" type="button">▶</button>
+          </div>
+          <button class="dpad-btn" id="btn-bwd" type="button">▼</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="health-bar">
+      <div><span>SYSTEM HEALTH</span><b id="h-sys">All systems nominal</b></div>
+      <div><span>BATTERY</span><b id="h-batt">98%</b><small id="h-batt-eta">SIMULATED · Est. 6h 45m</small></div>
+      <div><span>CPU (server walk)</span><b id="h-cpu">45%</b><small id="h-cpu-clk">SIMULATED</small></div>
+      <div><span>MEMORY</span><b id="h-mem">6.2 / 16 GB</b><small id="h-mem-pct">SIMULATED</small></div>
+      <div><span>STORAGE</span><b id="h-stor">128 / 512 GB</b><small>STATIC (not live)</small></div>
+      <div><span>TEMPERATURE</span><b id="h-temp">42°C</b><small id="h-temp-st">SIMULATED</small></div>
+      <div><span>NETWORK</span><b id="h-net">12ms</b><small>SIMULATED latency</small></div>
+      <div><span>SAFETY</span><b id="h-safe">ACTIVE</b><small>Logic mux · not MCU</small></div>
+    </footer>
+
+    <div class="overlay" id="view-overlay" hidden>
+      <div class="card overlay-card">
+        <div class="card-head">
+          <h2 id="overlay-title">Panel</h2>
+          <button class="btn" id="overlay-close" type="button">Close</button>
+        </div>
+        <div id="overlay-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay-templates" hidden>
+    <div id="tpl-scenarios">
+      <label>Scenario</label>
+      <select id="sel-scenario">
+        <option value="normal_campus">Normal campus</option>
+        <option value="exam_day">Exam day</option>
+        <option value="fest">Campus fest</option>
+        <option value="emergency">Emergency</option>
+      </select>
+      <label>Weather</label>
+      <select id="sel-weather">
+        <option value="clear_day">Clear day</option>
+        <option value="rain">Rain</option>
+        <option value="fog">Fog</option>
+        <option value="night">Night</option>
+      </select>
+      <label>Crowd</label>
+      <div class="chips">
+        <button class="chip" data-crowd="low" type="button">Low</button>
+        <button class="chip active" data-crowd="medium" type="button">Medium</button>
+        <button class="chip" data-crowd="high" type="button">High</button>
+      </div>
+      <label>Fault injection</label>
+      <div class="chips">
+        <button class="btn" id="btn-fault-lidar" type="button">LiDAR fail</button>
+        <button class="btn" id="btn-fault-cam" type="button">Camera fail</button>
+        <button class="btn" id="btn-fault-net" type="button">Server down</button>
+        <button class="btn" id="btn-fault-batt" type="button">Low battery</button>
+        <button class="btn" id="btn-fault-clear" type="button">Clear faults</button>
+      </div>
+    </div>
+    <div id="tpl-logs"><div class="log-feed" id="log-feed"></div></div>
+    <div id="tpl-analytics">
+      <div class="kv"><span>Missions completed</span><b id="an-ok">0</b></div>
+      <div class="kv"><span>Missions failed</span><b id="an-fail">0</b></div>
+      <div class="kv"><span>Success rate</span><b id="an-rate">100%</b></div>
+      <div class="kv"><span>Collisions</span><b id="an-col">0</b></div>
+      <div class="kv"><span>Distance</span><b id="an-dist">0 m</b></div>
+    </div>
+    <div id="tpl-sensors">
+      <p class="muted">Command Center sensors come from <code>virtual_space_node</code> (raycast LiDAR, OpenCV cameras, kinematic IMU). Not Gazebo plugins.</p>
+      <div class="kv"><span>Source</span><b id="ov-sns-src">—</b></div>
+      <div class="kv"><span>Front range</span><b id="ov-sns-front">—</b></div>
+      <div class="kv"><span>LiDAR min</span><b id="ov-sns-lmin">—</b></div>
+      <div class="kv"><span>IMU yaw / ωz / ax</span><b id="ov-sns-imu">—</b></div>
+      <div class="kv"><span>Bumper</span><b id="ov-sns-bump">—</b></div>
+      <div class="kv"><span>Heard ROS nodes</span><b id="ov-sns-nodes">—</b></div>
+      <div class="kv"><span>Topics</span><b id="ov-sns-topics">/scan /imu/data /camera/image_raw</b></div>
+    </div>
+    <div id="tpl-ai">
+      <p class="muted">Counts and boxes come from the twin camera FOV + tracker (geometric perception, not a trained YOLO weight). Inference time is measured on that pipeline.</p>
+      <div class="kv"><span>PERSON</span><b id="ov-ai-person">0</b></div>
+      <div class="kv"><span>VEHICLE</span><b id="ov-ai-veh">0</b></div>
+      <div class="kv"><span>BUILDING</span><b id="ov-ai-bldg">0</b></div>
+      <div class="kv"><span>OBSTACLE</span><b id="ov-ai-obs">0</b></div>
+      <div class="kv"><span>Inference</span><b id="ov-ai-ms">—</b></div>
+      <div class="kv"><span>Intent</span><b id="ov-ai-intent">—</b></div>
+      <div class="kv"><span>Nearest track</span><b id="ov-ai-near">—</b></div>
+      <div class="kv"><span>Speech</span><b id="ov-ai-speech">—</b></div>
+    </div>
+    <div id="tpl-settings">
+      <p class="muted">WASD or arrow keys drive GRACEEMO-01. Mission chips publish <code>/gracemo/nav_goal</code>; the twin pursues kinematically until Nav2 is launched. Campus footprints are approximate (see DATA_SOURCES.md).</p>
+      <label class="settings-row"><input type="checkbox" id="chk-debug-grid"> Show debug ground grid</label>
+    </div>
+    <div id="tpl-robots">
+      <div class="kv"><span>Fleet</span><b>GRACEEMO-01</b></div>
+      <div class="kv"><span>Pose</span><b id="ov-pose">—</b></div>
+      <div class="kv"><span>Task</span><b id="ov-task">IDLE</b></div>
+      <div class="kv"><span>Battery</span><b id="ov-batt">—</b></div>
+    </div>
+    <div id="tpl-server">
+      <div class="kv"><span>Status</span><b id="ov-srv">online</b></div>
+      <div class="kv"><span>GPU</span><b id="ov-gpu">—</b></div>
+      <div class="kv"><span>CPU</span><b id="ov-cpu">—</b></div>
+      <div class="kv"><span>Latency</span><b id="ov-lat">—</b></div>
+    </div>
+  </div>
+
+  <canvas id="mapCanvas" width="700" height="550" hidden></canvas>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

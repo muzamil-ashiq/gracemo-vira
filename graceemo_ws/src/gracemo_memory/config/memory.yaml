@@ -1,0 +1,4 @@
+memory:
+  ros__parameters:
+    db_path: '/tmp/graceemo_memory.db'
+    retention_days: 30

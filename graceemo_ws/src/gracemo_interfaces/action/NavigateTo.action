@@ -1,0 +1,11 @@
+# Navigate to a target pose
+geometry_msgs/PoseStamped target_pose
+string location_name
+---
+bool success
+float32 total_distance
+float32 total_time
+---
+float32 distance_remaining
+float32 estimated_time_remaining
+string current_status

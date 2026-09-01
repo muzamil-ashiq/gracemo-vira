@@ -1,0 +1,28 @@
+{
+  "robot_id": "GRACEEMO-01",
+  "generated_utc": "2026-09-01T06:55:48.420639Z",
+  "height_m": 1.372,
+  "wheel_radius_m": 0.12,
+  "wheel_separation_m": 0.42,
+  "design_reference": "blender/reference/GRACEEMO-01.jpg",
+  "artifacts": {
+    "engineering_blend": "blender/GRACEEMO-01_Engineering_Prototype.blend",
+    "engineering_preview": "blender/GRACEEMO_preview.png",
+    "professional_blend": "blender/GRACEEMO-01_PROFESSIONAL_v3.blend",
+    "professional_preview": "blender/GRACEEMO-01_v3_preview.png",
+    "robot_glb": [
+      "graceemo_ws/src/gracemo_description/meshes/GRACEEMO-01_robot.glb",
+      "ros2_ws/src/gracemo_description/meshes/GRACEEMO-01_robot.glb"
+    ]
+  },
+  "campus_generated_utc": "2026-09-01T06:55:49.878971Z",
+  "campus_artifacts": {
+    "campus_blend": "blender/GraceEMO_LPU.blend",
+    "campus_glb": "blender/GraceEMO_LPU_preview.glb",
+    "campus_preview_png": "blender/GraceEMO_LPU_preview.png",
+    "campus_robot_glb": [
+      "graceemo_ws/src/gracemo_description/meshes/GRACEEMO-01_campus_robot.glb",
+      "ros2_ws/src/gracemo_description/meshes/GRACEEMO-01_campus_robot.glb"
+    ]
+  }
+}

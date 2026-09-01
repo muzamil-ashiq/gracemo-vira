@@ -1,0 +1,874 @@
+This is the stage where we should stop treating the dashboard as a visual mock-up and make the simulation itself drive every AI feature.
+
+From your current screenshot, the UI is already fairly close to the right command-center structure. The problem is that many panels are still showing simulated/static values instead of outputs from an actual robot simulation.
+
+What I would build
+
+Your final simulation should work like this:
+
+                         GRACEEMO-01
+                              │
+                    ┌─────────┴─────────┐
+                    │    Gazebo Sim     │
+                    │                   │
+                    │  4 wheels         │
+                    │  Arms + hands     │
+                    │  Head             │
+                    │  LiDAR            │
+                    │  RGB cameras      │
+                    │  Depth camera     │
+                    │  IMU              │
+                    │  Encoders         │
+                    └─────────┬─────────┘
+                              │
+                            ROS 2
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+       Nav2                 AI Stack           Robot Control
+          │                   │                   │
+    SLAM/Localization    Perception            Joints
+    Path Planning        Detection             Wheels
+    Obstacle Avoidance   Tracking              Arms
+          │              Human pose             Hands
+          │              Scene AI
+          │                   │
+          └───────────────────┼───────────────────┘
+                              │
+                       Digital Twin API
+                              │
+                         Web Dashboard
+1. Make your AI Perception actually work
+
+Your current:
+
+Robot Perception & HUD
+
+should become a live perception system.
+
+Camera → AI → dashboard
+
+For example, the simulated front camera sees:
+
+       PERSON
+       ┌─────┐
+       │     │
+       │ 97% │
+       └─────┘
+
+          🚶
+
+The dashboard receives:
+
+Object: PERSON
+Confidence: 97%
+Distance: 4.82 m
+Position:
+X = 2.31
+Y = -0.44
+Z = 0.00
+
+And the bounding box should appear directly over the camera feed.
+
+2. Person detection
+
+This should be one of the first AI modules.
+
+The simulated camera should detect:
+
+people
+vehicles
+bicycles
+chairs
+tables
+doors
+stairs
+signs
+obstacles
+campus objects
+
+Dashboard:
+
+AI PERCEPTION
+
+PERSON       3
+VEHICLE      2
+OBSTACLE     7
+DOOR         1
+
+Inference: 18.7 ms
+FPS: 30
+
+No fake numbers.
+
+The numbers should come from the perception pipeline.
+
+3. Person tracking
+
+Don't just detect a person.
+
+Track them.
+
+Example:
+
+Person #001
+────────────
+
+Distance     3.8 m
+Velocity     0.7 m/s
+Direction    → 
+Confidence   94%
+
+If the person moves, the position changes in real time.
+
+This allows you to implement:
+
+"Follow that person."
+
+4. Human pose estimation
+
+Your AI system should eventually detect:
+
+      O
+     /|\
+     / \
+
+and recognize:
+
+standing
+walking
+sitting
+waving
+pointing
+falling
+
+This becomes useful for your campus-assistance scenarios.
+
+5. Gesture recognition
+
+Make commands such as:
+
+👋 WAVE
+✋ STOP
+👉 POINT
+👍 APPROVE
+
+work through the simulated camera.
+
+For example:
+
+Person
+   ↓
+Camera
+   ↓
+Pose/Gesture AI
+   ↓
+"POINT"
+   ↓
+Robot looks toward pointed direction
+6. Natural-language AI
+
+This is where your current:
+
+Mission Planner & NL Builder
+
+becomes powerful.
+
+User enters:
+
+Go to the library.
+
+System converts it into:
+
+INTENT
+NAVIGATE
+
+TARGET
+Library B37
+
+ACTION
+NavigateTo()
+
+STATUS
+PLANNING
+
+Then:
+
+AI
+ ↓
+Nav2
+ ↓
+Path Planner
+ ↓
+Gazebo
+ ↓
+Robot moves
+7. Multi-step missions
+
+For:
+
+Go to the library, find a person and guide them to Block 37.
+
+AI should create:
+
+MISSION #024
+
+✓ Navigate → Library
+○ Search for person
+○ Approach person
+○ Start interaction
+○ Navigate → Block 37
+○ Confirm arrival
+○ Return
+
+The dashboard updates each step.
+
+8. Real navigation
+
+Your current robot marker needs to be replaced with actual robot pose.
+
+Gazebo:
+
+Robot
+ ↓
+/odom
+ ↓
+TF
+ ↓
+Localization
+ ↓
+Nav2
+ ↓
+Dashboard
+
+Dashboard:
+
+X       43.21 m
+Y       87.14 m
+YAW     123.4°
+SPEED   0.42 m/s
+
+These values change as the simulated robot moves.
+
+9. Real LiDAR
+
+Your current LiDAR graphic should be driven by simulated LiDAR.
+
+The simulator generates:
+
+LaserScan
+
+Then:
+
+LiDAR
+ ↓
+Obstacle detection
+ ↓
+Local costmap
+ ↓
+Path planner
+
+Dashboard displays the actual scan.
+
+10. Depth perception
+
+Your:
+
+DEPTH FROM SCAN
+
+should become a real depth image.
+
+For example:
+
+Camera
+ ↓
+Depth
+ ↓
+Obstacle distance
+
+Person = 2.8 m
+Wall   = 5.2 m
+Chair  = 1.1 m
+11. Obstacle avoidance
+
+This is critical.
+
+Suppose the robot is moving:
+
+        🚧
+        │
+────────┼────────
+        │
+        🤖
+
+AI/Nav2 detects it.
+
+Then:
+
+Original path
+───────────────X
+
+Replanned path
+──────────╮
+          ╰──────
+
+Robot automatically changes trajectory.
+
+Your dashboard should show:
+
+OBSTACLE DETECTED
+
+Distance: 0.74 m
+
+Action:
+REPLANNING
+
+Velocity:
+0.42 → 0.15 m/s
+12. Four-wheel simulation
+
+This needs to be part of the actual simulation, not just the visual model.
+
+Each wheel should have:
+
+FL
+FR
+RL
+RR
+
+ROS 2 should receive their states.
+
+Dashboard:
+
+WHEEL STATUS
+
+FL  142 RPM   🟢
+FR  143 RPM   🟢
+RL  141 RPM   🟢
+RR  142 RPM   🟢
+13. CG and stability AI
+
+Because your robot is approximately 4.5 ft tall, we should include a stability model.
+
+Calculate:
+
+CG position
+support polygon
+wheel contact
+tilt
+acceleration
+payload
+arm position
+
+Then:
+
+STABILITY
+
+CG            SAFE
+Tilt          2.1°
+Support       SAFE
+Tip Margin    18 cm
+
+When the arm extends:
+
+CG →→
+
+Tip Margin
+18 cm → 11 cm
+
+Status:
+⚠ CAUTION
+
+This is much more useful than merely displaying "SAFE."
+
+14. Arm AI
+
+Your arms should become actual simulated joints.
+
+For example:
+
+Shoulder
+   ↓
+Upper Arm
+   ↓
+Elbow
+   ↓
+Forearm
+   ↓
+Wrist
+   ↓
+Hand
+
+Then the dashboard can command:
+
+Raise left hand.
+
+AI:
+
+Intent:
+MOVE_LEFT_ARM
+
+Target:
+HAND_UP
+
+IK
+ ↓
+Joint trajectory
+ ↓
+Gazebo
+15. Hand interaction
+
+Later we can implement:
+
+OPEN
+CLOSE
+POINT
+WAVE
+GRASP
+RELEASE
+
+The hand should physically move in Gazebo.
+
+16. Head movement
+
+Your head should respond to AI.
+
+For example:
+
+Person detected at left.
+
+Robot:
+
+       🤖
+      ↙
+     🚶
+
+Head yaw automatically turns toward the person.
+
+Similarly:
+
+Someone is speaking from the right.
+
+Head turns right.
+
+17. Voice AI
+
+Add:
+
+Microphone
+    ↓
+Speech-to-text
+    ↓
+Intent AI
+    ↓
+Action
+
+Example:
+
+"Where is the library?"
+
+AI:
+
+Intent = LOCATION_QUERY
+Target = Library
+
+Robot:
+
+"The library is approximately 120 metres ahead."
+
+18. Robot conversation
+
+Create an AI interaction layer:
+
+USER
+ ↓
+Speech
+ ↓
+LLM
+ ↓
+Intent
+ ↓
+Robot action / response
+
+Important: the LLM should not directly control motors.
+
+Instead:
+
+LLM
+ ↓
+validated command
+ ↓
+ROS 2 controller
+ ↓
+robot
+
+That gives you a much safer architecture.
+
+19. AI scene understanding
+
+Eventually the robot should be able to interpret:
+
+"What's around me?"
+
+and produce:
+
+SCENE
+
+3 people
+2 buildings
+1 vehicle
+1 bench
+1 entrance
+Crosswalk ahead
+Road crossing 8 m ahead
+20. Campus-specific AI
+
+This is where your project becomes much more interesting academically.
+
+Train/configure the system around the campus environment:
+
+LPU CAMPUS AI
+
+Building recognition
+Gate recognition
+Block recognition
+Road recognition
+Crosswalk detection
+Stair detection
+Lift detection
+Entrance detection
+Restricted-zone detection
+
+Then:
+
+Take me to Block 37.
+
+The robot should identify Block 37 rather than simply navigating to arbitrary coordinates.
+
+21. Safety AI
+
+Your existing:
+
+E-STOP
+
+should be real.
+
+Have:
+
+AI SAFETY
+
+Collision       🟢
+Obstacle        🟢
+Cliff           🟢
+Tilt            🟢
+Wheel slip      🟢
+Motor           🟢
+Battery         🟢
+Localization    🟢
+Communication   🟢
+
+And if something happens:
+
+🔴 SAFETY EVENT
+
+Front obstacle:
+0.31 m
+
+Robot:
+STOPPED
+
+Reason:
+COLLISION PREVENTION
+22. Battery simulation
+
+Instead of:
+
+Battery 98%
+
+make battery consumption depend on simulation.
+
+Battery should decrease based on:
+
+wheel movement
+acceleration
+arm movement
+computing load
+sensors
+payload
+terrain
+
+Then:
+
+98%
+ ↓
+97%
+ ↓
+96%
+...
+
+And:
+
+Return to charging station.
+
+should actually cause the robot to navigate to the charger.
+
+23. Charging AI
+
+Implement:
+
+Battery < threshold
+        ↓
+Mission check
+        ↓
+Find charger
+        ↓
+Navigate
+        ↓
+Dock
+        ↓
+Charge
+24. Fault injection
+
+This would be excellent for your research project.
+
+Create a simulation panel:
+
+FAULT INJECTION
+
+□ Front LiDAR failure
+□ Camera failure
+□ Wheel FL failure
+□ Wheel FR failure
+□ Motor overheating
+□ Battery low
+□ Network loss
+□ Localization failure
+□ Obstacle suddenly appears
+□ Emergency stop
+
+Then test how GRACEEMO responds.
+
+That gives you actual experimental data.
+
+25. Scenario engine
+
+Your existing:
+
+Scenarios
+
+should allow:
+
+Scenario 01
+
+Normal Campus Navigation
+
+Scenario 02
+
+Crowded Campus
+
+Scenario 03
+
+Obstacle Blocking Path
+
+Scenario 04
+
+Wheel Failure
+
+Scenario 05
+
+Low Battery
+
+Scenario 06
+
+Lost Localization
+
+Scenario 07
+
+Emergency Stop
+
+Scenario 08
+
+Person Assistance
+
+Scenario 09
+
+Delivery Mission
+
+Scenario 10
+
+Night Campus
+
+This is extremely useful for testing.
+
+26. AI performance metrics
+
+Add:
+
+AI PERFORMANCE
+
+Detection FPS       29.8
+Inference latency   18 ms
+Detection accuracy  94.2%
+Tracking stability  96.1%
+Navigation success  98.0%
+Obstacle avoidance  97.4%
+
+For research, these metrics become valuable.
+
+27. Mission recording
+
+Every simulation should be recordable:
+
+MISSION #024
+
+Duration       04:32
+Distance       214 m
+Obstacles       17
+Replans          3
+AI detections   42
+Battery         -7%
+Success         ✓
+
+Then replay it.
+
+28. What your final dashboard should look like
+
+Your current screenshot is already heading in the right direction.
+
+The finished system should have:
+
+┌───────────────────────────────────────────────────────────────┐
+│ GRACEEMO DIGITAL TWIN    🟣 SIMULATION   🟢 ROS2   🔋 98%     │
+├────────────┬──────────────────────────────────┬───────────────┤
+│            │                                  │ AI PERCEPTION │
+│ Dashboard  │                                  │               │
+│            │        3D LPU CAMPUS            │ PERSON   3    │
+│ Campus     │                                  │ VEHICLE  2    │
+│            │             🚶                   │ OBSTACLE 7    │
+│ Robots     │              ↓                   │               │
+│            │             🤖                   │ LiDAR         │
+│ Missions   │                                  │ DEPTH         │
+│            │       NAVIGATION PATH            │ CAMERA        │
+│ Sensors    │                                  │               │
+│            │                                  │               │
+│ AI         │                                  │               │
+│            ├──────────────────────────────────┤               │
+│ Navigation │ FRONT CAMERA │ LEFT │ RIGHT      │               │
+│            ├──────────────────────────────────┴───────────────┤
+│ Safety     │ BATTERY │ CPU │ GPU │ TEMP │ NETWORK │ SAFETY   │
+│            │                                                │
+└────────────┴────────────────────────────────────────────────┘
+Most important change
+
+Don't try to make Blender itself "AI".
+
+Use Blender primarily for:
+
+3D robot/model development + animation + visualization
+
+Use Gazebo for:
+
+physics + sensors + robot simulation
+
+Use ROS 2 for:
+
+robot communication + control
+
+Use AI models for:
+
+perception + speech + scene understanding + decision support
+
+Use your web application for:
+
+Digital Twin + command center + monitoring + missions
+
+So your stack becomes:
+
+                         WEB
+                          │
+                    React / UI
+                          │
+                     WebSocket
+                          │
+                       Backend
+                          │
+                        ROS 2
+             ┌────────────┼────────────┐
+             │            │            │
+           Nav2          AI         ros2_control
+             │            │            │
+             └────────────┼────────────┘
+                          │
+                       Gazebo
+                          │
+              ┌───────────┼───────────┐
+              │           │           │
+             4WD        Sensors      Robot
+              │           │           │
+              └───────────┴───────────┘
+And I would build it in this exact order:
+
+Phase 1 — Robot simulation
+
+4-wheel robot
+4.5-ft dimensions
+proper joints
+wheel controllers
+IMU
+LiDAR
+RGB/depth cameras
+odometry
+TF
+
+Phase 2 — ROS 2
+10. robot_state_publisher
+11. ros2_control
+12. joint states
+13. odometry
+14. TF
+15. sensor topics
+
+Phase 3 — Navigation
+16. SLAM
+17. localization
+18. Nav2
+19. global planner
+20. local planner
+21. obstacle avoidance
+
+Phase 4 — AI
+22. object detection
+23. tracking
+24. human detection
+25. pose
+26. gesture
+27. scene understanding
+28. speech
+29. natural-language commands
+
+Phase 5 — Digital Twin
+30. live 3D robot
+31. live campus
+32. sensor feeds
+33. robot state
+34. mission state
+35. AI state
+36. safety state
+
+Phase 6 — Research
+37. scenarios
+38. fault injection
+39. experiment recording
+40. replay
+41. analytics
+42. performance metrics
+
+One thing I need from you to do the actual implementation
+
+The screenshot is enough to identify what needs fixing, but not enough to modify your application. I need the actual project source/code that currently produces this localhost dashboard.
+
+If you give me the frontend/backend project files (or ZIP), I can work from the existing architecture and map the dashboard components to the actual simulation interfaces rather than giving you another disconnected prototype.
+
+And for the Blender side, your existing .blend/Python model is also useful because we need the robot's joint names and hierarchy to match the ROS 2 model exactly.
+
+The goal should be: click "SIMULATION" → launch the simulated GRACEEMO → move it in Gazebo → camera/LiDAR perceive the campus → AI detects objects/people → Nav2 plans → robot drives on four wheels → dashboard updates everything live.

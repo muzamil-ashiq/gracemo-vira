@@ -1,0 +1,6 @@
+voice:
+  ros__parameters:
+    wake_word: 'hey gracemo'
+    stt_model: 'small'
+    tts_engine: 'kokoro'
+    language: 'en'

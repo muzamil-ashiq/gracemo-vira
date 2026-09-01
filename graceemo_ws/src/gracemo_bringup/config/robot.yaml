@@ -1,0 +1,110 @@
+# =============================================================================
+# GraceEMO ViRa — Master Robot Configuration (LPU Digital Twin Edition)
+# =============================================================================
+# Change values here to reconfigure the entire robot without touching code.
+# =============================================================================
+
+robot:
+  name: 'gracemo'
+  wheel_radius: 0.12
+  wheel_separation: 0.42
+  max_linear_speed: 0.5
+  max_angular_speed: 1.5
+
+perception:
+  detector: 'yolo11n'
+  confidence_threshold: 0.5
+  device: 'cuda:0'
+  face_detection: true
+  face_model: 'yunet'
+  publish_annotated: true
+  camera_topic: '/camera/image_raw'
+  depth_camera_topic: '/camera/depth'
+  pedestrian_detection: true
+  vehicle_detection: true
+  obstacle_detection: true
+  sensor_fusion: true
+
+voice:
+  stt_engine: 'faster-whisper'
+  stt_model: 'small'
+  tts_engine: 'kokoro'
+  wake_word: 'hey gracemo'
+  language: 'en'
+  mic_device: 'default'
+
+brain:
+  llm_backend: 'gemini'
+  llm_model: 'gemini-2.0-flash'
+  api_key_env: 'GEMINI_API_KEY'
+  temperature: 0.3
+  max_tokens: 512
+  enable_behavior_trees: true
+  system_prompt: 'You are GraceEMO, an autonomous campus robot at Lovely Professional University (LPU). You navigate the campus, assist students and faculty, deliver items, and provide information about campus facilities.'
+  vlm_enabled: true
+  ai_transparency: true  # Publish decision reasoning
+
+memory:
+  database: 'sqlite'
+  db_path: '/workspace/gracemo_data/memory.db'
+  vector_search: true
+  vector_dimensions: 384
+  retention_days: 30
+
+navigation:
+  slam_algorithm: 'slam_toolbox'
+  planner: 'NavfnPlanner'
+  controller: 'RegulatedPurePursuit'
+  max_planner_duration: 5.0
+  human_aware: true
+  personal_space_radius: 0.8
+  min_obstacle_distance: 0.5
+  max_speed_near_pedestrians: 0.3
+  semantic_destinations: true
+  recovery_behaviors: true
+  return_home_enabled: true
+  emergency_stop_enabled: true
+
+simulation:
+  headless: true
+  world: 'lpu_campus'
+  web_dashboard_port: 8888
+  campus_metadata: '/workspace/graceemo_ws/src/gracemo_gazebo/config/campus_metadata.json'
+
+scenarios:
+  active_scenario: 'normal_campus'
+  pedestrian_update_rate_hz: 10.0
+  initial_crowd_density: 'medium'
+  initial_traffic_density: 'low'
+
+network:
+  latency_ms: 0
+  jitter_ms: 0
+  packet_loss_pct: 0.0
+  bandwidth_mbps: 100.0
+  server_available: true
+
+server:
+  port: 8090
+  gpu_utilization_sim: 55.0
+  cpu_utilization_sim: 40.0
+
+fault_injection:
+  enabled: false  # Set true to enable fault injection at startup
+
+analytics:
+  log_directory: '/workspace/gracemo_data/logs'
+  replay_directory: '/workspace/gracemo_data/replays'
+  structured_logging: true
+
+research:
+  enabled: false  # Set true to enable research mode
+
+safety:
+  emergency_stop: true
+  speed_limits: true
+  collision_boundaries: true
+  restricted_zone_avoidance: true
+  watchdog_timeout_s: 5.0
+  safe_stop_on_comm_loss: true
+  ai_cannot_bypass_safety: true  # LLM/VLM may propose, safety controller validates

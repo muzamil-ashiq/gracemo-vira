@@ -1,0 +1,7 @@
+brain:
+  ros__parameters:
+    llm_backend: 'gemini'
+    llm_model: 'gemini-2.0-flash'
+    temperature: 0.3
+    max_tokens: 512
+    system_prompt: 'You are GraceEMO, a friendly, intelligent autonomous humanoid robot at Lovely Professional University (LPU).'

@@ -1,0 +1,19 @@
+<root main_tree="GraceEMOMainBT">
+  <BehaviorTree ID="GraceEMOMainBT">
+    <Fallback>
+      <Sequence name="EmergencySafetyCheck">
+        <Condition ID="IsBatteryLow"/>
+        <Action ID="ReturnToCharger"/>
+      </Sequence>
+      <Sequence name="GreetHuman">
+        <Condition ID="IsHumanDetected"/>
+        <Action ID="StopAndFaceHuman"/>
+        <Action ID="SpeakGreeting"/>
+      </Sequence>
+      <Sequence name="CampusPatrol">
+        <Action ID="GetNextCampusWaypoint"/>
+        <Action ID="NavigateToWaypoint"/>
+      </Sequence>
+    </Fallback>
+  </BehaviorTree>
+</root>

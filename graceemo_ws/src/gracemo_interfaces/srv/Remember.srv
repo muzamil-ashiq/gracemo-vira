@@ -1,0 +1,8 @@
+# Store a fact in the memory system
+string category
+string key
+string value
+float32 importance
+---
+bool success
+string message

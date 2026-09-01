@@ -1,0 +1,7 @@
+# Look up a stored fact (named places, people)
+string category
+string key
+---
+bool success
+string value
+string message
