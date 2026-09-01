@@ -101,6 +101,15 @@ class MissionVisualizer:
             except Exception:
                 pass
 
+        # Vision Worker State (Decoupled for Zero-Latency 30 FPS Stream)
+        self.latest_raw_frame = None
+        self.latest_detections = []  # List of (xyxy, conf, cls_name)
+        self.vision_lock = threading.Lock()
+        
+        # Start async background YOLO inference thread
+        self.vision_thread = threading.Thread(target=self._vision_inference_loop, daemon=True)
+        self.vision_thread.start()
+
         # Background control loop thread (20Hz)
         self.running = True
         self.control_thread = threading.Thread(target=self._control_loop, daemon=True)
@@ -113,27 +122,55 @@ class MissionVisualizer:
         if self.voice:
             threading.Thread(target=self.voice.speak, args=(text,), daemon=True).start()
 
+    def _vision_inference_loop(self):
+        """Asynchronous background worker running YOLO without blocking the 30 FPS video transport."""
+        while self.running:
+            if self.latest_raw_frame is None:
+                time.sleep(0.02)
+                continue
+
+            with self.vision_lock:
+                frame_to_process = self.latest_raw_frame.copy()
+
+            try:
+                results = self.yolo(frame_to_process, verbose=False, conf=0.25, imgsz=480)
+                detections = []
+                for box in results[0].boxes:
+                    cls_id = int(box.cls[0].item())
+                    cls_name = self.yolo.names[cls_id]
+                    conf = float(box.conf[0].item())
+                    xyxy = box.xyxy[0].cpu().numpy().astype(int)
+                    detections.append((xyxy, conf, cls_name))
+                    self.detected_objects.add(cls_name)
+                    if self.current_room_label in self.room_inventory:
+                        self.room_inventory[self.current_room_label].add(cls_name)
+
+                with self.vision_lock:
+                    self.latest_detections = detections
+            except Exception:
+                pass
+
+            time.sleep(0.04)  # ~25 FPS inference rate
+
     def _on_image(self, msg: GzImage):
+        """Ultra-fast non-blocking transport callback (runs in < 1ms to eliminate stream buffering lag)."""
         try:
             arr = np.frombuffer(msg.data, dtype=np.uint8).reshape((msg.height, msg.width, 3))
             frame = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
-            self.latest_frame = frame
+            self.latest_raw_frame = frame
 
-            # Run YOLO
-            results = self.yolo(frame, verbose=False, conf=0.28)
-            annotated = results[0].plot()
+            # Render HUD and latest detection bounding boxes instantly onto fresh frame
+            annotated = frame.copy()
+            with self.vision_lock:
+                current_dets = list(self.latest_detections)
 
-            # Extract detected classes
             current_frame_classes = set()
-            for box in results[0].boxes:
-                cls_id = int(box.cls[0].item())
-                cls_name = self.yolo.names[cls_id]
+            for xyxy, conf, cls_name in current_dets:
                 current_frame_classes.add(cls_name)
-                self.detected_objects.add(cls_name)
-
-                # Assign to current room inventory
-                if self.current_room_label in self.room_inventory:
-                    self.room_inventory[self.current_room_label].add(cls_name)
+                x1, y1, x2, y2 = xyxy
+                cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 120), 2)
+                cv2.putText(annotated, f"{cls_name} {conf:.2f}", (x1, max(20, y1 - 6)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 120), 2)
 
             # Draw HUD Telemetry Overlay on Video
             h, w, _ = annotated.shape
@@ -157,7 +194,7 @@ class MissionVisualizer:
             cv2.putText(annotated, status_text, (w - 180, 36), cv2.FONT_HERSHEY_DUPLEX, 0.55, badge_color, 2)
 
             # Bottom HUD Bar: Active Detections
-            det_str = " | ".join(sorted(current_frame_classes)) if current_frame_classes else "Clear Field of View"
+            det_str = " | ".join(sorted(current_frame_classes)) if current_frame_classes else "Scanning Field of View"
             cv2.putText(annotated, f"OBJECTS: {det_str}", (15, h - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1)
 
             self.annotated_frame = annotated
