@@ -202,51 +202,39 @@ class MissionVisualizer:
     def plan_path_to_room(self, target_room: str):
         """
         Generate a collision-free waypoint trajectory through doorways and the central hallway.
-        Handles room-to-room, room-to-hallway, and hallway-to-room navigation.
+        Uses aligned approach and exit waypoints so the robot enters/exits doorways perfectly straight.
         """
         waypoints = []
         cur_x, cur_y = self.cur_x, self.cur_y
 
-        # Step 1: If currently inside a room, first exit to the hallway via that room's doorway
-        if cur_y > 1.1:
+        # Step 1: If currently inside a room, first exit through doorway into central hallway
+        if cur_y > 1.2:
             # Inside Bedroom (left) or Study (right)
-            if cur_x < 0:
-                # In Bedroom -> exit through bedroom doorway (-5.0, 1.0) to hallway (-5.0, 0.0)
-                waypoints.append((-5.0, 1.2))
-                waypoints.append((-5.0, 0.0))
-            else:
-                # In Study -> exit through study doorway (+5.0, 1.0) to hallway (+5.0, 0.0)
-                waypoints.append((5.0, 1.2))
-                waypoints.append((5.0, 0.0))
-        elif cur_y < -1.1:
+            door_x = -5.0 if cur_x < 0 else 5.0
+            waypoints.extend([(door_x, 2.0), (door_x, 0.8), (door_x, 0.0)])
+        elif cur_y < -1.2:
             # Inside Kitchen (left) or Living Room (right)
-            if cur_x < 0:
-                # In Kitchen -> exit through kitchen doorway (-5.0, -1.0) to hallway (-5.0, 0.0)
-                waypoints.append((-5.0, -1.2))
-                waypoints.append((-5.0, 0.0))
-            else:
-                # In Living Room -> exit through living doorway (+5.0, -1.0) to hallway (+5.0, 0.0)
-                waypoints.append((5.0, -1.2))
-                waypoints.append((5.0, 0.0))
+            door_x = -5.0 if cur_x < 0 else 5.0
+            waypoints.extend([(door_x, -2.0), (door_x, -0.8), (door_x, 0.0)])
 
         # Step 2: Route through central hallway to target room doorway and room center
         if target_room == "bedroom":
-            waypoints.extend([(-5.0, 0.0), (-5.0, 1.4), (-5.0, 3.5)])
+            waypoints.extend([(-5.0, 0.0), (-5.0, 0.6), (-5.0, 1.8), (-5.0, 3.8)])
         elif target_room == "study":
-            waypoints.extend([(5.0, 0.0), (5.0, 1.4), (5.0, 3.5)])
+            waypoints.extend([(5.0, 0.0), (5.0, 0.6), (5.0, 1.8), (5.0, 3.8)])
         elif target_room == "kitchen":
-            waypoints.extend([(-5.0, 0.0), (-5.0, -1.4), (-5.0, -3.5)])
+            waypoints.extend([(-5.0, 0.0), (-5.0, -0.6), (-5.0, -1.8), (-4.5, -3.8)])
         elif target_room == "living":
-            waypoints.extend([(5.0, 0.0), (5.0, -1.4), (5.0, -3.5)])
+            waypoints.extend([(5.0, 0.0), (5.0, -0.6), (5.0, -1.8), (4.5, -3.8)])
         elif target_room == "hallway":
             waypoints.append((0.0, 0.0))
 
-        # Deduplicate consecutive waypoints that are within 0.4m of each other
+        # Deduplicate consecutive waypoints within 0.35m
         clean_wps = []
         for wp in waypoints:
             if not clean_wps:
                 clean_wps.append(wp)
-            elif math.hypot(wp[0] - clean_wps[-1][0], wp[1] - clean_wps[-1][1]) > 0.4:
+            elif math.hypot(wp[0] - clean_wps[-1][0], wp[1] - clean_wps[-1][1]) > 0.35:
                 clean_wps.append(wp)
 
         return clean_wps
