@@ -9,6 +9,7 @@ from launch.actions import (
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -24,7 +25,7 @@ def generate_launch_description():
 
     os.environ["GZ_SIM_RESOURCE_PATH"] = resource_paths
 
-    robot_description = Command(["xacro ", xacro_file])
+    robot_description = ParameterValue(Command(["xacro ", xacro_file]), value_type=str)
     use_sim_time = LaunchConfiguration("use_sim_time", default="true")
 
     # Check if MNSE Kernel is online
@@ -61,24 +62,6 @@ def generate_launch_description():
                 "robot_description": robot_description,
                 "use_sim_time": use_sim_time
             }]
-        ),
-
-        # 3. ROS 2 <-> Gazebo Harmonic Transport Bridge
-        Node(
-            package="ros_gz_bridge",
-            executable="parameter_bridge",
-            name="ros_gz_bridge",
-            output="screen",
-            arguments=[
-                "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
-                "/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
-                "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
-                "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
-                "/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image",
-                "/imu/data@sensor_msgs/msg/Imu[gz.msgs.IMU",
-                "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V"
-            ],
-            parameters=[{"use_sim_time": use_sim_time}]
         ),
     ]
 
