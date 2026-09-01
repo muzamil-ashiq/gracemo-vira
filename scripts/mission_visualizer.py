@@ -148,13 +148,17 @@ class MissionVisualizer:
             cv2.putText(annotated, f"POS: ({self.cur_x:+.2f}m, {self.cur_y:+.2f}m) | HEADING: {math.degrees(self.cur_yaw):.0f}deg", (15, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (220, 220, 220), 1)
 
             # Status Badge Top Right
-            status_text = "SURVEYING" if self.surveying else ("NAVIGATING" if self.navigating else "IDLE")
-            badge_color = (0, 140, 255) if self.navigating else ((180, 0, 255) if self.surveying else (100, 200, 100))
-            cv2.putText(annotated, status_text, (w - 140, 36), cv2.FONT_HERSHEY_DUPLEX, 0.6, badge_color, 2)
+            if self.navigating:
+                status_text = f"NAV -> {self.target_room.upper()}"
+                badge_color = (0, 160, 255)
+            else:
+                status_text = "STATIONED"
+                badge_color = (0, 230, 100)
+            cv2.putText(annotated, status_text, (w - 180, 36), cv2.FONT_HERSHEY_DUPLEX, 0.55, badge_color, 2)
 
             # Bottom HUD Bar: Active Detections
-            det_str = " | ".join(sorted(current_frame_classes)) if current_frame_classes else "Scanning apartment environment..."
-            cv2.putText(annotated, f"DETECTED: {det_str}", (15, h - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1)
+            det_str = " | ".join(sorted(current_frame_classes)) if current_frame_classes else "Clear Field of View"
+            cv2.putText(annotated, f"OBJECTS: {det_str}", (15, h - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1)
 
             self.annotated_frame = annotated
 
@@ -271,26 +275,14 @@ class MissionVisualizer:
 
             log_tick += 1
 
-            # 1. 360-Degree Visual Survey Mode
-            if self.surveying:
-                self.publish_cmd(0.0, 0.40)  # Gentle 360 spin
-                elapsed = time.time() - self.survey_start_time
-                if elapsed > 8.0:
-                    self.surveying = False
-                    self.navigating = False
-                    self.publish_cmd(0.0, 0.0)
-                    found = ", ".join(self.room_inventory.get(self.current_room_label, ["objects"])) or "various furniture"
-                    console.print(f"[bold magenta]✓ [SURVEY COMPLETE] {self.current_room_label}: {found}[/bold magenta]")
-                    self.speak(f"Inspection of {self.current_room_label} complete. I found: {found}.")
-                continue
-
-            # 2. Check All Waypoints Reached
+            # 1. Check All Waypoints Reached -> Clean Arrival & Stop
             if self.wp_idx >= len(self.active_waypoints):
-                self.surveying = True
-                self.survey_start_time = time.time()
+                self.navigating = False
+                self.surveying = False
                 self.publish_cmd(0.0, 0.0)
-                console.print(f"[bold magenta]📍 [ARRIVED] Reached {self.target_room.upper()} center. Initiating 360 survey...[/bold magenta]")
-                self.speak(f"Arrived at {self.target_room.title()}. Starting visual survey.")
+                found = ", ".join(self.room_inventory.get(self.current_room_label, ["objects"])) or "furniture objects"
+                console.print(f"[bold magenta]📍 [ARRIVED] Reached {self.target_room.upper()} center. Stationed & Monitoring.[/bold magenta]")
+                self.speak(f"Arrived at {self.target_room.title()}. Monitoring {found}.")
                 continue
 
             # 3. Target Waypoint Vector
