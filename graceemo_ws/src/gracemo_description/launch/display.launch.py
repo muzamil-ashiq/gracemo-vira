@@ -4,20 +4,24 @@ Starts robot_state_publisher to broadcast TF2 frames from the URDF.
 """
 import os
 from launch import LaunchDescription
-from launch.substitutions import Command
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    # Path to the xacro file
-    urdf_dir = os.path.join(
-        get_package_share_directory('gracemo_description'), 'urdf'
-    )
-    xacro_file = os.path.join(urdf_dir, 'gracemo.urdf.xacro')
+    pkg_share = get_package_share_directory('gracemo_description')
+    default_model_path = os.path.join(pkg_share, 'urdf', 'gracemo.urdf.xacro')
 
-    # Process xacro → URDF XML string
-    robot_description = Command(['xacro ', xacro_file])
+    model_arg = DeclareLaunchArgument(
+        name='model',
+        default_value=default_model_path,
+        description='Absolute path to robot urdf.xacro file',
+    )
+
+    robot_description = ParameterValue(Command(['xacro ', LaunchConfiguration('model')]), value_type=str)
 
     # robot_state_publisher: publishes TF2 transforms from URDF
     robot_state_publisher = Node(

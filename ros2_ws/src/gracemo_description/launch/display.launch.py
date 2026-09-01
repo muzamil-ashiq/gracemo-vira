@@ -4,13 +4,14 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
-    pkg_dir = get_package_share_directory("gracemo_description")
-    xacro_file = os.path.join(pkg_dir, "urdf", "gracemo_vira.urdf.xacro")
+    pkg_share = get_package_share_directory("gracemo_description")
+    xacro_file = os.path.join(pkg_share, "urdf", "gracemo_vira.urdf.xacro")
 
-    robot_description = Command(["xacro ", xacro_file])
+    robot_description = ParameterValue(Command(["xacro ", xacro_file]), value_type=str)
 
     use_sim_time = LaunchConfiguration("use_sim_time", default="false")
 
