@@ -1,0 +1,49 @@
+# =============================================================================
+# GraceEMO ViRa — Docker Compose (LPU Digital Twin Platform)
+# =============================================================================
+services:
+  graceemo:
+    build:
+      context: .
+      dockerfile: Dockerfile.graceemo
+    container_name: graceemo_dev
+    stdin_open: true
+    tty: true
+    ports:
+      - "8888:8888"   # Web Virtual Studio (main UI)
+      - "8765:8765"   # Foxglove bridge (optional)
+      - "9090:9090"   # Custom web simulation UI
+      - "8090:8090"   # Central AI Server API
+      - "3000:3000"   # React Dashboard (when built)
+    volumes:
+      - ../:/workspace/GraceEMO-Final
+      - ../graceemo_ws:/workspace/graceemo_ws
+      - gracemo_data:/workspace/gracemo_data
+    working_dir: /workspace/graceemo_ws
+    environment:
+      - ROS_DOMAIN_ID=0
+      - ROS_LOCALHOST_ONLY=1
+      # Gazebo runs headless (no X11 needed)
+      - DISPLAY=
+      - GZ_SIM_HEADLESS_RENDERING=1
+      # AI Keys (set in .env file)
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: graceemo_db
+    environment:
+      POSTGRES_DB: graceemo_twin
+      POSTGRES_USER: graceemo
+      POSTGRES_PASSWORD: graceemo_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  gracemo_data:
+  pgdata:

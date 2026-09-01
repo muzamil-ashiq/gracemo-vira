@@ -1,0 +1,26 @@
+🤖 GraceEMO — Advanced Autonomous AI Robot
+
+Goal: Build a futuristic, real-time, deployable autonomous humanoid robot from the ground up using AI/ML/DL + ROS 2 + real-time robotics.
+
+Core Features
+🧠 Autonomous AI decision-making — goals, reasoning, planning, and self-directed actions
+👁️ Computer vision — object detection, scene understanding, pose & gesture recognition
+👤 Face recognition & re-identification — identify, remember, and track people
+🎙️ Natural voice interaction — wake word, speech-to-text, conversational AI, text-to-speech
+🧩 Multimodal intelligence — combine vision, audio, sensors, language, and context
+🗺️ SLAM & localization — understand where the robot is
+🧭 Mapping & navigation — 2D/3D/semantic maps, path planning, obstacle avoidance
+🚶 Person tracking & following — dynamically follow and interact with people
+🧠 Memory system — working, episodic, semantic, spatial, and procedural memory
+🤖 Machine/deep learning — continuously improve perception and behavior through training
+🎮 Reinforcement/imitation learning — learn navigation, interaction, and motion policies
+🌎 World model — understand people, objects, places, events, and changes around it
+🦾 Humanoid movement — head/neck, motors, servos, future arms/hands
+⚡ Real-time control — Raspberry Pi 5 + ESP32 hardware-control architecture
+🛡️ Safety & fault handling — watchdogs, emergency stop, collision protection, recovery
+🧪 Simulation → real robot — train/test in simulation before physical deployment
+📊 Real-world learning pipeline — collect data → train → validate → deploy → improve
+🔄 Fully autonomous operation — perception → understanding → decision → planning → action → learning
+In one line:
+
+GraceEMO is an AI-native autonomous humanoid robot that can see, hear, understand, remember, learn, navigate, communicate, make decisions, and act autonomously in the real world.

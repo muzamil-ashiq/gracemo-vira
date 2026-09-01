@@ -1,0 +1,202 @@
+{
+  "users": {
+    "sam_davi": {
+      "name": "Sam Davi",
+      "role": "Project Lead & Robotics Engineer",
+      "notes": [
+        "Lead creator of GraceEMO humanoid robot",
+        "Engineered hardware, sensors, and ROS 2 system",
+        "Discussed: Hello, I am Sam Davi, the lead robotics engineer."
+      ],
+      "relationship": "Creator",
+      "interactions_count": 2,
+      "last_seen": "2026-08-23 14:12:12"
+    },
+    "dr_mohit_arora": {
+      "name": "Dr. Mohit Arora",
+      "role": "Faculty Mentor & Research Professor",
+      "notes": [
+        "Spearheads AI & Autonomous Robotics research at LPU",
+        "Mentored the student creation team"
+      ],
+      "relationship": "Mentor",
+      "interactions_count": 1,
+      "last_seen": "2026-08-23 14:12:04"
+    },
+    "not_sure_if": {
+      "name": "not sure if",
+      "role": "Student / Guest",
+      "notes": [
+        "Discussed: I am not sure if I should eat this daily. I think I should eat this daily. I am "
+      ],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-23 14:42:35",
+      "last_seen": "2026-08-23 14:42:40"
+    },
+    "just_switching_the_windows_on_it_hey_you_can_speak_hello": {
+      "name": "just switching the windows on it Hey you can speak Hello",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-23 22:11:33",
+      "last_seen": "2026-08-23 22:11:33"
+    },
+    "not_sure_how_to_do_this": {
+      "name": "not sure how to do this",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-23 22:15:30",
+      "last_seen": "2026-08-23 22:15:30"
+    },
+    "just_you_are_putting_the_data_in_it_and_you_are_asking_you_can_add": {
+      "name": "just you are putting the data in it and you are asking you can add",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 13:14:13",
+      "last_seen": "2026-08-24 13:14:13"
+    },
+    "not_over": {
+      "name": "not over",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 13:27:24",
+      "last_seen": "2026-08-24 13:27:24"
+    },
+    "your_property_specific_one": {
+      "name": "your property specific one",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 13:35:01",
+      "last_seen": "2026-08-24 13:35:01"
+    },
+    "not_here": {
+      "name": "not here",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 13:35:45",
+      "last_seen": "2026-08-24 13:35:45"
+    },
+    "our_concern": {
+      "name": "our concern",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 15:43:06",
+      "last_seen": "2026-08-24 15:43:06"
+    },
+    "the_purple_of_the_green_side": {
+      "name": "the purple of the green side",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 15:45:49",
+      "last_seen": "2026-08-24 15:45:49"
+    },
+    "the_first_time": {
+      "name": "the first time",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:00:50",
+      "last_seen": "2026-08-24 16:00:50"
+    },
+    "the_first_temperature": {
+      "name": "the first temperature",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:01:40",
+      "last_seen": "2026-08-24 16:01:40"
+    },
+    "square": {
+      "name": "square",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:03:42",
+      "last_seen": "2026-08-24 16:03:42"
+    },
+    "the_best_thing_to_do": {
+      "name": "the best thing to do",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:04:25",
+      "last_seen": "2026-08-24 16:04:25"
+    },
+    "going_to_cross_the_street": {
+      "name": "going to cross the street",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:11:29",
+      "last_seen": "2026-08-24 16:11:29"
+    },
+    "not_sure_what": {
+      "name": "not sure what",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 2,
+      "first_met": "2026-08-24 16:13:27",
+      "last_seen": "2026-08-24 16:41:32"
+    },
+    "going_to_make": {
+      "name": "going to make",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:25:04",
+      "last_seen": "2026-08-24 16:25:04"
+    },
+    "impressed": {
+      "name": "impressed",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:33:52",
+      "last_seen": "2026-08-24 16:33:52"
+    },
+    "going_to_see_you": {
+      "name": "going to see you",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:37:03",
+      "last_seen": "2026-08-24 16:37:03"
+    },
+    "going_to_go_to_the_house_and_see_the_house": {
+      "name": "going to go to the house and see the house",
+      "role": "Student / Guest",
+      "notes": [],
+      "relationship": "Visitor",
+      "interactions_count": 1,
+      "first_met": "2026-08-24 16:42:03",
+      "last_seen": "2026-08-24 16:42:03"
+    }
+  },
+  "topics_discussed": [],
+  "recent_events": []
+}

@@ -1,0 +1,1644 @@
+1. What we are actually building
+Project concept
+LPU Autonomous Robotics Digital Twin
+A photorealistic/realistic simulation replica of the LPU campus in Gazebo, containing:
+campus roads
+pedestrian pathways
+academic blocks
+laboratories
+library
+hostels
+sports areas
+Uni-Mall
+Uni-Polis
+hospital
+parking
+gates
+intersections
+stairs
+ramps
+elevators where appropriate
+indoor/outdoor environments
+dynamic pedestrians
+vehicles
+bicycles
+environmental conditions
+signage
+restricted zones
+And inside that environment:
+Our robot
+The robot should have:
+Perception
+RGB camera
+depth camera
+LiDAR
+IMU
+wheel encoders
+microphones
+AI
+object detection
+person detection
+face/person identification where appropriate
+semantic understanding
+speech recognition
+natural-language interaction
+vision-language reasoning
+task planning
+Robotics
+SLAM
+localization
+navigation
+path planning
+obstacle avoidance
+waypoint navigation
+autonomous docking
+elevator/door interaction simulation
+human-aware navigation
+Control
+Jetson/IPC simulation
+STM32-level controller simulation
+motor controllers
+differential/omnidirectional drive
+PID
+encoder feedback
+safety controller
+Distributed intelligence
+                 CENTRAL SERVER
+                       │
+             Heavy AI / VLM / LLM
+                       │
+                 ROS 2 Network
+                       │
+                 ┌─────▼─────┐
+                 │   ROBOT   │
+                 │   EDGE    │
+                 └─────┬─────┘
+                       │
+                     MCU
+                       │
+                  Motors/Sensors
+2. The really important part: Digital Twin
+Don't make a beautiful campus model that is just a background.
+Make the campus robotically meaningful.
+Every important object should have metadata.
+For example:
+Block_37
+ ├── type: academic_building
+ ├── floors: 5
+ ├── accessible: true
+ ├── entrances: 4
+ ├── elevators: 2
+ ├── rooms: [...]
+ ├── navigation_nodes: [...]
+ └── restricted_zones: [...]
+Central Library:
+Central_Library
+ ├── type: library
+ ├── building: Block_37
+ ├── opening_status: dynamic
+ ├── entrances
+ ├── stairs
+ ├── elevators
+ ├── navigation_points
+ └── semantic_zones
+This is what turns it into a Digital Twin, rather than a 3D model.
+The official LPU library information identifies the Central Library as being in Block 37, which is exactly the type of real-world semantic information we should encode into the simulation.
+3. Campus should have multiple layers
+I strongly recommend building the environment in layers.
+Layer 1 — Geographic
+Campus boundary
+Roads
+Buildings
+Grounds
+Parking
+Paths
+Layer 2 — Architectural
+Building
+ ├── Floors
+ ├── Corridors
+ ├── Rooms
+ ├── Doors
+ ├── Stairs
+ └── Elevators
+Layer 3 — Semantic
+Library
+Laboratory
+Classroom
+Cafeteria
+Hospital
+Office
+Hostel
+Sports area
+Layer 4 — Navigation
+Waypoint
+Intersection
+Corridor node
+Entrance
+Elevator node
+Docking station
+Restricted zone
+Layer 5 — Dynamic
+Students
+Faculty
+Security
+Vehicles
+Buses
+Bicycles
+Wheelchairs
+Other robots
+Layer 6 — Robotics
+Sensors
+Robot state
+Battery
+Localization
+SLAM
+Navigation
+Controller
+Failures
+4. Campus areas I would include
+Based on LPU's published infrastructure, don't limit the model to academic blocks. LPU's own infrastructure material spans academics, research, sports, residences and other facilities.
+Academic
+academic blocks
+classrooms
+lecture theatres
+corridors
+faculty offices
+laboratories
+computer labs
+research centres
+Knowledge
+Central Library
+study areas
+reading areas
+Residential
+boys' residences
+girls' residences
+hostel roads
+hostel entrances
+mess
+Commercial/social
+Uni-Mall
+Uni-Polis
+cafés
+food areas
+shops
+Healthcare
+Uni-Hospital
+ambulance route
+emergency entrance
+Sports
+football field
+cricket/box cricket
+badminton
+basketball
+rugby
+fitness centre
+swimming pool
+shooting arena
+other sports facilities
+The official infrastructure page specifically lists many of these facilities.
+5. Add realistic campus behaviour
+This is where the simulation becomes really useful.
+Don't populate the campus with static humans.
+Create agents.
+Student agent
+Student
+ ├── walking
+ ├── running
+ ├── waiting
+ ├── talking
+ ├── entering building
+ ├── leaving building
+ └── crossing road
+Security agent
+Security
+ ├── patrol
+ ├── checkpoint
+ ├── stop vehicle
+ └── respond to event
+Vehicle agent
+Vehicle
+ ├── car
+ ├── bus
+ ├── motorcycle
+ └── emergency vehicle
+Robot agent
+Robot
+ ├── autonomous navigation
+ ├── perception
+ ├── planning
+ ├── interaction
+ └── task execution
+6. Add realistic events
+This is very important for research.
+The environment should randomly generate scenarios.
+Normal
+Student walking
+Vehicle crossing
+Door open
+Crowded corridor
+Difficult
+Sudden pedestrian
+Blocked corridor
+Sensor obstruction
+Crowded intersection
+Low lighting
+Network latency
+Failure
+LiDAR failure
+Camera failure
+Encoder failure
+Motor overheating
+Battery low
+Network disconnected
+Central server unavailable
+Now we can test:
+Can our robot continue operating safely?
+That's a proper robotics research question.
+7. Central server should also exist inside the simulation architecture
+This connects directly to your previous idea.
+I'd create:
+                 ┌──────────────────────────┐
+                 │    CENTRAL AI SERVER     │
+                 │                          │
+                 │ LLM                      │
+                 │ VLM                      │
+                 │ Knowledge Base            │
+                 │ Heavy AI inference       │
+                 │ Digital Twin database    │
+                 │ Fleet management         │
+                 └────────────┬─────────────┘
+                              │
+                         ROS 2 Network
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+     ROBOT 01              ROBOT 02             ROBOT 03
+        │                     │                     │
+      Edge                  Edge                  Edge
+        │                     │                     │
+      MCU                   MCU                   MCU
+Then deliberately introduce:
+network latency
+packet loss
+server outage
+bandwidth limitations
+And measure the robot's performance.
+That gives you a very interesting research component:
+Edge–Cloud Robotic Intelligence
+8. The UI/UX should NOT be just Gazebo
+This is important.
+Gazebo should be the simulation engine.
+Build a separate Robotics Command Center UI.
+I would make it look like a modern mission-control system.
+9. Main UI
+Desktop layout
+┌──────────────────────────────────────────────────────────────┐
+│ LPU ROBOTICS DIGITAL TWIN       ● SYSTEM ONLINE   23:42     │
+├────────────┬───────────────────────────────────────┬─────────┤
+│            │                                       │         │
+│  CONTROL   │                                       │ ROBOT   │
+│            │          3D CAMPUS VIEW               │ STATUS  │
+│ Dashboard  │                                       │         │
+│ Campus     │          🤖                           │ Battery │
+│ Robots     │       ─────────                       │ 87%     │
+│ Missions   │      /   LPU    \                     │         │
+│ Sensors    │                                       │ Network │
+│ AI         │                                       │ 12ms    │
+│ Server     │                                       │         │
+│ Scenarios  │                                       │ CPU     │
+│ Analytics  │                                       │ 54%     │
+│ Logs       │                                       │ GPU     │
+│            │                                       │ 61%     │
+├────────────┴───────────────────────────────────────┴─────────┤
+│ Mission: Deliver document → Block 37 → Central Library      │
+│ [PAUSE] [STOP] [RETURN HOME] [AUTONOMOUS]                  │
+└──────────────────────────────────────────────────────────────┘
+10. Left navigation
+Dashboard
+Overall system.
+Campus
+3D campus view.
+Robots
+Robot 01
+● Online
+
+Robot 02
+● Online
+
+Robot 03
+○ Offline
+Missions
+Deliver item
+Patrol campus
+Guide visitor
+Emergency response
+Room inspection
+Campus mapping
+Sensors
+Show:
+RGB Camera       ●
+Depth Camera     ●
+LiDAR            ●
+IMU              ●
+Encoder          ●
+Microphone       ●
+AI
+Object Detection
+VLM
+LLM
+Speech
+Planning
+Knowledge Base
+Server
+GPU utilization
+CPU utilization
+RAM
+Network
+Inference latency
+Queue
+Active requests
+Scenarios
+Normal Campus
+Crowded Campus
+Night
+Rain
+Sensor Failure
+Network Failure
+Emergency
+Analytics
+Navigation success
+Collision count
+Average latency
+Energy consumption
+Mission success
+Server dependency
+11. 3D campus UI
+The central screen should support:
+Camera modes
+First person
+Third person
+Top-down
+Free camera
+Robot camera
+Follow robot
+Map layers
+Toggle:
+☑ Buildings
+☑ Roads
+☑ Pedestrian paths
+☑ Navigation graph
+☑ LiDAR
+☑ Camera FOV
+☑ Obstacles
+☑ Restricted zones
+☑ People
+☑ Vehicles
+☑ Robot trajectories
+12. Robot visualization
+When you click the robot:
+┌──────────────────────┐
+│ ROBOT-01             │
+├──────────────────────┤
+│ Status       ACTIVE  │
+│ Battery      87%     │
+│ Speed        1.2 m/s │
+│ Position             │
+│ X: 124.2             │
+│ Y: 82.4              │
+│ Z: 0.0               │
+│                      │
+│ CPU         54%      │
+│ GPU         61%      │
+│ Temperature 52°C     │
+│ Network     12 ms    │
+│                      │
+│ Mission              │
+│ Block 37 → Library   │
+└──────────────────────┘
+13. AI transparency panel
+This is something I'd definitely add.
+When the robot makes a decision:
+ROBOT DECISION
+
+Goal:
+Reach Central Library
+
+Detected:
+👤 6 pedestrians
+🚗 2 vehicles
+🚧 Corridor blocked
+
+Current path:
+P14 → P18 → P22
+
+Decision:
+Alternative route selected
+
+Reason:
+Primary route has >70% obstruction.
+
+Confidence:
+91%
+This makes the system much more useful for research, debugging and demonstrations.
+14. Simulation control panel
+SIMULATION
+
+Time Scale
+0.25x ───●──── 1x ───── 5x
+
+Weather
+☀ Clear
+🌧 Rain
+🌫 Fog
+🌙 Night
+
+Traffic
+Low ───●──── High
+
+Pedestrians
+Low ─────●─── High
+
+Network
+Latency: 25 ms
+Packet Loss: 0%
+
+Server
+● Available
+
+[ RESET ]
+[ PAUSE ]
+[ RUN ]
+15. Mission builder
+This could be one of the coolest UI features.
+User types:
+"Go from Block 35 to Central Library, avoid crowded areas and return."
+The system converts it into:
+MISSION CREATED
+
+START
+Block 35
+
+        ↓
+
+TASK
+Navigate to Central Library
+
+        ↓
+
+CONSTRAINTS
+Avoid crowds
+Maximum speed: 1.5 m/s
+
+        ↓
+
+ACTION
+Deliver / interact
+
+        ↓
+
+RETURN
+Block 35
+
+        ↓
+
+STATUS
+READY
+Then:
+RUN SIMULATION
+16. Digital twin synchronization
+The UI should show:
+DIGITAL TWIN
+
+Simulation state       ● Synchronized
+Robot state             ● Synchronized
+Environment state       ● Synchronized
+Sensor state            ● Synchronized
+
+Last synchronization:
+23:41:52
+Eventually, when you have the physical robot:
+              DIGITAL TWIN
+                    ↕
+              REAL ROBOT
+The exact same dashboard can show:
+SIMULATION
+or
+REAL ROBOT
+or
+SIMULATION + REAL ROBOT
+17. The AI-agent prompt
+Now, this is the part you can directly give to your coding AI agent.
+I'd give the agent a master specification, not a simple prompt like "create LPU in Gazebo."
+Use this:
+MASTER AI AGENT PROMPT
+LPU Autonomous Robotics Digital Twin — Gazebo Simulation
+You are a senior robotics simulation architect, ROS 2 engineer, Gazebo developer, AI/ML engineer, 3D environment designer, backend engineer and UI/UX engineer.
+Your task is to build a production-quality research-grade LPU Autonomous Robotics Digital Twin using Gazebo + ROS 2.
+
+The objective is NOT to create a static 3D campus.
+
+The objective is to create a complete robotic simulation platform in which an autonomous robot can perceive, localize, navigate, reason, interact, execute missions, experience failures, recover from failures and communicate with centralized AI infrastructure.
+
+1. PRIMARY OBJECTIVE
+Create a virtual representation of Lovely Professional University's campus environment based on publicly available LPU campus information and the supplied LPU virtual tour reference:
+https://www.lpude.in/about-us/tour-lpu.php
+
+Use official LPU sources wherever possible for campus structure, facilities, landmarks and terminology.
+
+Do NOT invent precise architectural dimensions or building layouts when reliable source data is unavailable.
+
+Where exact geometry is unavailable:
+
+mark the area as approximate,
+maintain a configurable scale,
+document the assumption,
+make the geometry replaceable later.
+The final system must support both:
+SIMULATION MODE
+
+and eventually:
+
+REAL ROBOT / DIGITAL TWIN MODE.
+
+2. TECHNOLOGY STACK
+Use:
+Ubuntu Linux
+ROS 2
+Gazebo / current ROS 2-compatible Gazebo simulator
+Python
+C++
+RViz2 where useful
+URDF/Xacro
+SDF
+ros2_control
+Nav2
+TF2
+SLAM/localization framework
+OpenCV
+PCL where required
+DDS/ROS 2 networking
+PostgreSQL or suitable database for persistent simulation metadata
+FastAPI or equivalent backend
+WebSocket for live telemetry
+React + TypeScript for the dashboard
+Three.js or equivalent web visualization only where useful
+Docker for reproducible deployment
+Keep the system modular.
+Do not tightly couple the frontend directly to Gazebo internals.
+
+3. REPOSITORY STRUCTURE
+Create a clean monorepo:
+lpu_robotics_digital_twin/
+
+├── src/
+│ ├── lpu_world/
+│ ├── lpu_buildings/
+│ ├── lpu_navigation/
+│ ├── lpu_robot_description/
+│ ├── lpu_robot_control/
+│ ├── lpu_perception/
+│ ├── lpu_localization/
+│ ├── lpu_planning/
+│ ├── lpu_ai/
+│ ├── lpu_simulation/
+│ ├── lpu_scenarios/
+│ ├── lpu_fault_injection/
+│ ├── lpu_server_bridge/
+│ └── lpu_interfaces/
+│
+├── dashboard/
+│
+├── configs/
+├── worlds/
+├── models/
+├── maps/
+├── navigation/
+├── scripts/
+├── docker/
+├── docs/
+├── tests/
+└── README.md
+
+Use meaningful package names and avoid monolithic scripts.
+
+4. CAMPUS DIGITAL TWIN
+Build the campus as a semantic digital twin.
+Represent:
+
+campus boundary
+roads
+pedestrian paths
+intersections
+crossings
+gates
+parking
+academic blocks
+laboratories
+lecture theatres
+library
+research facilities
+residential areas
+hostels
+sports facilities
+hospital
+commercial areas
+Uni-Mall
+Uni-Polis
+cafés
+green areas
+restricted areas
+maintenance areas
+Each building must have metadata.
+Example:
+
+Building:
+Block_37
+
+Metadata:
+
+{
+"id": "block_37",
+"type": "academic",
+"name": "...",
+"floors": "...",
+"accessible": true,
+"entrances": [],
+"navigation_nodes": [],
+"restricted_zones": []
+}
+
+Do not fabricate facts.
+
+Create a source/assumption file documenting which campus information is verified and which geometry is approximate.
+
+5. CENTRAL LIBRARY
+Represent the Central Library as a semantic landmark.
+Use the verified LPU information that identifies the Central Library with Block 37.
+
+Model:
+
+entrances
+corridors
+reading areas
+stairs
+elevators if supported by verified/assumed geometry
+navigation points
+restricted areas
+service areas
+The robot must be able to receive a natural-language task such as:
+"Go to the Central Library."
+
+and resolve the semantic destination into a navigation goal.
+
+6. ROBOT MODEL
+Create a realistic mobile autonomous robot.
+Minimum components:
+
+chassis
+drive wheels
+caster/support mechanism if required
+RGB camera
+depth camera
+LiDAR
+IMU
+wheel encoders
+microphone/speaker abstraction
+battery model
+emergency stop
+bumper/contact sensors
+Use modular URDF/Xacro.
+Make sensor positions configurable.
+
+7. CONTROL ARCHITECTURE
+Simulate the following architecture:
+HIGH-LEVEL:
+
+Jetson/Industrial PC equivalent
+
+Responsibilities:
+
+ROS 2
+perception
+AI inference
+navigation
+planning
+mission management
+semantic understanding
+LOW-LEVEL:
+STM32-class MCU abstraction
+
+Responsibilities:
+
+motor commands
+encoder processing
+PID control
+safety
+watchdog
+sensor timing
+emergency stop
+The simulation must preserve this architectural separation even though both layers may initially run on the same physical development computer.
+8. PERCEPTION
+Implement:
+RGB camera
+
+Depth camera
+
+LiDAR
+
+IMU
+
+Encoders
+
+The system should publish appropriate ROS 2 topics.
+
+Support:
+
+object detection
+pedestrian detection
+vehicle detection
+obstacle detection
+depth estimation
+semantic perception
+sensor fusion
+Do not fake sensor data when the corresponding simulator sensor can be used.
+9. SLAM AND LOCALIZATION
+Implement:
+mapping
+localization
+pose estimation
+TF tree
+odometry
+sensor fusion
+The robot must be capable of:
+starting from an unknown location,
+generating/using a map,
+localizing itself,
+navigating to semantic landmarks.
+10. NAVIGATION
+Use Nav2 or an equivalent ROS 2 navigation architecture.
+Implement:
+
+global planning
+local planning
+obstacle avoidance
+dynamic obstacle handling
+waypoint navigation
+recovery behaviors
+goal cancellation
+return-to-home
+emergency stop
+The robot must avoid:
+walls
+static obstacles
+pedestrians
+vehicles
+restricted zones.
+11. HUMAN-AWARE NAVIGATION
+Create dynamic pedestrian agents.
+Pedestrians must have:
+
+walking paths
+random destinations
+different speeds
+pauses
+group behaviour
+crossing behaviour
+corridor behaviour
+The robot must avoid aggressively cutting through pedestrians.
+Add configurable:
+
+personal space
+minimum obstacle distance
+maximum robot speed near pedestrians.
+12. CAMPUS TRAFFIC
+Add:
+cars
+motorcycles
+buses
+bicycles
+emergency vehicles
+Implement traffic behaviour.
+Create:
+
+intersections
+pedestrian crossings
+parking areas
+restricted vehicle zones.
+13. WEATHER AND ENVIRONMENT
+Support simulation presets:
+CLEAR DAY
+
+RAIN
+
+FOG
+
+NIGHT
+
+HIGH CROWD
+
+LOW CROWD
+
+EMERGENCY
+
+Each preset changes:
+
+lighting
+visibility
+pedestrian density
+vehicle density
+sensor noise
+environmental conditions.
+14. CENTRAL AI SERVER
+Implement a centralized AI server abstraction.
+Architecture:
+
+ROBOT EDGE
+|
+| ROS 2 / network
+|
+CENTRAL AI SERVER
+
+Central server responsibilities:
+
+LLM reasoning
+VLM inference
+heavy vision models
+knowledge retrieval
+global mission planning
+simulation analytics
+model management
+fleet coordination
+long-term data storage
+The robot edge must remain functional if the server becomes unavailable.
+15. EDGE/CLOUD FAILOVER
+Implement three states:
+ONLINE
+
+PARTIAL
+
+OFFLINE
+
+When ONLINE:
+
+Heavy AI tasks may be sent to the server.
+
+When PARTIAL:
+
+Only selected workloads are offloaded.
+
+When OFFLINE:
+
+Robot uses local fallback models and deterministic navigation/control.
+
+The robot must still:
+
+stop safely
+avoid immediate obstacles
+localize
+navigate basic routes
+execute emergency behaviour.
+16. NETWORK SIMULATION
+Add configurable:
+latency
+jitter
+packet loss
+bandwidth
+server availability.
+Example:
+Latency:
+0 ms
+25 ms
+50 ms
+100 ms
+250 ms
+500 ms
+
+Packet loss:
+0%
+1%
+5%
+10%
+
+Use these conditions to evaluate system resilience.
+
+17. FAULT INJECTION
+Create a fault-injection engine.
+Support:
+
+camera failure
+depth sensor failure
+LiDAR failure
+IMU failure
+encoder failure
+motor failure
+overheating
+low battery
+network outage
+central server outage
+localization degradation.
+The robot should detect faults where possible.
+Every fault must generate:
+
+event
+timestamp
+severity
+affected subsystem
+recovery state.
+18. MISSION SYSTEM
+Create missions such as:
+Navigate to location
+Deliver item
+Campus patrol
+Visitor guidance
+Room inspection
+Emergency response
+Return home
+Multi-waypoint navigation
+Search for person/object
+Escort person
+Support natural-language mission creation.
+Example:
+
+"Go from Block 35 to the Central Library, avoid crowded areas, then return."
+
+Convert this into a structured mission graph.
+
+19. DIGITAL TWIN DATA MODEL
+Maintain real-time state for:
+ROBOT
+
+pose
+velocity
+battery
+CPU
+GPU
+temperature
+network
+mission
+health
+ENVIRONMENT
+pedestrians
+vehicles
+obstacles
+weather
+buildings
+restricted zones
+SERVER
+CPU
+GPU
+memory
+inference latency
+queue
+availability.
+20. WEB DASHBOARD
+Build a modern robotics command-center UI.
+Design language:
+
+dark professional interface
+high information density
+clean typography
+minimal gradients
+subtle glass panels
+strong status indicators
+accessible contrast
+responsive desktop layout.
+Do NOT create a generic SaaS dashboard.
+The interface must feel like:
+
+ROBOTICS MISSION CONTROL.
+
+21. DASHBOARD LAYOUT
+Top bar:
+LPU ROBOTICS DIGITAL TWIN
+
+System status
+
+Simulation time
+
+Network status
+
+Server status
+
+User/profile
+
+Left navigation:
+
+Dashboard
+
+Campus
+
+Robots
+
+Missions
+
+Sensors
+
+AI
+
+Server
+
+Scenarios
+
+Fault Injection
+
+Analytics
+
+Logs
+
+Settings
+
+Center:
+
+3D campus viewport.
+
+Right:
+
+Selected robot/status panel.
+
+Bottom:
+
+Timeline/events/mission console.
+
+22. 3D VIEW CONTROLS
+Support:
+orbit
+pan
+zoom
+first-person
+third-person
+follow robot
+top-down
+free camera.
+Layers:
+Buildings
+
+Roads
+
+Pedestrian paths
+
+Navigation graph
+
+LiDAR
+
+Camera FOV
+
+People
+
+Vehicles
+
+Restricted areas
+
+Robot trajectory
+
+Heatmaps.
+
+23. ROBOT STATUS PANEL
+Show:
+Robot ID
+
+Status
+
+Battery
+
+Speed
+
+Position
+
+Heading
+
+CPU
+
+GPU
+
+Temperature
+
+Network latency
+
+Mission
+
+Health
+
+Current goal
+
+Navigation state.
+
+Use clear status colours:
+
+GREEN = healthy
+
+YELLOW = warning
+
+RED = critical
+
+Do not rely on colour alone; include icons/text.
+
+24. AI DECISION PANEL
+Whenever the robot makes a major decision, show:
+Goal
+
+Detected objects
+
+Current route
+
+Alternative routes
+
+Decision
+
+Reason
+
+Confidence
+
+Server/edge source.
+
+Example:
+
+GOAL:
+Central Library
+
+DETECTED:
+6 pedestrians
+2 vehicles
+1 blocked corridor
+
+DECISION:
+Alternative route selected
+
+REASON:
+Primary route obstruction > threshold
+
+SOURCE:
+Edge planner
+
+CONFIDENCE:
+91%
+
+25. MISSION BUILDER
+Provide:
+Natural-language input
+
+Structured mission view
+
+Start location
+
+Destination
+
+Constraints
+
+Actions
+
+Return condition
+
+Execution status.
+
+Buttons:
+
+CREATE MISSION
+
+SIMULATE
+
+EXECUTE
+
+PAUSE
+
+ABORT
+
+RETURN HOME
+
+26. SCENARIO CONTROL
+Allow the operator to configure:
+Weather
+
+Crowd density
+
+Traffic density
+
+Time of day
+
+Network latency
+
+Packet loss
+
+Server status
+
+Sensor failures
+
+Battery level.
+
+Provide:
+
+RUN
+
+PAUSE
+
+RESET
+
+RANDOMIZE SCENARIO.
+
+27. ANALYTICS
+Record:
+Mission success rate
+
+Navigation time
+
+Distance travelled
+
+Collision count
+
+Near-miss count
+
+Energy consumption
+
+Average inference latency
+
+Server offload percentage
+
+Edge processing percentage
+
+Network failures
+
+Recovery success
+
+Sensor failures.
+
+Display:
+
+graphs
+timelines
+heatmaps
+mission comparison
+failure statistics.
+28. RESEARCH MODE
+Add a dedicated RESEARCH MODE.
+Allow the user to select:
+
+Experiment
+
+Variables
+
+Baseline
+
+Test condition
+
+Number of trials
+
+Metrics.
+
+Example:
+
+Experiment:
+
+"Effect of cloud latency on autonomous navigation."
+
+Variables:
+
+Latency:
+0 / 50 / 100 / 250 / 500 ms
+
+Metrics:
+
+Navigation success
+
+Mission time
+
+Collision/near-miss
+
+Server dependency
+
+Recovery time.
+
+Automatically generate experiment results.
+
+29. REPLAY SYSTEM
+Every simulation run must be replayable.
+Store:
+
+robot trajectory
+sensor events
+missions
+decisions
+faults
+network events
+environment state.
+Allow:
+PLAY
+
+PAUSE
+
+REWIND
+
+FAST FORWARD
+
+STEP.
+
+30. LOGGING
+Use structured logs.
+Example:
+
+[TIME]
+[ROBOT]
+[MODULE]
+[SEVERITY]
+[MESSAGE]
+
+Example:
+
+23:42:15
+ROBOT-01
+NAVIGATION
+WARNING
+Dynamic obstacle detected.
+
+23:42:16
+ROBOT-01
+PLANNER
+INFO
+Alternative route selected.
+
+31. SAFETY
+Implement:
+emergency stop
+speed limits
+collision boundaries
+restricted zones
+watchdog
+timeout recovery
+safe-stop state
+communication-loss handling.
+Never allow the LLM/VLM directly to bypass the deterministic safety/controller layer.
+AI may propose actions.
+
+The safety/controller layer must validate and execute them.
+
+32. UI/UX REQUIREMENTS
+The UI must be:
+responsive
+keyboard accessible
+readable at 100% and 125% scaling
+optimized for desktop
+usable under long monitoring sessions
+consistent in spacing
+consistent in iconography
+consistent in status indicators.
+Avoid:
+unnecessary animations
+excessive cards
+giant rounded containers
+decorative gradients
+clutter
+meaningless metrics.
+Every visual element must have an operational purpose.
+33. DEVELOPMENT PHASES
+Do NOT attempt to build everything simultaneously.
+Phase 1:
+
+ROS 2 workspace
+
+Gazebo
+
+Basic robot
+
+Basic campus block
+
+Teleoperation
+
+Sensors
+
+Phase 2:
+
+Campus environment
+
+Navigation
+
+SLAM
+
+Dynamic pedestrians
+
+Phase 3:
+
+Semantic campus
+
+Mission system
+
+AI perception
+
+Phase 4:
+
+Central AI server
+
+Network simulation
+
+Edge/cloud failover
+
+Phase 5:
+
+Fault injection
+
+Research experiments
+
+Analytics
+
+Phase 6:
+
+Professional dashboard
+
+Digital Twin synchronization
+
+Phase 7:
+
+Physical robot integration.
+
+34. QUALITY REQUIREMENTS
+Before declaring completion, verify:
+ROS 2 builds successfully
+Gazebo launches without errors
+robot spawns correctly
+TF tree is valid
+sensors publish data
+teleoperation works
+localization works
+navigation works
+dynamic obstacles work
+mission system works
+server communication works
+offline mode works
+faults can be injected
+logs are generated
+dashboard receives live data
+simulation runs reproducibly.
+Create automated tests wherever possible.
+35. DOCUMENTATION
+Generate:
+README.md
+
+ARCHITECTURE.md
+
+CAMPUS_MODEL.md
+
+ROBOT_MODEL.md
+
+NETWORK_ARCHITECTURE.md
+
+AI_ARCHITECTURE.md
+
+FAULT_MODEL.md
+
+EXPERIMENT_GUIDE.md
+
+UI_GUIDE.md
+
+DEPLOYMENT.md
+
+TROUBLESHOOTING.md
+
+ASSUMPTIONS.md
+
+DATA_SOURCES.md
+
+36. MOST IMPORTANT DESIGN PRINCIPLE
+Do not create a visually impressive but technically shallow demo.
+Build the system as a genuine robotics research platform.
+
+The final architecture must support:
+
+SIMULATION
+
+→
+
+AI PERCEPTION
+
+→
+
+LOCALIZATION
+
+→
+
+PLANNING
+
+→
+
+REAL-TIME CONTROL
+
+→
+
+CENTRAL AI OFFLOADING
+
+→
+
+FAULT HANDLING
+
+→
+
+DIGITAL TWIN
+
+→
+
+REAL ROBOT DEPLOYMENT.
+
+At every stage, preserve modular interfaces so simulated components can later be replaced by physical hardware.
+
+Do not hard-code assumptions that prevent real hardware integration later.
+
+When exact LPU campus information is unavailable, explicitly mark geometry and metadata as approximate rather than presenting fabricated details as real.
+
+Begin by generating the system architecture, repository structure, dependency graph and Phase-1 implementation plan before writing the complete implementation.
+18. One thing I would change in your original idea
+Don't tell the AI agent:
+"Create LPU in Gazebo."
+That will probably produce a generic campus with a robot driving around.
+Instead, tell it:
+"Create a robotics digital twin of LPU where the campus is the testbed for autonomous robotic intelligence."
+That distinction is huge.
+LPU itself describes its campus as a broad ecosystem of academic, research, residential, sports and other facilities, and its official materials already provide a 360° tour concept.
+So the campus isn't just your 3D environment.
+It becomes your robotics laboratory.
+19. And this can become your research platform
+You could run experiments like:
+Experiment A
+Cloud vs Edge AI
+How does network latency affect robot autonomy?
+Experiment B
+Sensor failure
+Can the robot maintain navigation when LiDAR fails?
+Experiment C
+Crowded campus
+How does pedestrian density affect navigation efficiency?
+Experiment D
+AI offloading
+When should the robot process locally vs use the central server?
+Experiment E
+Digital Twin
+How accurately can the simulated robot predict physical robot behaviour?
+Experiment F
+Multi-robot coordination
+          CENTRAL SERVER
+          /     |      \
+       R1      R2      R3
+       ↓       ↓       ↓
+    Library  Hostel  Hospital
+This is where your earlier idea of centralized processing becomes particularly powerful.
+20. The final system I'd aim for
+                    ┌──────────────────────────┐
+                    │       LPU DIGITAL TWIN   │
+                    │                          │
+                    │  600+ acre campus model  │
+                    │  Buildings               │
+                    │  Roads                   │
+                    │  People                  │
+                    │  Vehicles                │
+                    │  Weather                 │
+                    │  Semantic map             │
+                    └────────────┬─────────────┘
+                                 │
+                         ┌───────▼───────┐
+                         │   GAZEBO      │
+                         │  SIMULATION   │
+                         └───────┬───────┘
+                                 │
+                    ┌────────────▼────────────┐
+                    │       ROBOT EDGE        │
+                    │                         │
+                    │ Vision                  │
+                    │ LiDAR                   │
+                    │ SLAM                    │
+                    │ Navigation              │
+                    │ ROS 2                   │
+                    └────────────┬────────────┘
+                                 │
+                              CAN-FD
+                                 │
+                    ┌────────────▼────────────┐
+                    │       MCU LAYER         │
+                    │                         │
+                    │ Motor control           │
+                    │ Encoders                │
+                    │ PID                     │
+                    │ Safety                  │
+                    └────────────┬────────────┘
+                                 │
+                              MOTORS
+                                 
+                         ╔══════════════╗
+                         ║ CENTRAL AI   ║
+                         ║ GPU SERVER   ║
+                         ║              ║
+                         ║ LLM / VLM    ║
+                         ║ Heavy AI     ║
+                         ║ Knowledge    ║
+                         ║ Analytics    ║
+                         ╚══════╤═══════╝
+                                │
+                           ROS 2 / API
+                                │
+                    ┌───────────▼──────────┐
+                    │ ROBOTICS COMMAND     │
+                    │ CENTER               │
+                    │                      │
+                    │ 3D Campus           │
+                    │ Missions             │
+                    │ AI Decisions         │
+                    │ Sensors              │
+                    │ Server               │
+                    │ Faults               │
+                    │ Analytics            │
+                    └──────────────────────┘
