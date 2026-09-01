@@ -146,15 +146,15 @@
     <joint name="${prefix}_caster_joint" type="fixed">
       <parent link="base_link" />
       <child link="${prefix}_caster_link" />
-      <origin xyz="${x_offset} 0 ${-wheel_radius + 0.025}" rpy="0 0 0" />
+      <origin xyz="${x_offset} 0 ${-wheel_radius + 0.027}" rpy="0 0 0" />
     </joint>
 
     <gazebo reference="${prefix}_caster_link">
       <mu1>0.0</mu1>
       <mu2>0.0</mu2>
-      <kp>100000.0</kp>
-      <kd>10.0</kd>
-      <minDepth>0.001</minDepth>
+      <kp>1000.0</kp>
+      <kd>0.1</kd>
+      <minDepth>0.0001</minDepth>
       <material>Gazebo/Grey</material>
     </gazebo>
   </xacro:macro>

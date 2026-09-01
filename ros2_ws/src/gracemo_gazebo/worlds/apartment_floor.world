@@ -360,13 +360,13 @@
     <model name='gracemo_vira'>
     <link name='base_footprint'>
       <inertial>
-        <pose>0.001134020618556701 0 0.1438659793814433 0 0 0</pose>
+        <pose>0.001134020618556701 0 0.1438865979381444 0 0 0</pose>
         <mass>9.7000000000000011</mass>
         <inertia>
-          <ixx>0.27772792577319583</ixx>
+          <ixx>0.27768077525773188</ixx>
           <ixy>0</ixy>
-          <ixz>0.001587525773195876</ixz>
-          <iyy>0.27333505154639182</iyy>
+          <ixz>0.001587752577319588</ixz>
+          <iyy>0.27328790103092782</iyy>
           <iyz>0</iyz>
           <izz>0.07758792577319587</izz>
         </inertia>
@@ -380,7 +380,7 @@
         </geometry>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__front_caster_link_collision_1'>
-        <pose>0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
+        <pose>0.14000000000000001 0 0.027 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.025000000000000001</radius>
@@ -389,9 +389,9 @@
         <surface>
           <contact>
             <ode>
-              <kp>100000</kp>
-              <kd>10</kd>
-              <min_depth>0.001</min_depth>
+              <kp>1000</kp>
+              <kd>0.10000000000000001</kd>
+              <min_depth>0.0001</min_depth>
             </ode>
           </contact>
           <friction>
@@ -403,7 +403,7 @@
         </surface>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__rear_caster_link_collision_2'>
-        <pose>-0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
+        <pose>-0.14000000000000001 0 0.027 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.025000000000000001</radius>
@@ -412,9 +412,9 @@
         <surface>
           <contact>
             <ode>
-              <kp>100000</kp>
-              <kd>10</kd>
-              <min_depth>0.001</min_depth>
+              <kp>1000</kp>
+              <kd>0.10000000000000001</kd>
+              <min_depth>0.0001</min_depth>
             </ode>
           </contact>
           <friction>
@@ -465,7 +465,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__front_caster_link_visual_3'>
-        <pose>0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
+        <pose>0.14000000000000001 0 0.027 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.025000000000000001</radius>
@@ -507,7 +507,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__rear_caster_link_visual_6'>
-        <pose>-0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
+        <pose>-0.14000000000000001 0 0.027 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.025000000000000001</radius>
@@ -925,7 +925,7 @@
     </plugin>
     <self_collide>false</self_collide>
     <frame name='front_caster_joint' attached_to='base_link'>
-      <pose>0.14000000000000001 0 -0.040000000000000001 0 0 0</pose>
+      <pose>0.14000000000000001 0 -0.038000000000000013 0 0 0</pose>
     </frame>
     <frame name='front_caster_link' attached_to='front_caster_joint'>
       <pose>0 0 0 0 0 0</pose>
@@ -943,7 +943,7 @@
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='rear_caster_joint' attached_to='base_link'>
-      <pose>-0.14000000000000001 0 -0.040000000000000001 0 0 0</pose>
+      <pose>-0.14000000000000001 0 -0.038000000000000013 0 0 0</pose>
     </frame>
     <frame name='rear_caster_link' attached_to='rear_caster_joint'>
       <pose>0 0 0 0 0 0</pose>

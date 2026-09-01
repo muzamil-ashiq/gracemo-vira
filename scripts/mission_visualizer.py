@@ -222,16 +222,17 @@ class MissionVisualizer:
 
     def _on_scan(self, msg: GzLaserScan):
         # Scan range is -pi to +pi (360 samples). Center index (180) is straight ahead (0 deg).
-        # Inspect wide front cone (-65 deg to +65 deg: indices 115 to 245)
+        # Inspect direct forward 50-degree cone (-25 deg to +25 deg: indices 155 to 205)
         n = len(msg.ranges)
         if n >= 360:
             mid = n // 2
-            front_span = int(n * (65.0 / 360.0))
+            front_span = int(n * (25.0 / 360.0))
             front_ranges = [msg.ranges[i] for i in range(mid - front_span, mid + front_span + 1)]
         else:
             front_ranges = list(msg.ranges)
 
-        valid = [r for r in front_ranges if not math.isnan(r) and r > 0.1]
+        # Ignore robot self-reflection (chassis radius is 0.19m) by requiring r > 0.24m
+        valid = [r for r in front_ranges if not math.isnan(r) and r > 0.24]
         self.min_obstacle_dist = min(valid) if valid else 10.0
 
     def publish_cmd(self, vx: float, wz: float):
@@ -260,13 +261,13 @@ class MissionVisualizer:
 
         # Step 2: Route through central hallway to target room doorway and room center
         if target_room == "bedroom":
-            waypoints.extend([(-5.0, 0.0), (-5.0, 0.6), (-5.0, 1.8), (-5.0, 3.8)])
+            waypoints.extend([(-5.0, 0.0), (-5.0, 0.6), (-5.0, 1.8), (-5.5, 3.5)])
         elif target_room == "study":
-            waypoints.extend([(5.0, 0.0), (5.0, 0.6), (5.0, 1.8), (5.0, 3.8)])
+            waypoints.extend([(5.0, 0.0), (5.0, 0.6), (5.0, 1.8), (4.5, 3.5)])
         elif target_room == "kitchen":
-            waypoints.extend([(-5.0, 0.0), (-5.0, -0.6), (-5.0, -1.8), (-4.5, -3.8)])
+            waypoints.extend([(-5.0, 0.0), (-5.0, -0.6), (-5.0, -1.8), (-3.5, -3.5)])
         elif target_room == "living":
-            waypoints.extend([(5.0, 0.0), (5.0, -0.6), (5.0, -1.8), (4.5, -3.8)])
+            waypoints.extend([(5.0, 0.0), (5.0, -0.6), (5.0, -1.8), (3.5, -3.5)])
         elif target_room == "hallway":
             waypoints.append((0.0, 0.0))
 
@@ -322,7 +323,7 @@ class MissionVisualizer:
                 self.speak(f"Arrived at {self.target_room.title()}. Monitoring {found}.")
                 continue
 
-            # 3. Target Waypoint Vector
+            # 2. Target Waypoint Vector
             tx, ty = self.active_waypoints[self.wp_idx]
             dx = tx - self.cur_x
             dy = ty - self.cur_y
@@ -345,24 +346,15 @@ class MissionVisualizer:
                 alpha += 2 * math.pi
 
             # Mathematically Clean Regulated Pure Pursuit Controller
-            # Mode 1: Proximity Wall Safety Backup
-            if self.min_obstacle_dist < 0.22:
-                vx = -0.18
-                wz = 0.0
-                phase = "BACKUP"
-            # Mode 2: Strict Orientation Gating (vx = 0 while turning in place)
-            elif abs(alpha) > math.radians(20):
+            # Mode 1: Strict Orientation Gating (vx = 0 while turning in place)
+            if abs(alpha) > math.radians(20):
                 vx = 0.0
                 wz = float(np.clip(1.5 * alpha, -1.0, 1.0))
                 phase = "ALIGN"
-            # Mode 3: Clean Pure Pursuit Arc Driving (Aligned within 20 deg)
+            # Mode 2: Clean Pure Pursuit Arc Driving (Aligned within 20 deg)
             else:
                 lookahead = max(0.60, min(1.5, dist))
                 v_max = min(0.38, max(0.12, 0.45 * dist))
-
-                if self.min_obstacle_dist < 0.50:
-                    v_max = min(v_max, 0.16)
-
                 curvature = 2.0 * math.sin(alpha) / lookahead
                 vx = v_max * max(0.4, math.cos(alpha))
                 wz = float(np.clip(vx * curvature, -0.75, 0.75))
