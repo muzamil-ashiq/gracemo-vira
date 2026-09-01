@@ -321,24 +321,23 @@ class MissionVisualizer:
                 vx = -0.20
                 wz = 0.40 if alpha > 0 else -0.40
                 phase = "BACKUP"
-            # 2. Large Heading Error: Pivot on the spot
-            elif abs(alpha) > math.radians(40):
-                vx = 0.0
-                wz = 0.65 if alpha > 0 else -0.65
-                phase = "ALIGN"
-            # 3. Aligned: Smooth Curvature Arc Drive
             else:
-                lookahead = max(0.45, min(1.2, dist))
+                # Unified Continuous Regulated Pure Pursuit:
+                # Forward speed smoothly scales with cosine alignment — zero mode-switching oscillation!
+                alignment = max(0.0, math.cos(alpha))
                 v_max = min(0.35, max(0.12, 0.45 * dist))
                 
-                # Slow down if approaching obstacles ahead
-                if self.min_obstacle_dist < 0.60:
-                    v_max = min(v_max, 0.18)
-                    
+                # Proximity speed regulation
+                if self.min_obstacle_dist < 0.55:
+                    v_max = min(v_max, 0.16)
+
+                vx = v_max * (alignment ** 2)
+
+                # Smooth curvature steering with proportional heading correction
+                lookahead = max(0.50, min(1.2, dist))
                 curvature = 2.0 * math.sin(alpha) / lookahead
-                vx = v_max * max(0.2, math.cos(alpha))
-                wz = float(np.clip(vx * curvature + 0.3 * alpha, -0.75, 0.75))
-                phase = "PURSUIT"
+                wz = float(np.clip(vx * curvature + 1.1 * alpha, -0.65, 0.65))
+                phase = "DRIVE" if alignment > 0.7 else "ORIENT"
 
             self.publish_cmd(vx, wz)
 
@@ -353,15 +352,16 @@ class MissionVisualizer:
 
 
 def print_help():
-    table = Table(title="🎮 GRaCEmo ViRa Mission Controls", border_style="cyan", show_header=True)
-    table.add_column("Key / Command", style="bold yellow")
+    table = Table(title="🎮 GRaCEmo ViRa Mission & Voice Controls", border_style="cyan", show_header=True)
+    table.add_column("Command / Voice", style="bold yellow")
     table.add_column("Action", style="green")
-    table.add_row("1 or 'bedroom'", "Navigate to Master Bedroom")
-    table.add_row("2 or 'study'", "Navigate to Home Study")
-    table.add_row("3 or 'living'", "Navigate to Living Room")
-    table.add_row("4 or 'kitchen'", "Navigate to Kitchen & Dining")
-    table.add_row("h or 'hallway'", "Return to Central Hallway")
-    table.add_row("a or 'auto'", "Start full autonomous 4-room cataloging tour")
+    table.add_row("1 or 'bedroom' / 🗣️ 'Go to bedroom'", "Navigate to Master Bedroom")
+    table.add_row("2 or 'study' / 🗣️ 'Go to study'", "Navigate to Home Study")
+    table.add_row("3 or 'living' / 🗣️ 'Go to living room'", "Navigate to Living Room")
+    table.add_row("4 or 'kitchen' / 🗣️ 'Go to kitchen'", "Navigate to Kitchen & Dining")
+    table.add_row("h or 'hallway' / 🗣️ 'Go to hallway'", "Return to Central Hallway")
+    table.add_row("a or 'auto' / 🗣️ 'Start tour'", "Start full autonomous 4-room tour")
+    table.add_row("w / a / s / d / space", "Manual teleoperation drive & stop")
     table.add_row("q or 'quit'", "Stop robot and exit")
     console.print(table)
 
@@ -371,7 +371,7 @@ def main():
 
     console.print(Panel.fit(
         "[bold cyan]GRaCEmo ViRa — Real-Time Mission Visualizer & Control Online[/bold cyan]\n"
-        "[dim]Type a command below or press keys in the OpenCV video window.[/dim]",
+        "[dim]Type a command, press keys in the HUD, or speak into your microphone.[/dim]",
         border_style="cyan"
     ))
     print_help()
@@ -391,72 +391,94 @@ def main():
     patrol_idx = 0
     auto_tour = False
 
-    # Dedicated thread for Terminal Input
-    def terminal_input_loop():
+    def handle_command(cmd_str: str):
         nonlocal auto_tour, patrol_idx
+        cmd = cmd_str.strip().lower()
+        if not cmd:
+            return
+
+        if cmd in ("q", "quit", "exit"):
+            vis.running = False
+        elif any(w in cmd for w in ["bedroom", "1"]):
+            auto_tour = False
+            vis.navigate_to_room("bedroom")
+        elif any(w in cmd for w in ["study", "2"]):
+            auto_tour = False
+            vis.navigate_to_room("study")
+        elif any(w in cmd for w in ["living", "3"]):
+            auto_tour = False
+            vis.navigate_to_room("living")
+        elif any(w in cmd for w in ["kitchen", "4"]):
+            auto_tour = False
+            vis.navigate_to_room("kitchen")
+        elif any(w in cmd for w in ["hallway", "hall", "h"]):
+            auto_tour = False
+            vis.navigate_to_room("hallway")
+        elif any(w in cmd for w in ["auto", "tour", "patrol", "a"]):
+            auto_tour = True
+            patrol_idx = 0
+            vis.navigate_to_room(patrol_order[patrol_idx])
+            vis.speak("Starting full autonomous apartment tour.")
+        elif cmd in ("w", "forward"):
+            vis.navigating = False
+            vis.surveying = False
+            vis.publish_cmd(0.35, 0.0)
+        elif cmd in ("s", "backward", "back"):
+            vis.navigating = False
+            vis.surveying = False
+            vis.publish_cmd(-0.30, 0.0)
+        elif cmd in ("left",):
+            vis.navigating = False
+            vis.surveying = False
+            vis.publish_cmd(0.0, 0.60)
+        elif cmd in ("right",):
+            vis.navigating = False
+            vis.surveying = False
+            vis.publish_cmd(0.0, -0.60)
+        elif any(w in cmd for w in [" ", "stop", "halt", "x"]):
+            vis.navigating = False
+            vis.surveying = False
+            vis.publish_cmd(0.0, 0.0)
+            console.print("[bold red]🛑 Emergency Stop applied.[/bold red]")
+            vis.speak("Stopped.")
+        elif cmd in ("help", "?"):
+            print_help()
+        else:
+            if not vis.navigate_to_room(cmd):
+                console.print(f"[dim]Type 'help' for command list.[/dim]")
+
+    # 1. Background thread for Terminal Keyboard Input
+    def terminal_input_loop():
         while vis.running:
             try:
                 line = sys.stdin.readline()
                 if not line:
                     break
-                cmd = line.strip().lower()
-                if not cmd:
-                    continue
-
-                if cmd in ("q", "quit", "exit"):
-                    vis.running = False
-                    break
-                elif cmd in ("1", "bedroom"):
-                    auto_tour = False
-                    vis.navigate_to_room("bedroom")
-                elif cmd in ("2", "study"):
-                    auto_tour = False
-                    vis.navigate_to_room("study")
-                elif cmd in ("3", "living", "living room"):
-                    auto_tour = False
-                    vis.navigate_to_room("living")
-                elif cmd in ("4", "kitchen"):
-                    auto_tour = False
-                    vis.navigate_to_room("kitchen")
-                elif cmd in ("h", "hallway"):
-                    auto_tour = False
-                    vis.navigate_to_room("hallway")
-                elif cmd in ("a", "auto", "tour"):
-                    auto_tour = True
-                    patrol_idx = 0
-                    vis.navigate_to_room(patrol_order[patrol_idx])
-                    vis.speak("Starting full autonomous apartment tour.")
-                elif cmd in ("w", "forward"):
-                    vis.navigating = False
-                    vis.surveying = False
-                    vis.publish_cmd(0.35, 0.0)
-                elif cmd in ("s", "backward", "back"):
-                    vis.navigating = False
-                    vis.surveying = False
-                    vis.publish_cmd(-0.30, 0.0)
-                elif cmd in ("left",):
-                    vis.navigating = False
-                    vis.surveying = False
-                    vis.publish_cmd(0.0, 0.60)
-                elif cmd in ("right",):
-                    vis.navigating = False
-                    vis.surveying = False
-                    vis.publish_cmd(0.0, -0.60)
-                elif cmd in (" ", "stop", "x"):
-                    vis.navigating = False
-                    vis.surveying = False
-                    vis.publish_cmd(0.0, 0.0)
-                    console.print("[bold red]🛑 Emergency Stop applied.[/bold red]")
-                elif cmd in ("help", "?"):
-                    print_help()
-                else:
-                    if not vis.navigate_to_room(cmd):
-                        console.print(f"[dim]Type 'help' for command list.[/dim]")
+                handle_command(line)
             except Exception:
                 break
 
     input_thread = threading.Thread(target=terminal_input_loop, daemon=True)
     input_thread.start()
+
+    # 2. Background thread for Voice Microphone Input via STT
+    def voice_listener_loop():
+        if not vis.voice:
+            return
+        console.print("[bold green]🎤 Microphone Voice Engine Active (Speak commands anytime!)[/bold green]")
+        while vis.running:
+            try:
+                # Listen to microphone and transcribe via faster-whisper
+                text = vis.voice.listen_and_transcribe(timeout=4.0)
+                if text and len(text.strip()) > 1:
+                    console.print(f"\n[bold cyan]🎙️ Heard Voice Command:[/bold cyan] [italic]\"{text}\"[/italic]")
+                    handle_command(text)
+            except Exception:
+                time.sleep(1.0)
+
+    if vis.voice:
+        voice_thread = threading.Thread(target=voice_listener_loop, daemon=True)
+        voice_thread.start()
 
     try:
         while vis.running:
