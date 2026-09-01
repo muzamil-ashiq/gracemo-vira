@@ -8,13 +8,12 @@
   <!-- Dimensions & Constants -->
   <xacro:property name="wheel_radius" value="0.065" />
   <xacro:property name="wheel_width" value="0.035" />
-  <xacro:property name="wheelbase" value="0.33" />
-  <xacro:property name="chassis_l" value="0.40" />
-  <xacro:property name="chassis_w" value="0.28" />
-  <xacro:property name="chassis_h" value="0.14" />
-  <xacro:property name="torso_l" value="0.20" />
-  <xacro:property name="torso_w" value="0.22" />
-  <xacro:property name="torso_h" value="0.38" />
+  <xacro:property name="wheelbase" value="0.32" />
+  <xacro:property name="chassis_radius" value="0.20" />
+  <xacro:property name="chassis_height" value="0.14" />
+  <xacro:property name="torso_height" value="0.40" />
+  <xacro:property name="torso_width" value="0.22" />
+  <xacro:property name="torso_depth" value="0.18" />
 
   <!-- ======================================================================== -->
   <!-- Base Footprint (Ground Projection)                                       -->
@@ -28,49 +27,66 @@
   </joint>
 
   <!-- ======================================================================== -->
-  <!-- Base Link (Chassis Body)                                                 -->
+  <!-- Base Link (Sleek Cylindrical Mobile Chassis)                             -->
   <!-- ======================================================================== -->
   <link name="base_link">
-    <!-- Main Chassis Box -->
+    <!-- Main Cylindrical Chassis Shell -->
     <visual>
-      <origin xyz="0 0 ${chassis_h/2.0}" rpy="0 0 0" />
+      <origin xyz="0 0 ${chassis_height/2.0}" rpy="0 0 0" />
       <geometry>
-        <box size="${chassis_l} ${chassis_w} ${chassis_h}" />
+        <cylinder radius="${chassis_radius}" length="${chassis_height}" />
       </geometry>
       <material name="chassis_blue" />
     </visual>
-    <collision>
-      <origin xyz="0 0 ${chassis_h/2.0}" rpy="0 0 0" />
-      <geometry>
-        <box size="${chassis_l} ${chassis_w} ${chassis_h}" />
-      </geometry>
-    </collision>
-    <!-- Bumper Trim Front -->
+    <!-- Lower Protective Skirt Ring -->
     <visual>
-      <origin xyz="${chassis_l/2.0} 0 ${chassis_h/2.0}" rpy="0 0 0" />
+      <origin xyz="0 0 ${chassis_height * 0.2}" rpy="0 0 0" />
       <geometry>
-        <box size="0.02 ${chassis_w + 0.01} ${chassis_h - 0.02}" />
+        <cylinder radius="${chassis_radius + 0.005}" length="${chassis_height * 0.35}" />
       </geometry>
       <material name="dark_grey" />
     </visual>
+    <!-- Top Deck Accent Plate -->
+    <visual>
+      <origin xyz="0 0 ${chassis_height + 0.005}" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${chassis_radius * 0.9}" length="0.01" />
+      </geometry>
+      <material name="dark_grey" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${chassis_height/2.0}" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${chassis_radius}" length="${chassis_height}" />
+      </geometry>
+    </collision>
     <inertial>
-      <origin xyz="0 0 ${chassis_h/2.0}" rpy="0 0 0" />
-      <mass value="6.0" />
-      <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.09" iyz="0.0" izz="0.11" />
+      <origin xyz="0 0 ${chassis_height/2.0}" rpy="0 0 0" />
+      <mass value="6.5" />
+      <inertia ixx="0.07" ixy="0.0" ixz="0.0" iyy="0.07" iyz="0.0" izz="0.12" />
     </inertial>
   </link>
 
   <!-- ======================================================================== -->
-  <!-- Drive Wheels (Left & Right)                                              -->
+  <!-- Drive Wheels (Left & Right - Recessed in Wheel Wells)                     -->
   <!-- ======================================================================== -->
   <xacro:macro name="wheel" params="prefix y_offset">
     <link name="${prefix}_wheel_link">
+      <!-- Rubber Tire -->
       <visual>
         <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
         <geometry>
           <cylinder radius="${wheel_radius}" length="${wheel_width}" />
         </geometry>
         <material name="rubber_black" />
+      </visual>
+      <!-- Metallic Silver Rim Hub -->
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+        <geometry>
+          <cylinder radius="${wheel_radius * 0.6}" length="${wheel_width + 0.002}" />
+        </geometry>
+        <material name="metallic_silver" />
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
@@ -104,7 +120,7 @@
   <xacro:wheel prefix="right" y_offset="${-wheelbase/2.0}" />
 
   <!-- ======================================================================== -->
-  <!-- Support Casters (Front & Rear)                                           -->
+  <!-- Support Casters (Front & Rear Spheres)                                   -->
   <!-- ======================================================================== -->
   <xacro:macro name="caster" params="prefix x_offset">
     <link name="${prefix}_caster_link">
@@ -138,37 +154,37 @@
     </gazebo>
   </xacro:macro>
 
-  <xacro:caster prefix="front" x_offset="${chassis_l/2.0 - 0.05}" />
-  <xacro:caster prefix="rear" x_offset="${-chassis_l/2.0 + 0.05}" />
+  <xacro:caster prefix="front" x_offset="${chassis_radius - 0.06}" />
+  <xacro:caster prefix="rear" x_offset="${-chassis_radius + 0.06}" />
 
   <!-- ======================================================================== -->
-  <!-- Torso & Humanoid Body Column                                             -->
+  <!-- Humanoid Torso (Center Column & Chest Status Display)                     -->
   <!-- ======================================================================== -->
   <link name="torso_link">
-    <!-- Torso Column -->
+    <!-- Torso Column Body -->
     <visual>
-      <origin xyz="0 0 ${torso_h/2.0}" rpy="0 0 0" />
+      <origin xyz="0 0 ${torso_height/2.0}" rpy="0 0 0" />
       <geometry>
-        <box size="${torso_l} ${torso_w} ${torso_h}" />
+        <box size="${torso_depth} ${torso_width} ${torso_height}" />
       </geometry>
       <material name="chassis_blue" />
     </visual>
-    <collision>
-      <origin xyz="0 0 ${torso_h/2.0}" rpy="0 0 0" />
+    <!-- Chest Glass Status Screen -->
+    <visual>
+      <origin xyz="${torso_depth/2.0 + 0.004} 0 ${torso_height * 0.6}" rpy="0 0 0" />
       <geometry>
-        <box size="${torso_l} ${torso_w} ${torso_h}" />
+        <box size="0.006 0.14 0.12" />
+      </geometry>
+      <material name="camera_lens_black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${torso_height/2.0}" rpy="0 0 0" />
+      <geometry>
+        <box size="${torso_depth} ${torso_width} ${torso_height}" />
       </geometry>
     </collision>
-    <!-- Chest Screen Display -->
-    <visual>
-      <origin xyz="${torso_l/2.0 + 0.005} 0 ${torso_h * 0.6}" rpy="0 0 0" />
-      <geometry>
-        <box size="0.008 0.14 0.12" />
-      </geometry>
-      <material name="dark_grey" />
-    </visual>
     <inertial>
-      <origin xyz="0 0 ${torso_h/2.0}" rpy="0 0 0" />
+      <origin xyz="0 0 ${torso_height/2.0}" rpy="0 0 0" />
       <mass value="3.5" />
       <inertia ixx="0.04" ixy="0.0" ixz="0.0" iyy="0.04" iyz="0.0" izz="0.02" />
     </inertial>
@@ -177,17 +193,26 @@
   <joint name="torso_joint" type="fixed">
     <parent link="base_link" />
     <child link="torso_link" />
-    <origin xyz="-0.02 0 ${chassis_h}" rpy="0 0 0" />
+    <origin xyz="-0.02 0 ${chassis_height}" rpy="0 0 0" />
   </joint>
 
   <!-- ======================================================================== -->
-  <!-- 2D LiDAR (Front Chest Deck)                                              -->
+  <!-- 2D LiDAR (Mounted on Front Deck Platform)                                -->
   <!-- ======================================================================== -->
   <link name="lidar_link">
+    <!-- LiDAR Base Turret -->
     <visual>
-      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.045" length="0.04" />
+        <cylinder radius="0.045" length="0.03" />
+      </geometry>
+      <material name="dark_grey" />
+    </visual>
+    <!-- LiDAR Spinning Ring -->
+    <visual>
+      <origin xyz="0 0 0.032" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.015" />
       </geometry>
       <material name="lidar_orange" />
     </visual>
@@ -207,14 +232,14 @@
   <joint name="lidar_joint" type="fixed">
     <parent link="base_link" />
     <child link="lidar_link" />
-    <origin xyz="${chassis_l/2.0 - 0.06} 0 ${chassis_h}" rpy="0 0 0" />
+    <origin xyz="0.13 0 ${chassis_height}" rpy="0 0 0" />
   </joint>
 
   <!-- ======================================================================== -->
-  <!-- Head & Camera Visor                                                      -->
+  <!-- Humanoid Head & Visor                                                    -->
   <!-- ======================================================================== -->
   <link name="head_link">
-    <!-- Neck Collar -->
+    <!-- Neck Joint -->
     <visual>
       <origin xyz="0 0 0.02" rpy="0 0 0" />
       <geometry>
@@ -222,30 +247,30 @@
       </geometry>
       <material name="dark_grey" />
     </visual>
-    <!-- Head Unit -->
+    <!-- Rounded Head Shell -->
     <visual>
-      <origin xyz="0.01 0 0.10" rpy="0 0 0" />
+      <origin xyz="0.01 0 0.09" rpy="0 0 0" />
       <geometry>
-        <box size="0.14 0.16 0.12" />
+        <box size="0.14 0.16 0.11" />
       </geometry>
       <material name="chassis_blue" />
     </visual>
-    <collision>
-      <origin xyz="0.01 0 0.10" rpy="0 0 0" />
-      <geometry>
-        <box size="0.14 0.16 0.12" />
-      </geometry>
-    </collision>
     <!-- Dark Glass Face Visor -->
     <visual>
-      <origin xyz="0.082 0 0.10" rpy="0 0 0" />
+      <origin xyz="0.081 0 0.09" rpy="0 0 0" />
       <geometry>
         <box size="0.006 0.13 0.07" />
       </geometry>
       <material name="camera_lens_black" />
     </visual>
-    <inertial>
+    <collision>
       <origin xyz="0.01 0 0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.16 0.11" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.01 0 0.08" rpy="0 0 0" />
       <mass value="0.8" />
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
     </inertial>
@@ -254,10 +279,10 @@
   <joint name="head_joint" type="fixed">
     <parent link="torso_link" />
     <child link="head_link" />
-    <origin xyz="0 0 ${torso_h}" rpy="0 0 0" />
+    <origin xyz="0 0 ${torso_height}" rpy="0 0 0" />
   </joint>
 
-  <!-- Camera Link (Front Eye) -->
+  <!-- Camera Link (Front Centered Optical Eye) -->
   <link name="camera_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
@@ -271,7 +296,7 @@
   <joint name="camera_joint" type="fixed">
     <parent link="head_link" />
     <child link="camera_link" />
-    <origin xyz="0.086 0 0.10" rpy="0 0 0" />
+    <origin xyz="0.085 0 0.09" rpy="0 0 0" />
   </joint>
 
   <link name="camera_optical_link" />
@@ -283,42 +308,42 @@
   </joint>
 
   <!-- ======================================================================== -->
-  <!-- Left & Right Humanoid Arms (Clean Integrated Design)                     -->
+  <!-- Left & Right Manipulation Arm Pods (Sleek Anatomical Integration)        -->
   <!-- ======================================================================== -->
   <xacro:macro name="arm" params="prefix y_offset">
     <link name="${prefix}_arm_link">
-      <!-- Upper Arm -->
+      <!-- Upper Arm Column -->
       <visual>
         <origin xyz="0 0 -0.09" rpy="0 0 0" />
         <geometry>
-          <box size="0.05 0.04 0.18" />
+          <box size="0.045 0.035 0.18" />
         </geometry>
         <material name="metallic_silver" />
       </visual>
-      <!-- Forearm & Gripper -->
+      <!-- Forearm Section -->
       <visual>
-        <origin xyz="0.03 0 -0.22" rpy="0 0.25 0" />
+        <origin xyz="0.025 0 -0.21" rpy="0 0.2 0" />
         <geometry>
-          <box size="0.045 0.035 0.14" />
+          <box size="0.04 0.03 0.13" />
         </geometry>
         <material name="dark_grey" />
       </visual>
       <!-- Gripper Hand Accent -->
       <visual>
-        <origin xyz="0.065 0 -0.28" rpy="0 0.25 0" />
+        <origin xyz="0.055 0 -0.27" rpy="0 0.2 0" />
         <geometry>
-          <box size="0.03 0.03 0.02" />
+          <box size="0.03 0.025 0.02" />
         </geometry>
         <material name="lidar_orange" />
       </visual>
       <collision>
-        <origin xyz="0.02 0 -0.16" rpy="0 0 0" />
+        <origin xyz="0.02 0 -0.15" rpy="0 0 0" />
         <geometry>
-          <box size="0.07 0.05 0.32" />
+          <box size="0.06 0.045 0.30" />
         </geometry>
       </collision>
       <inertial>
-        <origin xyz="0.02 0 -0.16" rpy="0 0 0" />
+        <origin xyz="0.02 0 -0.15" rpy="0 0 0" />
         <mass value="0.7" />
         <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.001" />
       </inertial>
@@ -327,12 +352,12 @@
     <joint name="${prefix}_arm_joint" type="fixed">
       <parent link="torso_link" />
       <child link="${prefix}_arm_link" />
-      <origin xyz="0.0 ${y_offset} ${torso_h - 0.04}" rpy="0 0 0" />
+      <origin xyz="0.0 ${y_offset} ${torso_height - 0.04}" rpy="0 0 0" />
     </joint>
   </xacro:macro>
 
-  <xacro:arm prefix="left" y_offset="${torso_w/2.0 + 0.025}" />
-  <xacro:arm prefix="right" y_offset="${-torso_w/2.0 - 0.025}" />
+  <xacro:arm prefix="left" y_offset="${torso_width/2.0 + 0.022}" />
+  <xacro:arm prefix="right" y_offset="${-torso_width/2.0 - 0.022}" />
 
   <!-- ======================================================================== -->
   <!-- IMU Link                                                                 -->

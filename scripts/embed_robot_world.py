@@ -20,10 +20,11 @@ with open(world_file, "r") as f:
     world_content = f.read()
 
 # Clean out any old robot models and comments
+world_content = re.sub(r'\s*<!--\s*🤖\s*GRaCEmo ViRa ROBOT MODEL\s*-->', '', world_content)
 world_content = re.sub(r'\s*<!--\s*ROBOT MODEL\s*-->', '', world_content)
 world_content = re.sub(r'\s*<model name=[\'"]gracemo_vira[\'"]>.*?</model>', '', world_content, flags=re.DOTALL)
 
-# Perfect 3D isometric camera pose: looking down at the hallway robot
+# Default 3D perspective camera looking at the hallway robot
 world_content = re.sub(r'<camera name=[\'"]user_camera[\'"]>.*?</camera>', """<camera name="user_camera">
         <pose>-2.5 -4.5 3.5 0 0.55 1.1</pose>
         <view_controller>orbit</view_controller>
@@ -41,4 +42,4 @@ new_world = world_content.replace("</world>", f"""    <!-- =====================
 with open(world_file, "w") as f:
     f.write(new_world)
 
-print("Updated apartment_floor.world with unified robot! Lines:", new_world.count("\n"))
+print("Synchronized apartment_floor.world with sleek robot! Lines:", new_world.count("\n"))

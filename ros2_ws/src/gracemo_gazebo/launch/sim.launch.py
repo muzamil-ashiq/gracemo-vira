@@ -19,8 +19,10 @@ def generate_launch_description():
     world_file  = os.path.join(pkg_gracemo_gazebo, "worlds", "apartment_floor.world")
     xacro_file  = os.path.join(pkg_gracemo_description, "urdf", "gracemo_vira.urdf.xacro")
     models_path = os.path.join(pkg_gracemo_gazebo, "models")
+    fuel_cache  = os.path.expanduser("~/.ignition/fuel/fuel.gazebosim.org/openrobotics/models")
+    resource_paths = f"{models_path}:{fuel_cache}"
 
-    os.environ["GZ_SIM_RESOURCE_PATH"] = models_path
+    os.environ["GZ_SIM_RESOURCE_PATH"] = resource_paths
 
     robot_description = Command(["xacro ", xacro_file])
     use_sim_time = LaunchConfiguration("use_sim_time", default="true")
@@ -36,7 +38,7 @@ def generate_launch_description():
 
     nodes = [
         DeclareLaunchArgument("use_sim_time", default_value="true", description="Use simulation clock"),
-        SetEnvironmentVariable("GZ_SIM_RESOURCE_PATH", models_path),
+        SetEnvironmentVariable("GZ_SIM_RESOURCE_PATH", resource_paths),
 
         # 1. Launch Gazebo Harmonic (gz sim 8) with world (contains embedded robot)
         IncludeLaunchDescription(
@@ -74,13 +76,7 @@ def generate_launch_description():
                 "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
                 "/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image",
                 "/imu/data@sensor_msgs/msg/Imu[gz.msgs.IMU",
-                "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
-                "/left_arm/shoulder_cmd@std_msgs/msg/Float64]gz.msgs.Double",
-                "/right_arm/shoulder_cmd@std_msgs/msg/Float64]gz.msgs.Double",
-                "/left_arm/elbow_cmd@std_msgs/msg/Float64]gz.msgs.Double",
-                "/right_arm/elbow_cmd@std_msgs/msg/Float64]gz.msgs.Double",
-                "/head/pan_cmd@std_msgs/msg/Float64]gz.msgs.Double",
-                "/head/tilt_cmd@std_msgs/msg/Float64]gz.msgs.Double"
+                "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V"
             ],
             parameters=[{"use_sim_time": use_sim_time}]
         ),

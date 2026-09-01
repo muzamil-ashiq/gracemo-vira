@@ -1,13 +1,11 @@
 <?xml version="1.0" ?>
 <!--
-  GRACEmo ViRa — Home Apartment Simulation (Gazebo Harmonic)
+  GRACEmo ViRa — Photorealistic 3D Apartment Simulation (Gazebo Harmonic 8)
   Layout: Central hallway (Y=-1.0 to Y=+1.0, length 18m) connecting 4 distinct rooms:
     - Bedroom     (Top-Left,    X:-9 to  0, Y: 1 to  7) -> doorway at X=-5.0, Y=1.0
     - Study       (Top-Right,   X: 0 to  9, Y: 1 to  7) -> doorway at X=+5.0, Y=1.0
     - Kitchen     (Bottom-Left, X:-9 to  0, Y:-7 to -1) -> doorway at X=-5.0, Y=-1.0
     - Living Room (Bottom-Right,X: 0 to  9, Y:-7 to -1) -> doorway at X=+5.0, Y=-1.0
-  All rooms are completely enclosed by separating walls.
-  Hallway is completely clear and open.
 -->
 <sdf version="1.6">
   <world name="gracemo_home">
@@ -32,7 +30,7 @@
             name="gz::sim::systems::Imu"/>
 
     <scene>
-      <ambient>0.45 0.42 0.40 1</ambient>
+      <ambient>0.48 0.45 0.42 1</ambient>
       <background>0.3 0.3 0.35 1</background>
       <shadows>false</shadows>
     </scene>
@@ -48,13 +46,13 @@
     <light type="directional" name="sun">
       <cast_shadows>false</cast_shadows>
       <pose>0 0 20 0 0 0</pose>
-      <diffuse>0.9 0.88 0.85 1</diffuse>
+      <diffuse>0.92 0.90 0.88 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
       <direction>-0.3 0.2 -0.9</direction>
     </light>
 
     <!-- =====================================================================
-         FLOOR (18m x 14m)
+         FLOOR (18m x 14m Wood Tone)
          ===================================================================== -->
     <model name="floor">
       <static>true</static>
@@ -71,28 +69,24 @@
     <!-- =====================================================================
          OUTER BOUNDARY WALLS
          ===================================================================== -->
-    <!-- North outer wall -->
     <model name="wall_north"><static>true</static>
       <link name="l"><pose>0 7.1 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>18.2 0.2 2.6</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>18.2 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- South outer wall -->
     <model name="wall_south"><static>true</static>
       <link name="l"><pose>0 -7.1 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>18.2 0.2 2.6</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>18.2 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- West outer wall -->
     <model name="wall_west"><static>true</static>
       <link name="l"><pose>-9.1 0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>0.2 14.2 2.6</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>0.2 14.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- East outer wall -->
     <model name="wall_east"><static>true</static>
       <link name="l"><pose>9.1 0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>0.2 14.2 2.6</size></box></geometry></collision>
@@ -101,17 +95,16 @@
     </model>
 
     <!-- =====================================================================
-         ROOM DIVIDING WALLS (Separating adjacent rooms)
+         ROOM DIVIDING WALLS
          ===================================================================== -->
-    <!-- Wall separating Bedroom (left) and Study (right) along X=0 from Y=1 to Y=7 -->
+    <!-- Bedroom <-> Study Dividing Wall -->
     <model name="wall_bedroom_study"><static>true</static>
       <link name="l"><pose>0 4.0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>0.2 6.0 2.6</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>0.2 6.0 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
       </link>
     </model>
-
-    <!-- Wall separating Kitchen (left) and Living Room (right) along X=0 from Y=-1 to Y=-7 -->
+    <!-- Kitchen <-> Living Room Dividing Wall -->
     <model name="wall_kitchen_living"><static>true</static>
       <link name="l"><pose>0 -4.0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>0.2 6.0 2.6</size></box></geometry></collision>
@@ -121,27 +114,20 @@
 
     <!-- =====================================================================
          HALLWAY WALLS (Y = +1.0 and Y = -1.0)
-         Continuous corridor with 1.2m doorways into each room
          ===================================================================== -->
-
-    <!-- North Hallway Wall (Y = +1.0) -->
-    <!-- Segment 1: West of Bedroom door (X: -9.0 to -5.6) -->
+    <!-- North Hallway Wall -->
     <model name="hall_north_west"><static>true</static>
       <link name="l"><pose>-7.3 1.0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>3.4 0.2 2.6</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>3.4 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- Bedroom Doorway at X = -5.0 (width 1.2m) -->
-    <!-- Segment 2: Between Bedroom door and Study door (X: -4.4 to +4.4) -->
     <model name="hall_north_middle"><static>true</static>
       <link name="l"><pose>0.0 1.0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>8.8 0.2 2.6</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>8.8 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- Study Doorway at X = +5.0 (width 1.2m) -->
-    <!-- Segment 3: East of Study door (X: +5.6 to +9.0) -->
     <model name="hall_north_east"><static>true</static>
       <link name="l"><pose>7.3 1.0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>3.4 0.2 2.6</size></box></geometry></collision>
@@ -149,24 +135,19 @@
       </link>
     </model>
 
-    <!-- South Hallway Wall (Y = -1.0) -->
-    <!-- Segment 1: West of Kitchen door (X: -9.0 to -5.6) -->
+    <!-- South Hallway Wall -->
     <model name="hall_south_west"><static>true</static>
       <link name="l"><pose>-7.3 -1.0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>3.4 0.2 2.6</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>3.4 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- Kitchen Doorway at X = -5.0 (width 1.2m) -->
-    <!-- Segment 2: Between Kitchen door and Living Room door (X: -4.4 to +4.4) -->
     <model name="hall_south_middle"><static>true</static>
       <link name="l"><pose>0.0 -1.0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>8.8 0.2 2.6</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>8.8 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- Living Room Doorway at X = +5.0 (width 1.2m) -->
-    <!-- Segment 3: East of Living Room door (X: +5.6 to +9.0) -->
     <model name="hall_south_east"><static>true</static>
       <link name="l"><pose>7.3 -1.0 1.3 0 0 0</pose>
         <collision name="c"><geometry><box><size>3.4 0.2 2.6</size></box></geometry></collision>
@@ -175,19 +156,15 @@
     </model>
 
     <!-- =====================================================================
-         🛏️  ROOM 1: BEDROOM  (Top-Left: X -9 to 0, Y 1 to 7, center: -4.5, 4.0)
+         🛏️  ROOM 1: BEDROOM  (Top-Left: X -9 to 0, Y 1 to 7)
          ===================================================================== -->
-    <!-- Bed -->
-    <model name="master_bed"><static>true</static><pose>-6.5 5.0 0 0 0 0</pose>
-      <link name="link">
-        <visual name="frame"><pose>0 0 0.20 0 0 0</pose><geometry><box><size>2.0 1.6 0.40</size></box></geometry><material><ambient>0.55 0.35 0.18 1</ambient><diffuse>0.60 0.38 0.20 1</diffuse></material></visual>
-        <visual name="mattress"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>1.9 1.5 0.12</size></box></geometry><material><ambient>0.92 0.92 0.95 1</ambient><diffuse>0.95 0.95 0.98 1</diffuse></material></visual>
-        <visual name="pillow1"><pose>0.55 0.38 0.53 0 0 0</pose><geometry><box><size>0.60 0.32 0.08</size></box></geometry><material><ambient>0.80 0.85 0.95 1</ambient></material></visual>
-        <visual name="pillow2"><pose>0.55 -0.38 0.53 0 0 0</pose><geometry><box><size>0.60 0.32 0.08</size></box></geometry><material><ambient>0.80 0.85 0.95 1</ambient></material></visual>
-        <visual name="headboard"><pose>-0.95 0 0.62 0 0 0</pose><geometry><box><size>0.08 1.6 0.65</size></box></geometry><material><ambient>0.50 0.32 0.16 1</ambient><diffuse>0.55 0.35 0.18 1</diffuse></material></visual>
-        <collision name="col"><pose>0 0 0.25 0 0 0</pose><geometry><box><size>2.0 1.6 0.50</size></box></geometry></collision>
-      </link>
-    </model>
+    <!-- 3D PBR Master Bed -->
+    <include>
+      <uri>model://bed</uri>
+      <name>master_bed</name>
+      <static>true</static>
+      <pose>-6.0 5.0 0 0 0 0</pose>
+    </include>
     <!-- Wardrobe -->
     <model name="wardrobe"><static>true</static>
       <link name="l"><pose>-8.6 4.0 1.0 0 0 0</pose>
@@ -197,79 +174,61 @@
     </model>
     <!-- Nightstand -->
     <model name="nightstand"><static>true</static>
-      <link name="l"><pose>-5.3 3.2 0.30 0 0 0</pose>
+      <link name="l"><pose>-4.2 3.4 0.30 0 0 0</pose>
         <collision name="c"><geometry><box><size>0.50 0.50 0.60</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>0.50 0.50 0.60</size></box></geometry><material><ambient>0.40 0.26 0.14 1</ambient><diffuse>0.44 0.28 0.16 1</diffuse></material></visual>
       </link>
     </model>
 
     <!-- =====================================================================
-         🍳  ROOM 2: KITCHEN  (Bottom-Left: X -9 to 0, Y -7 to -1, center: -4.5, -4.0)
+         🍳  ROOM 2: KITCHEN  (Bottom-Left: X -9 to 0, Y -7 to -1)
          ===================================================================== -->
-    <!-- Counter -->
+    <!-- 3D Refrigerator -->
+    <include>
+      <uri>model://refrigerator</uri>
+      <name>refrigerator</name>
+      <static>true</static>
+      <pose>-1.5 -6.2 0 0 0 0</pose>
+    </include>
+    <!-- 3D Dining Table -->
+    <include>
+      <uri>model://table</uri>
+      <name>dining_table</name>
+      <static>true</static>
+      <pose>-4.5 -4.0 0 0 0 0</pose>
+    </include>
+    <!-- 3D Chairs -->
+    <include>
+      <uri>model://chair</uri>
+      <name>chair_1</name>
+      <static>true</static>
+      <pose>-4.5 -3.0 0 0 0 3.14</pose>
+    </include>
+    <include>
+      <uri>model://chair</uri>
+      <name>chair_2</name>
+      <static>true</static>
+      <pose>-4.5 -5.0 0 0 0 0</pose>
+    </include>
+    <!-- Kitchen Counter -->
     <model name="kitchen_counter"><static>true</static>
       <link name="l"><pose>-8.0 -4.0 0.45 0 0 0</pose>
         <collision name="c"><geometry><box><size>1.6 4.5 0.90</size></box></geometry></collision>
         <visual name="v"><geometry><box><size>1.6 4.5 0.90</size></box></geometry><material><ambient>0.85 0.85 0.88 1</ambient><diffuse>0.90 0.90 0.93 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- Refrigerator -->
-    <model name="refrigerator"><static>true</static><pose>-1.5 -6.2 0 0 0 0</pose>
-      <link name="link">
-        <visual name="body"><pose>0 0 0.87 0 0 0</pose><geometry><box><size>0.70 0.68 1.74</size></box></geometry><material><ambient>0.88 0.88 0.90 1</ambient><diffuse>0.92 0.92 0.94 1</diffuse></material></visual>
-        <visual name="handle"><pose>0.36 0 1.10 0 0 0</pose><geometry><box><size>0.03 0.04 0.35</size></box></geometry><material><ambient>0.65 0.65 0.68 1</ambient></material></visual>
-        <collision name="col"><pose>0 0 0.87 0 0 0</pose><geometry><box><size>0.70 0.68 1.74</size></box></geometry></collision>
-      </link>
-    </model>
-    <!-- Dining table -->
-    <model name="dining_table"><static>true</static><pose>-4.5 -4.0 0 0 0 0</pose>
-      <link name="link">
-        <visual name="top"><pose>0 0 0.78 0 0 0</pose><geometry><box><size>1.5 0.9 0.04</size></box></geometry><material><ambient>0.55 0.36 0.18 1</ambient><diffuse>0.60 0.40 0.20 1</diffuse></material></visual>
-        <collision name="top_c"><pose>0 0 0.78 0 0 0</pose><geometry><box><size>1.5 0.9 0.04</size></box></geometry></collision>
-        <visual name="leg1"><pose>0.66 0.38 0.39 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>0.78</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg2"><pose>-0.66 0.38 0.39 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>0.78</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg3"><pose>0.66 -0.38 0.39 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>0.78</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg4"><pose>-0.66 -0.38 0.39 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>0.78</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-      </link>
-    </model>
-    <!-- Chairs -->
-    <model name="chair_1"><static>true</static><pose>-4.5 -2.8 0 0 0 3.14</pose>
-      <link name="link">
-        <visual name="seat"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry><material><ambient>0.42 0.28 0.14 1</ambient><diffuse>0.48 0.32 0.16 1</diffuse></material></visual>
-        <visual name="back"><pose>0 -0.22 0.74 0 0 0</pose><geometry><box><size>0.46 0.04 0.55</size></box></geometry><material><ambient>0.40 0.26 0.12 1</ambient></material></visual>
-        <visual name="leg1"><pose>0.20 0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg2"><pose>-0.20 0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg3"><pose>0.20 -0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg4"><pose>-0.20 -0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <collision name="c"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry></collision>
-      </link>
-    </model>
-    <model name="chair_2"><static>true</static><pose>-4.5 -5.2 0 0 0 0</pose>
-      <link name="link">
-        <visual name="seat"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry><material><ambient>0.42 0.28 0.14 1</ambient><diffuse>0.48 0.32 0.16 1</diffuse></material></visual>
-        <visual name="back"><pose>0 0.22 0.74 0 0 0</pose><geometry><box><size>0.46 0.04 0.55</size></box></geometry><material><ambient>0.40 0.26 0.12 1</ambient></material></visual>
-        <visual name="leg1"><pose>0.20 0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg2"><pose>-0.20 0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg3"><pose>0.20 -0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <visual name="leg4"><pose>-0.20 -0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
-        <collision name="c"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry></collision>
-      </link>
-    </model>
 
     <!-- =====================================================================
-         🛋️  ROOM 3: LIVING ROOM  (Bottom-Right: X 0 to 9, Y -7 to -1, center: 4.5, -4.0)
+         🛋️  ROOM 3: LIVING ROOM  (Bottom-Right: X 0 to 9, Y -7 to -1)
          ===================================================================== -->
-    <!-- Sofa -->
-    <model name="living_sofa"><static>true</static><pose>4.5 -5.5 0 0 0 0</pose>
-      <link name="link">
-        <visual name="seat"><pose>0 0 0.22 0 0 0</pose><geometry><box><size>2.2 0.9 0.44</size></box></geometry><material><ambient>0.20 0.25 0.55 1</ambient><diffuse>0.22 0.28 0.60 1</diffuse></material></visual>
-        <visual name="back"><pose>0 -0.42 0.60 0 0 0</pose><geometry><box><size>2.2 0.12 0.55</size></box></geometry><material><ambient>0.18 0.22 0.52 1</ambient></material></visual>
-        <visual name="arm_l"><pose>1.08 0 0.44 0 0 0</pose><geometry><box><size>0.12 0.9 0.44</size></box></geometry><material><ambient>0.16 0.20 0.48 1</ambient></material></visual>
-        <visual name="arm_r"><pose>-1.08 0 0.44 0 0 0</pose><geometry><box><size>0.12 0.9 0.44</size></box></geometry><material><ambient>0.16 0.20 0.48 1</ambient></material></visual>
-        <collision name="col"><pose>0 0 0.22 0 0 0</pose><geometry><box><size>2.2 0.9 0.44</size></box></geometry></collision>
-      </link>
-    </model>
-    <!-- Coffee table -->
+    <!-- 3D Sofa -->
+    <include>
+      <uri>model://sofa</uri>
+      <name>living_sofa</name>
+      <static>true</static>
+      <pose>4.5 -5.2 0 0 0 0</pose>
+    </include>
+    <!-- Coffee Table -->
     <model name="coffee_table"><static>true</static>
       <link name="l"><pose>4.5 -3.5 0.22 0 0 0</pose>
         <collision name="c"><geometry><box><size>1.1 0.6 0.44</size></box></geometry></collision>
@@ -281,35 +240,25 @@
       <link name="console"><pose>0 0 0.25 0 0 0</pose><collision name="c"><geometry><box><size>0.4 2.0 0.5</size></box></geometry></collision><visual name="v"><geometry><box><size>0.4 2.0 0.5</size></box></geometry><material><ambient>0.15 0.15 0.18 1</ambient><diffuse>0.18 0.18 0.20 1</diffuse></material></visual></link>
       <link name="screen"><pose>0 0 0.95 0 0 0</pose><collision name="c"><geometry><box><size>0.06 1.4 0.80</size></box></geometry></collision><visual name="v"><geometry><box><size>0.06 1.4 0.80</size></box></geometry><material><ambient>0.03 0.03 0.04 1</ambient><diffuse>0.05 0.05 0.06 1</diffuse></material></visual></link>
     </model>
-    <!-- Bowl on coffee table -->
-    <model name="bowl"><pose>4.5 -3.5 0.48 0 0 0</pose>
-      <link name="link">
-        <visual name="v"><geometry><cylinder><radius>0.09</radius><length>0.06</length></cylinder></geometry><material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.90 0.86 0.80 1</diffuse></material></visual>
-        <collision name="c"><geometry><cylinder><radius>0.09</radius><length>0.06</length></cylinder></geometry></collision>
-        <inertial><mass>0.2</mass></inertial>
-      </link>
-    </model>
+    <!-- 3D Bowl on Coffee Table -->
+    <include>
+      <uri>model://bowl</uri>
+      <name>bowl</name>
+      <static>true</static>
+      <pose>4.5 -3.5 0.45 0 0 0</pose>
+    </include>
 
     <!-- =====================================================================
-         💻  ROOM 4: STUDY  (Top-Right: X 0 to 9, Y 1 to 7, center: 4.5, 4.0)
+         💻  ROOM 4: STUDY  (Top-Right: X 0 to 9, Y 1 to 7)
          ===================================================================== -->
-    <!-- Bookshelf -->
-    <model name="bookshelf"><static>true</static><pose>8.6 5.5 0 0 0 0</pose>
-      <link name="link">
-        <visual name="back"><pose>0 0 0.9 0 0 0</pose><geometry><box><size>0.1 1.8 1.8</size></box></geometry><material><ambient>0.38 0.24 0.14 1</ambient><diffuse>0.44 0.28 0.16 1</diffuse></material></visual>
-        <collision name="bc"><pose>0 0 0.9 0 0 0</pose><geometry><box><size>0.1 1.8 1.8</size></box></geometry></collision>
-        <visual name="shelf1"><pose>0 0 0.30 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient></material></visual>
-        <visual name="shelf2"><pose>0 0 0.75 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient></material></visual>
-        <visual name="shelf3"><pose>0 0 1.20 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient></material></visual>
-        <visual name="shelf4"><pose>0 0 1.65 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient></material></visual>
-        <visual name="side_l"><pose>0 0.87 0.9 0 0 0</pose><geometry><box><size>0.35 0.04 1.8</size></box></geometry><material><ambient>0.36 0.22 0.12 1</ambient></material></visual>
-        <visual name="side_r"><pose>0 -0.87 0.9 0 0 0</pose><geometry><box><size>0.35 0.04 1.8</size></box></geometry><material><ambient>0.36 0.22 0.12 1</ambient></material></visual>
-        <visual name="books1"><pose>0 0.50 0.53 0 0 0</pose><geometry><box><size>0.30 0.70 0.40</size></box></geometry><material><ambient>0.6 0.2 0.2 1</ambient></material></visual>
-        <visual name="books2"><pose>0 -0.40 0.98 0 0 0</pose><geometry><box><size>0.30 0.80 0.40</size></box></geometry><material><ambient>0.2 0.4 0.6 1</ambient></material></visual>
-        <visual name="books3"><pose>0 0.30 1.43 0 0 0</pose><geometry><box><size>0.30 1.00 0.40</size></box></geometry><material><ambient>0.3 0.5 0.2 1</ambient></material></visual>
-      </link>
-    </model>
-    <!-- Study desk -->
+    <!-- 3D Bookshelf -->
+    <include>
+      <uri>model://bookshelf</uri>
+      <name>bookshelf</name>
+      <static>true</static>
+      <pose>8.5 5.5 0 0 0 0</pose>
+    </include>
+    <!-- Study Desk -->
     <model name="study_desk"><static>true</static><pose>4.5 5.5 0 0 0 0</pose>
       <link name="top"><pose>0 0 0.73 0 0 0</pose><collision name="c"><geometry><box><size>1.8 0.8 0.04</size></box></geometry></collision><visual name="v"><geometry><box><size>1.8 0.8 0.04</size></box></geometry><material><ambient>0.38 0.24 0.14 1</ambient><diffuse>0.44 0.28 0.16 1</diffuse></material></visual></link>
       <link name="leg1"><pose>0.80 0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
@@ -322,14 +271,24 @@
       <link name="l"><collision name="c"><geometry><box><size>0.55 0.05 0.32</size></box></geometry></collision><visual name="v"><geometry><box><size>0.55 0.05 0.32</size></box></geometry><material><ambient>0.08 0.08 0.10 1</ambient><diffuse>0.10 0.10 0.12 1</diffuse></material></visual>
       </link>
     </model>
-    <!-- Cardboard box -->
-    <model name="cardboard_box"><pose>1.5 6.0 0.12 0 0 0</pose>
-      <link name="link">
-        <visual name="v"><geometry><box><size>0.5 0.4 0.24</size></box></geometry><material><ambient>0.72 0.58 0.35 1</ambient><diffuse>0.78 0.62 0.38 1</diffuse></material></visual>
-        <collision name="c"><geometry><box><size>0.5 0.4 0.24</size></box></geometry></collision>
-        <inertial><mass>1.0</mass></inertial>
-      </link>
-    </model>
+    <!-- 3D Cardboard Box -->
+    <include>
+      <uri>model://cardboard_box</uri>
+      <name>cardboard_box</name>
+      <static>true</static>
+      <pose>1.5 6.0 0 0 0 0</pose>
+    </include>
+    <!-- 3D Coke Can -->
+    <include>
+      <uri>model://coke_can</uri>
+      <name>coke_can</name>
+      <static>true</static>
+      <pose>4.0 5.5 0.76 0 0 0</pose>
+    </include>
+
+      <!-- =====================================================================
+         🤖 GRaCEmo ViRa ROBOT MODEL
+         ===================================================================== -->
 
       <!-- =====================================================================
          🤖 GRaCEmo ViRa ROBOT MODEL
@@ -337,27 +296,28 @@
     <model name='gracemo_vira'>
     <link name='base_footprint'>
       <inertial>
-        <pose>-0.0035102040816326519 0 0.27247346938775507 0 0 0</pose>
-        <mass>12.25</mass>
+        <pose>-0.003568627450980391 0 0.27374901960784309 0 0 0</pose>
+        <mass>12.75</mass>
         <inertia>
-          <ixx>0.4517984788775512</ixx>
+          <ixx>0.5062653218627452</ixx>
           <ixy>0</ixy>
-          <ixz>0.01345864081632653</ixz>
-          <iyy>0.47926254010204089</iyy>
+          <ixz>0.01406191960784314</ixz>
+          <iyy>0.49329434931372551</iyy>
           <iyz>0</iyz>
-          <izz>0.1718940612244898</izz>
+          <izz>0.1792162274509804</izz>
         </inertia>
       </inertial>
       <collision name='base_footprint_fixed_joint_lump__base_link_collision'>
         <pose>0 0 0.13500000000000001 0 0 0</pose>
         <geometry>
-          <box>
-            <size>0.40000000000000002 0.28000000000000003 0.14000000000000001</size>
-          </box>
+          <cylinder>
+            <length>0.14000000000000001</length>
+            <radius>0.20000000000000001</radius>
+          </cylinder>
         </geometry>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__front_caster_link_collision_1'>
-        <pose>0.14999999999999999 0 0.033500000000000002 0 0 0</pose>
+        <pose>0.14000000000000001 0 0.033500000000000002 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.033500000000000002</radius>
@@ -376,7 +336,7 @@
         </surface>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__lidar_link_collision_2'>
-        <pose>0.14000000000000001 0 0.22500000000000001 0 0 0</pose>
+        <pose>0.13 0 0.22500000000000001 0 0 0</pose>
         <geometry>
           <cylinder>
             <length>0.040000000000000001</length>
@@ -393,7 +353,7 @@
         </surface>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__rear_caster_link_collision_3'>
-        <pose>-0.14999999999999999 0 0.033500000000000002 0 0 0</pose>
+        <pose>-0.14000000000000001 0 0.033500000000000002 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.033500000000000002</radius>
@@ -412,43 +372,44 @@
         </surface>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__torso_link_collision_4'>
-        <pose>-0.02 0 0.39500000000000002 0 0 0</pose>
+        <pose>-0.02 0 0.40500000000000003 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.20000000000000001 0.22 0.38</size>
+            <size>0.17999999999999999 0.22 0.40000000000000002</size>
           </box>
         </geometry>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__head_link_collision_5'>
-        <pose>-0.01 0 0.68500000000000005 0 0 0</pose>
+        <pose>-0.01 0 0.69500000000000006 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.14000000000000001 0.16 0.12</size>
+            <size>0.14000000000000001 0.16 0.11</size>
           </box>
         </geometry>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__left_arm_link_collision_6'>
-        <pose>0 0.13500000000000001 0.38500000000000012 0 0 0</pose>
+        <pose>0 0.13200000000000001 0.41500000000000009 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.070000000000000007 0.050000000000000003 0.32000000000000001</size>
+            <size>0.059999999999999998 0.044999999999999998 0.29999999999999999</size>
           </box>
         </geometry>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__right_arm_link_collision_7'>
-        <pose>0 -0.13500000000000001 0.38500000000000012 0 0 0</pose>
+        <pose>0 -0.13200000000000001 0.41500000000000009 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.070000000000000007 0.050000000000000003 0.32000000000000001</size>
+            <size>0.059999999999999998 0.044999999999999998 0.29999999999999999</size>
           </box>
         </geometry>
       </collision>
       <visual name='base_footprint_fixed_joint_lump__base_link_visual'>
         <pose>0 0 0.13500000000000001 0 0 0</pose>
         <geometry>
-          <box>
-            <size>0.40000000000000002 0.28000000000000003 0.14000000000000001</size>
-          </box>
+          <cylinder>
+            <length>0.14000000000000001</length>
+            <radius>0.20000000000000001</radius>
+          </cylinder>
         </geometry>
         <material>
           <diffuse>0.125 0.5 1 1</diffuse>
@@ -456,19 +417,33 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__base_link_visual_1'>
-        <pose>0.20000000000000001 0 0.13500000000000001 0 0 0</pose>
+        <pose>0 0 0.092999999999999999 0 0 0</pose>
         <geometry>
-          <box>
-            <size>0.02 0.28999999999999998 0.12</size>
-          </box>
+          <cylinder>
+            <length>0.049000000000000002</length>
+            <radius>0.20499999999999999</radius>
+          </cylinder>
         </geometry>
         <material>
           <diffuse>0 0 0 1</diffuse>
           <ambient>0 0 0 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__front_caster_link_visual_2'>
-        <pose>0.14999999999999999 0 0.033500000000000002 0 0 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__base_link_visual_2'>
+        <pose>0 0 0.20999999999999999 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.01</length>
+            <radius>0.17999999999999999</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__front_caster_link_visual_3'>
+        <pose>0.14000000000000001 0 0.033500000000000002 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.033500000000000002</radius>
@@ -483,21 +458,34 @@
           <ambient>0.9375 0.9375 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_3'>
-        <pose>0.14000000000000001 0 0.22500000000000001 0 0 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_4'>
+        <pose>0.13 0 0.22 0 0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.040000000000000001</length>
+            <length>0.029999999999999999</length>
             <radius>0.044999999999999998</radius>
           </cylinder>
         </geometry>
         <material>
-          <diffuse>1 0.5625 0.0625 1</diffuse>
-          <ambient>1 0.5625 0.0625 1</ambient>
+          <diffuse>0.25 0.25 0.25 1</diffuse>
+          <ambient>0.25 0.25 0.25 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__rear_caster_link_visual_4'>
-        <pose>-0.14999999999999999 0 0.033500000000000002 0 0 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_5'>
+        <pose>0.13 0 0.23699999999999999 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.014999999999999999</length>
+            <radius>0.040000000000000001</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__rear_caster_link_visual_6'>
+        <pose>-0.14000000000000001 0 0.033500000000000002 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.033500000000000002</radius>
@@ -512,11 +500,11 @@
           <ambient>0.9375 0.9375 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__torso_link_visual_5'>
-        <pose>-0.02 0 0.39500000000000002 0 0 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__torso_link_visual_7'>
+        <pose>-0.02 0 0.40500000000000003 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.20000000000000001 0.22 0.38</size>
+            <size>0.17999999999999999 0.22 0.40000000000000002</size>
           </box>
         </geometry>
         <material>
@@ -524,11 +512,11 @@
           <ambient>0.125 0.5 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__torso_link_visual_6'>
-        <pose>0.085000000000000006 0 0.433 0 0 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__torso_link_visual_8'>
+        <pose>0.073999999999999996 0 0.44500000000000001 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.0080000000000000002 0.14000000000000001 0.12</size>
+            <size>0.0060000000000000001 0.14000000000000001 0.12</size>
           </box>
         </geometry>
         <material>
@@ -536,8 +524,8 @@
           <ambient>0 0 0 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__head_link_visual_7'>
-        <pose>-0.02 0 0.60499999999999998 0 0 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__head_link_visual_9'>
+        <pose>-0.02 0 0.625 0 0 0</pose>
         <geometry>
           <cylinder>
             <length>0.040000000000000001</length>
@@ -549,11 +537,11 @@
           <ambient>0.25 0.25 0.25 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__head_link_visual_8'>
-        <pose>-0.01 0 0.68500000000000005 0 0 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__head_link_visual_10'>
+        <pose>-0.01 0 0.69500000000000006 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.14000000000000001 0.16 0.12</size>
+            <size>0.14000000000000001 0.16 0.11</size>
           </box>
         </geometry>
         <material>
@@ -561,8 +549,8 @@
           <ambient>0 0 0 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__head_link_visual_9'>
-        <pose>0.062 0 0.68500000000000005 0 0 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__head_link_visual_11'>
+        <pose>0.060999999999999999 0 0.69500000000000006 0 0 0</pose>
         <geometry>
           <box>
             <size>0.0060000000000000001 0.13 0.070000000000000007</size>
@@ -573,8 +561,8 @@
           <ambient>0 0 0 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__camera_link_visual_10'>
-        <pose>0.065999999999999989 0 0.68500000000000005 0 1.5707963267948966 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__camera_link_visual_12'>
+        <pose>0.065000000000000002 0 0.69500000000000006 0 1.5707963267948966 0</pose>
         <geometry>
           <cylinder>
             <length>0.01</length>
@@ -586,47 +574,11 @@
           <ambient>0.9375 0.9375 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_11'>
-        <pose>-0.02 0.13500000000000001 0.45500000000000002 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.050000000000000003 0.040000000000000001 0.17999999999999999</size>
-          </box>
-        </geometry>
-        <material>
-          <diffuse>0.9375 0.9375 1 1</diffuse>
-          <ambient>0.9375 0.9375 1 1</ambient>
-        </material>
-      </visual>
-      <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_12'>
-        <pose>0.0099999999999999985 0.13500000000000001 0.32500000000000001 0 0.25000000000000017 0</pose>
-        <geometry>
-          <box>
-            <size>0.044999999999999998 0.035000000000000003 0.14000000000000001</size>
-          </box>
-        </geometry>
-        <material>
-          <diffuse>0 0 0 1</diffuse>
-          <ambient>0 0 0 1</ambient>
-        </material>
-      </visual>
       <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_13'>
-        <pose>0.044999999999999998 0.13500000000000001 0.26500000000000001 0 0.25000000000000017 0</pose>
+        <pose>-0.02 0.13200000000000001 0.47499999999999998 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.029999999999999999 0.029999999999999999 0.02</size>
-          </box>
-        </geometry>
-        <material>
-          <diffuse>0 0 0 1</diffuse>
-          <ambient>0 0 0 1</ambient>
-        </material>
-      </visual>
-      <visual name='base_footprint_fixed_joint_lump__right_arm_link_visual_14'>
-        <pose>-0.02 -0.13500000000000001 0.45500000000000002 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.050000000000000003 0.040000000000000001 0.17999999999999999</size>
+            <size>0.044999999999999998 0.035000000000000003 0.17999999999999999</size>
           </box>
         </geometry>
         <material>
@@ -634,11 +586,23 @@
           <ambient>0.9375 0.9375 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__right_arm_link_visual_15'>
-        <pose>0.0099999999999999985 -0.13500000000000001 0.32500000000000001 0 0.25000000000000017 0</pose>
+      <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_14'>
+        <pose>0.005000000000000001 0.13200000000000001 0.35499999999999998 0 0.20000000000000004 0</pose>
         <geometry>
           <box>
-            <size>0.044999999999999998 0.035000000000000003 0.14000000000000001</size>
+            <size>0.040000000000000001 0.029999999999999999 0.13</size>
+          </box>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_15'>
+        <pose>0.035000000000000003 0.13200000000000001 0.29499999999999998 0 0.20000000000000004 0</pose>
+        <geometry>
+          <box>
+            <size>0.029999999999999999 0.025000000000000001 0.02</size>
           </box>
         </geometry>
         <material>
@@ -647,10 +611,34 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__right_arm_link_visual_16'>
-        <pose>0.044999999999999998 -0.13500000000000001 0.26500000000000001 0 0.25000000000000017 0</pose>
+        <pose>-0.02 -0.13200000000000001 0.47499999999999998 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.029999999999999999 0.029999999999999999 0.02</size>
+            <size>0.044999999999999998 0.035000000000000003 0.17999999999999999</size>
+          </box>
+        </geometry>
+        <material>
+          <diffuse>0.9375 0.9375 1 1</diffuse>
+          <ambient>0.9375 0.9375 1 1</ambient>
+        </material>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__right_arm_link_visual_17'>
+        <pose>0.005000000000000001 -0.13200000000000001 0.35499999999999998 0 0.20000000000000004 0</pose>
+        <geometry>
+          <box>
+            <size>0.040000000000000001 0.029999999999999999 0.13</size>
+          </box>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__right_arm_link_visual_18'>
+        <pose>0.035000000000000003 -0.13200000000000001 0.29499999999999998 0 0.20000000000000004 0</pose>
+        <geometry>
+          <box>
+            <size>0.029999999999999999 0.025000000000000001 0.02</size>
           </box>
         </geometry>
         <material>
@@ -685,7 +673,7 @@
         </ray>
         <always_on>true</always_on>
         <visualize>true</visualize>
-        <pose>0.14000000000000001 0 0.20499999999999999 0 0 0</pose>
+        <pose>0.13 0 0.20499999999999999 0 0 0</pose>
       </sensor>
       <sensor name='camera' type='camera'>
         <topic>/camera/image_raw</topic>
@@ -704,11 +692,11 @@
         </camera>
         <always_on>true</always_on>
         <visualize>true</visualize>
-        <pose>0.066000000000000003 0 0.68500000000000005 0 0 0</pose>
+        <pose>0.065000000000000002 0 0.69499999999999995 0 0 0</pose>
       </sensor>
     </link>
     <joint name='left_wheel_joint' type='revolute'>
-      <pose relative_to='base_footprint'>0 0.16500000000000001 0.065000000000000002 0 0 0</pose>
+      <pose relative_to='base_footprint'>0 0.16 0.065000000000000002 0 0 0</pose>
       <parent>base_footprint</parent>
       <child>left_wheel_link</child>
       <axis>
@@ -778,9 +766,26 @@
           <ambient>0.0625 0.0625 0.0625 1</ambient>
         </material>
       </visual>
+      <visual name='left_wheel_link_visual_1'>
+        <pose>0 0 0 1.5707963267948959 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.037000000000000012</length>
+            <radius>0.039</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/DarkGrey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
     </link>
     <joint name='right_wheel_joint' type='revolute'>
-      <pose relative_to='base_footprint'>0 -0.16500000000000001 0.065000000000000002 0 0 0</pose>
+      <pose relative_to='base_footprint'>0 -0.16 0.065000000000000002 0 0 0</pose>
       <parent>base_footprint</parent>
       <child>right_wheel_link</child>
       <axis>
@@ -850,6 +855,23 @@
           <ambient>0.0625 0.0625 0.0625 1</ambient>
         </material>
       </visual>
+      <visual name='right_wheel_link_visual_1'>
+        <pose>0 0 0 1.5707963267948959 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.037000000000000012</length>
+            <radius>0.039</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/DarkGrey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
     </link>
     <plugin name='gz::sim::systems::JointStatePublisher' filename='gz-sim-joint-state-publisher-system'/>
     <plugin name='gz::sim::systems::DiffDrive' filename='gz-sim-diff-drive-system'>
@@ -872,7 +894,7 @@
       <odom_publish_frequency>50</odom_publish_frequency>
     </plugin>
     <frame name='front_caster_joint' attached_to='base_link'>
-      <pose>0.14999999999999999 0 -0.0315 0 0 0</pose>
+      <pose>0.14000000000000001 0 -0.0315 0 0 0</pose>
     </frame>
     <frame name='front_caster_link' attached_to='front_caster_joint'>
       <pose>0 0 0 0 0 0</pose>
@@ -884,13 +906,13 @@
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='lidar_joint' attached_to='base_link'>
-      <pose>0.14000000000000001 0 0.14000000000000001 0 0 0</pose>
+      <pose>0.13 0 0.14000000000000001 0 0 0</pose>
     </frame>
     <frame name='lidar_link' attached_to='lidar_joint'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='rear_caster_joint' attached_to='base_link'>
-      <pose>-0.14999999999999999 0 -0.0315 0 0 0</pose>
+      <pose>-0.14000000000000001 0 -0.0315 0 0 0</pose>
     </frame>
     <frame name='rear_caster_link' attached_to='rear_caster_joint'>
       <pose>0 0 0 0 0 0</pose>
@@ -902,25 +924,25 @@
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='camera_joint' attached_to='head_link'>
-      <pose>0.085999999999999993 0 0.10000000000000001 0 0 0</pose>
+      <pose>0.085000000000000006 0 0.089999999999999997 0 0 0</pose>
     </frame>
     <frame name='camera_link' attached_to='camera_joint'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='head_joint' attached_to='torso_link'>
-      <pose>0 0 0.38 0 0 0</pose>
+      <pose>0 0 0.40000000000000002 0 0 0</pose>
     </frame>
     <frame name='head_link' attached_to='head_joint'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='left_arm_joint' attached_to='torso_link'>
-      <pose>0 0.13500000000000001 0.34000000000000002 0 0 0</pose>
+      <pose>0 0.13200000000000001 0.35999999999999999 0 0 0</pose>
     </frame>
     <frame name='left_arm_link' attached_to='left_arm_joint'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='right_arm_joint' attached_to='torso_link'>
-      <pose>0 -0.13500000000000001 0.34000000000000002 0 0 0</pose>
+      <pose>0 -0.13200000000000001 0.35999999999999999 0 0 0</pose>
     </frame>
     <frame name='right_arm_link' attached_to='right_arm_joint'>
       <pose>0 0 0 0 0 0</pose>
