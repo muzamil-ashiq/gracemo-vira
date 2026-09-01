@@ -1,12 +1,17 @@
 import os
+import subprocess
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (IncludeLaunchDescription, DeclareLaunchArgument,
-                             SetEnvironmentVariable, TimerAction)
+from launch.actions import (
+    IncludeLaunchDescription,
+    DeclareLaunchArgument,
+    SetEnvironmentVariable,
+    TimerAction,
+    ExecuteProcess,
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
-import subprocess
 
 
 def generate_launch_description():
@@ -19,7 +24,7 @@ def generate_launch_description():
     urdf_file   = "/tmp/gracemo_vira_spawn.urdf"
     models_path = os.path.join(pkg_gracemo_gazebo, "models")
 
-    # Pre-generate URDF from xacro to a temp file (avoids topic timing issues)
+    # Generate standalone URDF from Xacro for Gazebo spawn
     subprocess.run(["xacro", xacro_file, "-o", urdf_file], check=True)
 
     os.environ["GZ_SIM_RESOURCE_PATH"] = models_path
@@ -27,20 +32,20 @@ def generate_launch_description():
     robot_description = Command(["xacro ", xacro_file])
     use_sim_time = LaunchConfiguration("use_sim_time", default="true")
 
-    # Only start kernel_bridge if kernel is actually reachable
+    # Check if MNSE Kernel is online
     kernel_running = False
     try:
         import urllib.request
-        urllib.request.urlopen("http://127.0.0.1:7780/health", timeout=1)
+        urllib.request.urlopen("http://127.0.0.1:7780/health", timeout=0.5)
         kernel_running = True
     except Exception:
         pass
 
     nodes = [
-        DeclareLaunchArgument("use_sim_time", default_value="true"),
+        DeclareLaunchArgument("use_sim_time", default_value="true", description="Use simulation clock"),
         SetEnvironmentVariable("GZ_SIM_RESOURCE_PATH", models_path),
 
-        # 1. Launch Gazebo Harmonic
+        # 1. Launch Gazebo Harmonic (gz sim 8)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(pkg_ros_gz_sim, "launch", "gz_sim.launch.py")
@@ -51,7 +56,7 @@ def generate_launch_description():
             }.items()
         ),
 
-        # 2. Robot State Publisher (TF tree)
+        # 2. Robot State Publisher (publishes TF tree from robot_description)
         Node(
             package="robot_state_publisher",
             executable="robot_state_publisher",
@@ -63,28 +68,25 @@ def generate_launch_description():
             }]
         ),
 
-        # 3. Spawn robot — 6s delay using pre-generated URDF file (most reliable)
+        # 3. Spawn Robot in Gazebo Harmonic via native gz service (gz-transport13)
         TimerAction(
-            period=6.0,
+            period=4.0,
             actions=[
-                Node(
-                    package="ros_gz_sim",
-                    executable="create",
-                    name="spawn_gracemo_vira",
-                    output="screen",
-                    arguments=[
-                        "-world", "gracemo_home",
-                        "-file",  urdf_file,
-                        "-name",  "gracemo_vira",
-                        "-x", "0.0",
-                        "-y", "0.0",
-                        "-z", "0.15"
-                    ]
+                ExecuteProcess(
+                    cmd=[
+                        "gz", "service",
+                        "-s", "/world/gracemo_home/create",
+                        "--reqtype", "gz.msgs.EntityFactory",
+                        "--reptype", "gz.msgs.Boolean",
+                        "--timeout", "5000",
+                        "--req", f'sdf_filename: "{urdf_file}", name: "gracemo_vira", pose: {{position: {{z: 0.15}}}}'
+                    ],
+                    output="screen"
                 )
             ]
         ),
 
-        # 4. ROS <-> Gazebo Bridge (gz.msgs for Harmonic)
+        # 4. ROS 2 <-> Gazebo Harmonic Transport Bridge
         Node(
             package="ros_gz_bridge",
             executable="parameter_bridge",
@@ -97,13 +99,18 @@ def generate_launch_description():
                 "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
                 "/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image",
                 "/imu/data@sensor_msgs/msg/Imu[gz.msgs.IMU",
-                "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V"
+                "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
+                "/left_arm/shoulder_cmd@std_msgs/msg/Float64]gz.msgs.Double",
+                "/right_arm/shoulder_cmd@std_msgs/msg/Float64]gz.msgs.Double",
+                "/left_arm/elbow_cmd@std_msgs/msg/Float64]gz.msgs.Double",
+                "/right_arm/elbow_cmd@std_msgs/msg/Float64]gz.msgs.Double",
+                "/head/pan_cmd@std_msgs/msg/Float64]gz.msgs.Double",
+                "/head/tilt_cmd@std_msgs/msg/Float64]gz.msgs.Double"
             ],
             parameters=[{"use_sim_time": use_sim_time}]
         ),
     ]
 
-    # 5. Kernel bridge — only if kernel server is running (optional)
     if kernel_running:
         nodes.append(Node(
             package="gracemo_bridge",
@@ -113,6 +120,6 @@ def generate_launch_description():
             parameters=[{"kernel_url": "http://127.0.0.1:7780"}]
         ))
     else:
-        print("[sim.launch.py] Kernel not reachable at :7780 — skipping kernel_bridge")
+        print("[sim.launch.py] Kernel offline at :7780 — skipping gracemo_kernel_bridge (start kernel with 'k' or kernel binary if needed)")
 
     return LaunchDescription(nodes)
