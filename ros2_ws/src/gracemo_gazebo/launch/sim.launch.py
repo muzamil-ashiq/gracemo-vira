@@ -49,14 +49,17 @@ def generate_launch_description():
         ),
 
         # 3. Spawn GRaCEmo ViRa robot in Gazebo
+        # Harmonic's 'create' requires -world <world_name> (name from world SDF)
         Node(
             package="ros_gz_sim",
             executable="create",
             name="spawn_gracemo_vira",
             output="screen",
             arguments=[
+                "-world", "gracemo_home",
                 "-topic", "robot_description",
                 "-name", "gracemo_vira",
+                "-allow_renaming", "false",
                 "-x", "0.0",
                 "-y", "0.0",
                 "-z", "0.10"
