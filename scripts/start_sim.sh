@@ -18,7 +18,17 @@ echo "================================================================="
   "killall -9 gz-sim gz ruby kernel_bridge 2>/dev/null || true" \
   >/dev/null 2>&1 || true
 
-# 2. Launch Gazebo Harmonic + ROS bridge inside distrobox
+# 2. Build workspace and update embedded robot
+echo "Building ROS 2 workspace..."
+~/.local/bin/distrobox enter gracemo-harmonic -- bash -c "
+    source /opt/ros/humble/setup.bash
+    cd $WS_DIR
+    colcon build --symlink-install 2>&1 | tail -3
+    source $WS_DIR/install/setup.bash
+    python3 $DIR/scripts/embed_robot_world.py
+"
+
+# 3. Launch Gazebo Harmonic + ROS bridge inside distrobox
 echo "Launching Gazebo Harmonic..."
 ~/.local/bin/distrobox enter gracemo-harmonic -- bash -c "
     source /opt/ros/humble/setup.bash
