@@ -26,13 +26,13 @@ def generate_launch_description():
         DeclareLaunchArgument("use_sim_time", default_value="true", description="Use simulation clock"),
         SetEnvironmentVariable("GZ_SIM_RESOURCE_PATH", models_path),
 
-        # 1. Gazebo Harmonic (gz sim) with auto-run physics
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(pkg_ros_gz_sim, "launch", "gz_sim.launch.py")
             ),
             launch_arguments={
-                "gz_args": f"-r {world_file}"
+                "gz_args": f"-r {world_file}",
+                "gz_version": "8"          # Force Gazebo Harmonic (gz sim), not Fortress (ign gazebo)
             }.items()
         ),
 
