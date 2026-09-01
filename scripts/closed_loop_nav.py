@@ -18,12 +18,13 @@ import requests
 
 KERNEL_URL = "http://127.0.0.1:7780"
 
-# Spacious parking spots in front of room furniture (0.8m clearance)
+# Updated waypoints matching the 4-room apartment layout:
+# Doorways at X=±5.0 on hallway walls Y=±1.0
 ROOM_WAYPOINTS = {
-    "kitchen":  [(3.6, 0.0), (3.6, 1.8), (3.6, 2.8)],
-    "bedroom":  [(-2.3, 0.0), (-2.3, 1.8), (-3.8, 3.2)],
-    "living":   [(4.0, 0.0), (4.0, -1.8), (3.6, -3.0)],
-    "study":    [(-1.3, 0.0), (-1.3, -1.8), (-3.5, -3.0)],
+    "bedroom":  [(-5.0, 0.0), (-5.0, 1.5), (-5.0, 3.5)],
+    "study":    [(5.0, 0.0),  (5.0, 1.5),  (5.0, 3.5)],
+    "kitchen":  [(-5.0, 0.0), (-5.0, -1.5), (-5.0, -3.5)],
+    "living":   [(5.0, 0.0),  (5.0, -1.5),  (5.0, -3.5)],
     "hallway":  [(0.0, 0.0)]
 }
 
