@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 GRaCEmo ViRa — Real-Time Visual Perception, Navigation & Mission Control
-Dual Terminal + Video HUD Control | YOLO Vision | Room Cataloging | Voice Output
+Direct Gazebo Harmonic Transport (gz.transport13) + YOLO Detection + Dual Control + TTS
 """
 
 import os
@@ -18,11 +18,12 @@ import cv2
 os.environ["OPENCV_LOG_LEVEL"] = "OFF"
 os.environ["ORT_LOGGING_LEVEL"] = "3"
 
-import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import Image, LaserScan
-from geometry_msgs.msg import Twist
-from nav_msgs.msg import Odometry
+import gz.transport13 as gz_transport
+from gz.msgs10.image_pb2 import Image as GzImage
+from gz.msgs10.twist_pb2 import Twist as GzTwist
+from gz.msgs10.odometry_pb2 import Odometry as GzOdometry
+from gz.msgs10.laserscan_pb2 import LaserScan as GzLaserScan
+
 from ultralytics import YOLO
 from rich.console import Console
 from rich.panel import Panel
@@ -50,22 +51,10 @@ ROOM_WAYPOINTS = {
     "hallway":  [(0.0, 0.0)]
 }
 
-ROOM_SIGNATURES = {
-    "Master Bedroom": {"bed", "wardrobe", "pillow"},
-    "Kitchen & Dining": {"refrigerator", "dining_table", "table", "chair", "bottle", "cup"},
-    "Living Room": {"sofa", "couch", "tv", "bowl"},
-    "Home Study": {"bookshelf", "desk", "laptop", "book", "cardboard_box", "coke_can"}
-}
 
-
-class MissionVisualizerNode(Node):
+class MissionVisualizer:
     def __init__(self):
-        super().__init__("mission_visualizer_node")
-
-        self.cmd_pub = self.create_publisher(Twist, "/cmd_vel", 10)
-        self.image_sub = self.create_subscription(Image, "/camera/image_raw", self._on_image, 10)
-        self.odom_sub = self.create_subscription(Odometry, "/odom", self._on_odom, 10)
-        self.scan_sub = self.create_subscription(LaserScan, "/scan", self._on_scan, 10)
+        self.node = gz_transport.Node()
 
         # Load YOLO model
         model_path = str(ROOT / "yolo11n.pt") if (ROOT / "yolo11n.pt").exists() else "yolo11n.pt"
@@ -96,6 +85,14 @@ class MissionVisualizerNode(Node):
             "Home Study": set()
         }
 
+        # Subscriptions
+        self.node.subscribe(GzImage, "/camera/image_raw", self._on_image)
+        self.node.subscribe(GzOdometry, "/odom", self._on_odom)
+        self.node.subscribe(GzLaserScan, "/scan", self._on_scan)
+
+        # Publisher
+        self.cmd_pub = self.node.advertise("/cmd_vel", GzTwist)
+
         # TTS voice
         self.voice = None
         if VoiceAdapter:
@@ -104,26 +101,26 @@ class MissionVisualizerNode(Node):
             except Exception:
                 pass
 
-        # Timer for control loop (20Hz)
-        self.timer = self.create_timer(0.05, self._control_loop)
-        self.get_logger().info("🚀 Mission Visualizer & Perception Node Online.")
+        # Background control loop thread (20Hz)
+        self.running = True
+        self.control_thread = threading.Thread(target=self._control_loop, daemon=True)
+        self.control_thread.start()
+
+        console.print("[bold green]✓ Connected to Gazebo Harmonic via native gz.transport13[/bold green]")
 
     def speak(self, text: str):
         console.print(f"\n[bold cyan]🗣️ ViRa:[/bold cyan] [italic yellow]\"{text}\"[/italic yellow]")
         if self.voice:
             threading.Thread(target=self.voice.speak, args=(text,), daemon=True).start()
 
-    def _on_image(self, msg: Image):
+    def _on_image(self, msg: GzImage):
         try:
-            arr = np.frombuffer(msg.data, dtype=np.uint8).reshape((msg.height, msg.width, -1))
-            if msg.encoding in ("rgb8", "RGB8"):
-                frame = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
-            else:
-                frame = arr.copy()
+            arr = np.frombuffer(msg.data, dtype=np.uint8).reshape((msg.height, msg.width, 3))
+            frame = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
             self.latest_frame = frame
 
             # Run YOLO
-            results = self.yolo(frame, verbose=False, conf=0.30)
+            results = self.yolo(frame, verbose=False, conf=0.28)
             annotated = results[0].plot()
 
             # Extract detected classes
@@ -164,10 +161,11 @@ class MissionVisualizerNode(Node):
         except Exception:
             pass
 
-    def _on_odom(self, msg: Odometry):
-        self.cur_x = msg.pose.pose.position.x
-        self.cur_y = msg.pose.pose.position.y
-        q = msg.pose.pose.orientation
+    def _on_odom(self, msg: GzOdometry):
+        pos = msg.pose.position
+        self.cur_x = pos.x
+        self.cur_y = pos.y
+        q = msg.pose.orientation
         siny_cosp = 2 * (q.w * q.z + q.x * q.y)
         cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
         self.cur_yaw = math.atan2(siny_cosp, cosy_cosp)
@@ -181,9 +179,15 @@ class MissionVisualizerNode(Node):
         else:
             self.current_room_label = "Central Hallway"
 
-    def _on_scan(self, msg: LaserScan):
+    def _on_scan(self, msg: GzLaserScan):
         valid = [r for r in msg.ranges if not math.isnan(r) and r > 0.1]
         self.min_obstacle_dist = min(valid) if valid else 10.0
+
+    def publish_cmd(self, vx: float, wz: float):
+        twist = GzTwist()
+        twist.linear.x = float(vx)
+        twist.angular.z = float(wz)
+        self.cmd_pub.publish(twist)
 
     def navigate_to_room(self, room_name: str):
         key = room_name.lower().strip()
@@ -201,62 +205,60 @@ class MissionVisualizerNode(Node):
         return False
 
     def _control_loop(self):
-        if not self.has_odom or not self.navigating:
-            return
+        while self.running:
+            time.sleep(0.05)
+            if not self.has_odom or not self.navigating:
+                continue
 
-        # 1. Check if surveying room
-        if self.surveying:
-            twist = Twist()
-            twist.angular.z = 0.6  # Spin 360 deg
-            self.cmd_pub.publish(twist)
+            # 1. Check if surveying room
+            if self.surveying:
+                self.publish_cmd(0.0, 0.5)  # Spin 360 deg
 
-            # Check if full rotation completed (or 8s elapsed)
-            elapsed = time.time() - self.survey_start_time
-            if elapsed > 7.0:
-                self.surveying = False
-                self.navigating = False
-                twist.angular.z = 0.0
-                self.cmd_pub.publish(twist)
-                found = ", ".join(self.room_inventory.get(self.current_room_label, ["objects"])) or "various furniture"
-                console.print(f"[bold magenta]✓ [SURVEY COMPLETE] {self.current_room_label}: {found}[/bold magenta]")
-                self.speak(f"Inspection of {self.current_room_label} complete. I found: {found}.")
-            return
+                # Check if 7s elapsed for full rotation
+                elapsed = time.time() - self.survey_start_time
+                if elapsed > 7.0:
+                    self.surveying = False
+                    self.navigating = False
+                    self.publish_cmd(0.0, 0.0)
+                    found = ", ".join(self.room_inventory.get(self.current_room_label, ["objects"])) or "various furniture"
+                    console.print(f"[bold magenta]✓ [SURVEY COMPLETE] {self.current_room_label}: {found}[/bold magenta]")
+                    self.speak(f"Inspection of {self.current_room_label} complete. I found: {found}.")
+                continue
 
-        # 2. Reached all waypoints?
-        if self.wp_idx >= len(self.active_waypoints):
-            self.surveying = True
-            self.survey_start_yaw = self.cur_yaw
-            self.survey_start_time = time.time()
-            console.print(f"[bold magenta]📍 [ARRIVED] Reached {self.target_room.upper()} center. Initiating 360 survey...[/bold magenta]")
-            self.speak(f"Arrived at {self.target_room.title()}. Starting visual survey.")
-            return
+            # 2. Reached all waypoints?
+            if self.wp_idx >= len(self.active_waypoints):
+                self.surveying = True
+                self.survey_start_yaw = self.cur_yaw
+                self.survey_start_time = time.time()
+                console.print(f"[bold magenta]📍 [ARRIVED] Reached {self.target_room.upper()} center. Initiating 360 survey...[/bold magenta]")
+                self.speak(f"Arrived at {self.target_room.title()}. Starting visual survey.")
+                continue
 
-        # 3. Drive towards current waypoint
-        tx, ty = self.active_waypoints[self.wp_idx]
-        dx = tx - self.cur_x
-        dy = ty - self.cur_y
-        dist = math.hypot(dx, dy)
+            # 3. Drive towards current waypoint
+            tx, ty = self.active_waypoints[self.wp_idx]
+            dx = tx - self.cur_x
+            dy = ty - self.cur_y
+            dist = math.hypot(dx, dy)
 
-        if dist < 0.40:
-            self.wp_idx += 1
-            return
+            if dist < 0.40:
+                self.wp_idx += 1
+                continue
 
-        target_yaw = math.atan2(dy, dx)
-        angle_err = target_yaw - self.cur_yaw
-        while angle_err > math.pi:
-            angle_err -= 2 * math.pi
-        while angle_err < -math.pi:
-            angle_err += 2 * math.pi
+            target_yaw = math.atan2(dy, dx)
+            angle_err = target_yaw - self.cur_yaw
+            while angle_err > math.pi:
+                angle_err -= 2 * math.pi
+            while angle_err < -math.pi:
+                angle_err += 2 * math.pi
 
-        twist = Twist()
-        if abs(angle_err) > 0.4:
-            twist.angular.z = max(-1.2, min(1.2, 2.5 * angle_err))
-            twist.linear.x = 0.08
-        else:
-            twist.linear.x = min(0.50, 0.7 * dist)
-            twist.angular.z = 1.4 * angle_err
+            if abs(angle_err) > 0.4:
+                wz = max(-1.2, min(1.2, 2.5 * angle_err))
+                vx = 0.08
+            else:
+                vx = min(0.50, 0.7 * dist)
+                wz = 1.4 * angle_err
 
-        self.cmd_pub.publish(twist)
+            self.publish_cmd(vx, wz)
 
 
 def print_help():
@@ -274,12 +276,7 @@ def print_help():
 
 
 def main():
-    rclpy.init()
-    node = MissionVisualizerNode()
-
-    # Spin ROS 2 in background thread
-    spin_thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
-    spin_thread.start()
+    vis = MissionVisualizer()
 
     console.print(Panel.fit(
         "[bold cyan]GRaCEmo ViRa — Real-Time Mission Visualizer & Control Online[/bold cyan]\n"
@@ -288,9 +285,8 @@ def main():
     ))
     print_help()
 
-    # Create dummy black frame if camera not yet arrived
     placeholder = np.zeros((480, 640, 3), dtype=np.uint8)
-    cv2.putText(placeholder, "Connecting to /camera/image_raw...", (60, 240), cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 200, 255), 1)
+    cv2.putText(placeholder, "Connecting to Gazebo Harmonic Camera...", (40, 240), cv2.FONT_HERSHEY_DUPLEX, 0.7, (0, 200, 255), 1)
 
     gui_available = True
     try:
@@ -304,12 +300,10 @@ def main():
     patrol_idx = 0
     auto_tour = False
 
-    running = True
-
     # Dedicated thread for Terminal Input
     def terminal_input_loop():
-        nonlocal auto_tour, patrol_idx, running
-        while running and rclpy.ok():
+        nonlocal auto_tour, patrol_idx
+        while vis.running:
             try:
                 line = sys.stdin.readline()
                 if not line:
@@ -319,33 +313,32 @@ def main():
                     continue
 
                 if cmd in ("q", "quit", "exit"):
-                    running = False
+                    vis.running = False
                     break
                 elif cmd in ("1", "bedroom"):
                     auto_tour = False
-                    node.navigate_to_room("bedroom")
+                    vis.navigate_to_room("bedroom")
                 elif cmd in ("2", "study"):
                     auto_tour = False
-                    node.navigate_to_room("study")
+                    vis.navigate_to_room("study")
                 elif cmd in ("3", "living", "living room"):
                     auto_tour = False
-                    node.navigate_to_room("living")
+                    vis.navigate_to_room("living")
                 elif cmd in ("4", "kitchen"):
                     auto_tour = False
-                    node.navigate_to_room("kitchen")
+                    vis.navigate_to_room("kitchen")
                 elif cmd in ("h", "hallway"):
                     auto_tour = False
-                    node.navigate_to_room("hallway")
+                    vis.navigate_to_room("hallway")
                 elif cmd in ("a", "auto", "tour"):
                     auto_tour = True
                     patrol_idx = 0
-                    node.navigate_to_room(patrol_order[patrol_idx])
-                    node.speak("Starting full autonomous apartment tour.")
+                    vis.navigate_to_room(patrol_order[patrol_idx])
+                    vis.speak("Starting full autonomous apartment tour.")
                 elif cmd in ("help", "?"):
                     print_help()
                 else:
-                    # Generic room match
-                    if not node.navigate_to_room(cmd):
+                    if not vis.navigate_to_room(cmd):
                         console.print(f"[dim]Type 'help' for command list.[/dim]")
             except Exception:
                 break
@@ -354,57 +347,56 @@ def main():
     input_thread.start()
 
     try:
-        while running and rclpy.ok():
+        while vis.running:
             # 1. Update Video GUI if available
             if gui_available:
-                frame_to_show = node.annotated_frame if node.annotated_frame is not None else placeholder
+                frame_to_show = vis.annotated_frame if vis.annotated_frame is not None else placeholder
                 try:
                     cv2.imshow("GRaCEmo ViRa — Live Vision HUD", frame_to_show)
                     key = cv2.waitKey(30) & 0xFF
                     if key == ord('q') or key == 27:
-                        running = False
+                        vis.running = False
                         break
                     elif key == ord('1'):
                         auto_tour = False
-                        node.navigate_to_room("bedroom")
+                        vis.navigate_to_room("bedroom")
                     elif key == ord('2'):
                         auto_tour = False
-                        node.navigate_to_room("study")
+                        vis.navigate_to_room("study")
                     elif key == ord('3'):
                         auto_tour = False
-                        node.navigate_to_room("living")
+                        vis.navigate_to_room("living")
                     elif key == ord('4'):
                         auto_tour = False
-                        node.navigate_to_room("kitchen")
+                        vis.navigate_to_room("kitchen")
                     elif key == ord('h') or key == ord('H'):
                         auto_tour = False
-                        node.navigate_to_room("hallway")
+                        vis.navigate_to_room("hallway")
                     elif key == ord('a') or key == ord('A'):
                         auto_tour = True
                         patrol_idx = 0
-                        node.navigate_to_room(patrol_order[patrol_idx])
-                        node.speak("Starting full autonomous apartment tour.")
+                        vis.navigate_to_room(patrol_order[patrol_idx])
+                        vis.speak("Starting full autonomous apartment tour.")
                 except Exception:
                     gui_available = False
             else:
                 time.sleep(0.05)
 
             # 2. Auto tour progression
-            if auto_tour and not node.navigating and not node.surveying:
+            if auto_tour and not vis.navigating and not vis.surveying:
                 patrol_idx += 1
                 if patrol_idx < len(patrol_order):
                     time.sleep(1.0)
-                    node.navigate_to_room(patrol_order[patrol_idx])
+                    vis.navigate_to_room(patrol_order[patrol_idx])
                 else:
                     auto_tour = False
-                    node.speak("Full apartment tour complete. All 4 rooms cataloged.")
+                    vis.speak("Full apartment tour complete. All 4 rooms cataloged.")
 
     finally:
+        vis.running = False
+        vis.publish_cmd(0.0, 0.0)
         if gui_available:
             cv2.destroyAllWindows()
-        node.cmd_pub.publish(Twist())
-        node.destroy_node()
-        rclpy.shutdown()
 
 
 if __name__ == "__main__":
