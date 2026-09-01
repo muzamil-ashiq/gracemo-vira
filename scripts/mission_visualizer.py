@@ -181,11 +181,11 @@ class MissionVisualizer:
 
     def _on_scan(self, msg: GzLaserScan):
         # Scan range is -pi to +pi (360 samples). Center index (180) is straight ahead (0 deg).
-        # Only inspect front cone (-25 deg to +25 deg: indices 155 to 205)
+        # Inspect wide front cone (-65 deg to +65 deg: indices 115 to 245)
         n = len(msg.ranges)
         if n >= 360:
             mid = n // 2
-            front_span = int(n * (25.0 / 360.0))
+            front_span = int(n * (65.0 / 360.0))
             front_ranges = [msg.ranges[i] for i in range(mid - front_span, mid + front_span + 1)]
         else:
             front_ranges = list(msg.ranges)
@@ -229,12 +229,12 @@ class MissionVisualizer:
         elif target_room == "hallway":
             waypoints.append((0.0, 0.0))
 
-        # Deduplicate consecutive waypoints within 0.35m
+        # Deduplicate consecutive waypoints within 0.25m
         clean_wps = []
         for wp in waypoints:
             if not clean_wps:
                 clean_wps.append(wp)
-            elif math.hypot(wp[0] - clean_wps[-1][0], wp[1] - clean_wps[-1][1]) > 0.35:
+            elif math.hypot(wp[0] - clean_wps[-1][0], wp[1] - clean_wps[-1][1]) > 0.25:
                 clean_wps.append(wp)
 
         return clean_wps
@@ -284,7 +284,7 @@ class MissionVisualizer:
                     self.speak(f"Inspection of {self.current_room_label} complete. I found: {found}.")
                 continue
 
-            # 2. Check Waypoint Reached
+            # 2. Check All Waypoints Reached
             if self.wp_idx >= len(self.active_waypoints):
                 self.surveying = True
                 self.survey_start_time = time.time()
@@ -299,9 +299,9 @@ class MissionVisualizer:
             dy = ty - self.cur_y
             dist = math.hypot(dx, dy)
 
-            # Waypoint reached tolerance (0.55m for intermediate, 0.40m for final)
+            # Strict Waypoint Reach Tolerance (0.28m for doorways, 0.35m for final target)
             is_final_wp = (self.wp_idx == len(self.active_waypoints) - 1)
-            reach_radius = 0.40 if is_final_wp else 0.55
+            reach_radius = 0.35 if is_final_wp else 0.28
 
             if dist < reach_radius:
                 console.print(f"[green]  ✓ Waypoint {self.wp_idx+1}/{len(self.active_waypoints)} reached ({tx:.1f}, {ty:.1f})[/green]")
@@ -315,29 +315,29 @@ class MissionVisualizer:
             while alpha < -math.pi:
                 alpha += 2 * math.pi
 
-            # Regulated Pure Pursuit Controller
-            # 1. Front Obstacle Safety Recovery
-            if self.min_obstacle_dist < 0.28:
-                vx = -0.20
-                wz = 0.40 if alpha > 0 else -0.40
+            # Mathematically Clean Regulated Pure Pursuit Controller
+            # Mode 1: Proximity Wall Safety Backup
+            if self.min_obstacle_dist < 0.22:
+                vx = -0.18
+                wz = 0.0
                 phase = "BACKUP"
+            # Mode 2: Strict Orientation Gating (vx = 0 while turning in place)
+            elif abs(alpha) > math.radians(20):
+                vx = 0.0
+                wz = float(np.clip(1.5 * alpha, -1.0, 1.0))
+                phase = "ALIGN"
+            # Mode 3: Clean Pure Pursuit Arc Driving (Aligned within 20 deg)
             else:
-                # Unified Continuous Regulated Pure Pursuit:
-                # Forward speed smoothly scales with cosine alignment — zero mode-switching oscillation!
-                alignment = max(0.0, math.cos(alpha))
-                v_max = min(0.35, max(0.12, 0.45 * dist))
-                
-                # Proximity speed regulation
-                if self.min_obstacle_dist < 0.55:
+                lookahead = max(0.60, min(1.5, dist))
+                v_max = min(0.38, max(0.12, 0.45 * dist))
+
+                if self.min_obstacle_dist < 0.50:
                     v_max = min(v_max, 0.16)
 
-                vx = v_max * (alignment ** 2)
-
-                # Smooth curvature steering with proportional heading correction
-                lookahead = max(0.50, min(1.2, dist))
                 curvature = 2.0 * math.sin(alpha) / lookahead
-                wz = float(np.clip(vx * curvature + 1.1 * alpha, -0.65, 0.65))
-                phase = "DRIVE" if alignment > 0.7 else "ORIENT"
+                vx = v_max * max(0.4, math.cos(alpha))
+                wz = float(np.clip(vx * curvature, -0.75, 0.75))
+                phase = "PURSUIT"
 
             self.publish_cmd(vx, wz)
 

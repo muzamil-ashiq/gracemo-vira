@@ -122,19 +122,19 @@
   <xacro:wheel prefix="right" y_offset="${-wheelbase/2.0}" />
 
   <!-- ======================================================================== -->
-  <!-- Support Casters (Elevated 6mm clearance so drive wheels carry 100% load)  -->
+  <!-- Support Casters (Exact ground tangent frictionless gliders)              -->
   <!-- ======================================================================== -->
   <xacro:macro name="caster" params="prefix x_offset">
     <link name="${prefix}_caster_link">
       <visual>
         <geometry>
-          <sphere radius="0.020" />
+          <sphere radius="0.025" />
         </geometry>
         <material name="metallic_silver" />
       </visual>
       <collision>
         <geometry>
-          <sphere radius="0.020" />
+          <sphere radius="0.025" />
         </geometry>
       </collision>
       <inertial>
@@ -146,14 +146,15 @@
     <joint name="${prefix}_caster_joint" type="fixed">
       <parent link="base_link" />
       <child link="${prefix}_caster_link" />
-      <origin xyz="${x_offset} 0 ${-wheel_radius + 0.026}" rpy="0 0 0" />
+      <origin xyz="${x_offset} 0 ${-wheel_radius + 0.025}" rpy="0 0 0" />
     </joint>
 
     <gazebo reference="${prefix}_caster_link">
       <mu1>0.0</mu1>
       <mu2>0.0</mu2>
       <kp>100000.0</kp>
-      <kd>1.0</kd>
+      <kd>10.0</kd>
+      <minDepth>0.001</minDepth>
       <material>Gazebo/Grey</material>
     </gazebo>
   </xacro:macro>
