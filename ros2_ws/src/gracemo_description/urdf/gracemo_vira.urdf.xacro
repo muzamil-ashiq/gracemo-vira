@@ -53,23 +53,23 @@
       <material name="dark_grey" />
     </visual>
 
-    <!-- Collision Box: Sized narrower than wheelbase so wheels NEVER intersect -->
     <collision>
       <origin xyz="0 0 ${chassis_height/2.0 + 0.01}" rpy="0 0 0" />
       <geometry>
-        <box size="0.26 0.22 ${chassis_height}" />
+        <box size="0.24 0.20 ${chassis_height}" />
       </geometry>
     </collision>
 
+    <!-- Heavy low base mass to keep wheels firmly planted with high traction -->
     <inertial>
-      <origin xyz="0 0 ${chassis_height/2.0}" rpy="0 0 0" />
-      <mass value="5.0" />
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <mass value="8.0" />
       <inertia ixx="0.04" ixy="0.0" ixz="0.0" iyy="0.04" iyz="0.0" izz="0.06" />
     </inertial>
   </link>
 
   <!-- ======================================================================== -->
-  <!-- Drive Wheels (Left & Right - Fully Cleared from Chassis Collision)        -->
+  <!-- Drive Wheels (High Grip & Smooth Rolling)                                -->
   <!-- ======================================================================== -->
   <xacro:macro name="wheel" params="prefix y_offset">
     <link name="${prefix}_wheel_link">
@@ -94,7 +94,7 @@
         </geometry>
       </collision>
       <inertial>
-        <mass value="0.5" />
+        <mass value="0.8" />
         <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
       </inertial>
     </link>
@@ -104,15 +104,16 @@
       <child link="${prefix}_wheel_link" />
       <origin xyz="0 ${y_offset} 0" rpy="0 0 0" />
       <axis xyz="0 1 0" />
-      <limit effort="40.0" velocity="15.0" />
-      <dynamics damping="0.05" friction="0.05" />
+      <limit effort="50.0" velocity="20.0" />
+      <dynamics damping="0.02" friction="0.02" />
     </joint>
 
     <gazebo reference="${prefix}_wheel_link">
-      <mu1>1.2</mu1>
-      <mu2>1.2</mu2>
+      <mu1>50.0</mu1>
+      <mu2>50.0</mu2>
       <kp>1000000.0</kp>
-      <kd>100.0</kd>
+      <kd>10.0</kd>
+      <minDepth>0.001</minDepth>
       <material>Gazebo/DarkGrey</material>
     </gazebo>
   </xacro:macro>
@@ -121,38 +122,38 @@
   <xacro:wheel prefix="right" y_offset="${-wheelbase/2.0}" />
 
   <!-- ======================================================================== -->
-  <!-- Support Casters (Front & Rear Frictionless Spheres)                      -->
+  <!-- Support Casters (Elevated 6mm clearance so drive wheels carry 100% load)  -->
   <!-- ======================================================================== -->
   <xacro:macro name="caster" params="prefix x_offset">
     <link name="${prefix}_caster_link">
       <visual>
         <geometry>
-          <sphere radius="0.025" />
+          <sphere radius="0.020" />
         </geometry>
         <material name="metallic_silver" />
       </visual>
       <collision>
         <geometry>
-          <sphere radius="0.025" />
+          <sphere radius="0.020" />
         </geometry>
       </collision>
       <inertial>
-        <mass value="0.1" />
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
+        <mass value="0.05" />
+        <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
       </inertial>
     </link>
 
     <joint name="${prefix}_caster_joint" type="fixed">
       <parent link="base_link" />
       <child link="${prefix}_caster_link" />
-      <origin xyz="${x_offset} 0 ${-wheel_radius + 0.025}" rpy="0 0 0" />
+      <origin xyz="${x_offset} 0 ${-wheel_radius + 0.026}" rpy="0 0 0" />
     </joint>
 
     <gazebo reference="${prefix}_caster_link">
       <mu1>0.0</mu1>
       <mu2>0.0</mu2>
       <kp>100000.0</kp>
-      <kd>10.0</kd>
+      <kd>1.0</kd>
       <material>Gazebo/Grey</material>
     </gazebo>
   </xacro:macro>
@@ -179,9 +180,9 @@
       <material name="camera_lens_black" />
     </visual>
     <inertial>
-      <origin xyz="0 0 ${torso_height/2.0}" rpy="0 0 0" />
-      <mass value="2.0" />
-      <inertia ixx="0.02" ixy="0.0" ixz="0.0" iyy="0.02" iyz="0.0" izz="0.01" />
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <mass value="0.3" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
     </inertial>
   </link>
 
