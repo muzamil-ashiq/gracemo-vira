@@ -210,13 +210,11 @@ class MissionVisualizer:
             if not self.has_odom or not self.navigating:
                 continue
 
-            # 1. Check if surveying room
+            # 1. 360-Degree Visual Survey Mode
             if self.surveying:
-                self.publish_cmd(0.0, 0.5)  # Spin 360 deg
-
-                # Check if 7s elapsed for full rotation
+                self.publish_cmd(0.0, 0.40)  # Gentle 360 spin
                 elapsed = time.time() - self.survey_start_time
-                if elapsed > 7.0:
+                if elapsed > 8.0:
                     self.surveying = False
                     self.navigating = False
                     self.publish_cmd(0.0, 0.0)
@@ -225,22 +223,23 @@ class MissionVisualizer:
                     self.speak(f"Inspection of {self.current_room_label} complete. I found: {found}.")
                 continue
 
-            # 2. Reached all waypoints?
+            # 2. Check Waypoint Reached
             if self.wp_idx >= len(self.active_waypoints):
                 self.surveying = True
-                self.survey_start_yaw = self.cur_yaw
                 self.survey_start_time = time.time()
+                self.publish_cmd(0.0, 0.0)
                 console.print(f"[bold magenta]📍 [ARRIVED] Reached {self.target_room.upper()} center. Initiating 360 survey...[/bold magenta]")
                 self.speak(f"Arrived at {self.target_room.title()}. Starting visual survey.")
                 continue
 
-            # 3. Drive towards current waypoint
+            # 3. Target Waypoint Vector
             tx, ty = self.active_waypoints[self.wp_idx]
             dx = tx - self.cur_x
             dy = ty - self.cur_y
             dist = math.hypot(dx, dy)
 
-            if dist < 0.40:
+            # Waypoint reached tolerance
+            if dist < 0.45:
                 self.wp_idx += 1
                 continue
 
@@ -251,12 +250,15 @@ class MissionVisualizer:
             while angle_err < -math.pi:
                 angle_err += 2 * math.pi
 
-            if abs(angle_err) > 0.4:
-                wz = max(-1.2, min(1.2, 2.5 * angle_err))
-                vx = 0.08
+            # Two-Phase Stable Motion:
+            # Phase 1: Rotate on spot to align with target (heading error > 0.3 rad)
+            if abs(angle_err) > 0.30:
+                vx = 0.0
+                wz = np.clip(1.2 * angle_err, -0.65, 0.65)
             else:
-                vx = min(0.50, 0.7 * dist)
-                wz = 1.4 * angle_err
+                # Phase 2: Drive straight forward with gentle steering correction
+                vx = min(0.38, max(0.12, 0.5 * dist))
+                wz = 0.8 * angle_err
 
             self.publish_cmd(vx, wz)
 
@@ -335,6 +337,27 @@ def main():
                     patrol_idx = 0
                     vis.navigate_to_room(patrol_order[patrol_idx])
                     vis.speak("Starting full autonomous apartment tour.")
+                elif cmd in ("w", "forward"):
+                    vis.navigating = False
+                    vis.surveying = False
+                    vis.publish_cmd(0.35, 0.0)
+                elif cmd in ("s", "backward", "back"):
+                    vis.navigating = False
+                    vis.surveying = False
+                    vis.publish_cmd(-0.30, 0.0)
+                elif cmd in ("left",):
+                    vis.navigating = False
+                    vis.surveying = False
+                    vis.publish_cmd(0.0, 0.60)
+                elif cmd in ("right",):
+                    vis.navigating = False
+                    vis.surveying = False
+                    vis.publish_cmd(0.0, -0.60)
+                elif cmd in (" ", "stop", "x"):
+                    vis.navigating = False
+                    vis.surveying = False
+                    vis.publish_cmd(0.0, 0.0)
+                    console.print("[bold red]🛑 Emergency Stop applied.[/bold red]")
                 elif cmd in ("help", "?"):
                     print_help()
                 else:
@@ -372,6 +395,22 @@ def main():
                     elif key == ord('h') or key == ord('H'):
                         auto_tour = False
                         vis.navigate_to_room("hallway")
+                    elif key == ord('w') or key == ord('W'):
+                        vis.navigating = False
+                        vis.surveying = False
+                        vis.publish_cmd(0.35, 0.0)
+                    elif key == ord('s') or key == ord('S'):
+                        vis.navigating = False
+                        vis.surveying = False
+                        vis.publish_cmd(-0.30, 0.0)
+                    elif key == ord('d') or key == ord('D'):
+                        vis.navigating = False
+                        vis.surveying = False
+                        vis.publish_cmd(0.0, -0.60)
+                    elif key == ord(' '):
+                        vis.navigating = False
+                        vis.surveying = False
+                        vis.publish_cmd(0.0, 0.0)
                     elif key == ord('a') or key == ord('A'):
                         auto_tour = True
                         patrol_idx = 0
