@@ -13,10 +13,24 @@ echo "================================================================="
 echo "  GRaCEmo ViRa — Gazebo Harmonic 8 + ROS 2 Humble"
 echo "================================================================="
 
-# 1. Clean up stale Gazebo processes
+# 1. Kill ALL gz-sim processes everywhere (host + distrobox) to prevent
+#    zombie publishers from interfering with /odom and /cmd_vel topics
+echo "Cleaning up stale Gazebo processes..."
+pkill -9 -f "gz sim" 2>/dev/null || true
+pkill -9 -f "gz-sim" 2>/dev/null || true
+pkill -9 -f "ruby.*gz" 2>/dev/null || true
 ~/.local/bin/distrobox enter gracemo-harmonic -- bash -c \
-  "killall -9 gz-sim gz ruby kernel_bridge 2>/dev/null || true" \
+  "pkill -9 -f 'gz sim' 2>/dev/null; pkill -9 -f 'gz-sim' 2>/dev/null; killall -9 ruby 2>/dev/null; true" \
   >/dev/null 2>&1 || true
+sleep 1
+
+# Verify no stale gz-sim server is still running
+STALE=$(pgrep -c -f "gz sim server" 2>/dev/null || echo 0)
+if [ "$STALE" -gt 0 ]; then
+    echo "⚠️  WARNING: $STALE stale gz-sim server(s) still running, force killing..."
+    pkill -9 -f "gz sim server" 2>/dev/null || true
+    sleep 1
+fi
 
 # 2. Build workspace and update embedded robot
 echo "Building ROS 2 workspace..."
