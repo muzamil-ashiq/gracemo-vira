@@ -453,10 +453,15 @@ function showView(name) {
     if (title) title.textContent = titles[name] || 'Panel';
     body.appendChild(tpl);
     overlay.hidden = false;
-    overlay.classList.add('is-open');
     const gridChk = document.getElementById('chk-debug-grid');
     if (gridChk && window.GraceGazebo) {
-      gridChk.onchange = () => window.GraceGazebo.setDebugGrid(gridChk.checked);
+      const saved = localStorage.getItem('graceemo_debug_grid');
+      gridChk.checked = saved !== null ? saved === '1' : true;
+      window.GraceGazebo.setDebugGrid(gridChk.checked);
+      gridChk.onchange = () => {
+        window.GraceGazebo.setDebugGrid(gridChk.checked);
+        localStorage.setItem('graceemo_debug_grid', gridChk.checked ? '1' : '0');
+      };
     }
   }
 }
@@ -718,6 +723,10 @@ function initUi() {
     delete keys[e.key.toLowerCase()];
     if (Object.keys(keys).length === 0) sendTeleop(0, 0);
   });
+
+  const savedGrid = localStorage.getItem('graceemo_debug_grid');
+  const showGrid = savedGrid !== null ? savedGrid === '1' : true;
+  if (window.GraceGazebo) window.GraceGazebo.setDebugGrid(showGrid);
 
   tickHud();
   setInterval(tickHud, 1000);

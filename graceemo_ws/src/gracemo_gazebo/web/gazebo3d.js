@@ -116,7 +116,7 @@ window.GraceGazebo = (function () {
 
   const grid = new THREE.GridHelper(200, 40, 0xd7e4c8, 0x8faf7a);
   grid.position.y = 0.02;
-  grid.visible = false;
+  grid.visible = true;
   scene.add(grid);
 
   const asphaltTex = makeCanvasTexture((ctx, w, h) => {
