@@ -31,7 +31,11 @@ from rich.live import Live
 console = Console(highlight=False)
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "adapters" / "voice"))
+for adapter_sub in ["sdk", "vision", "voice", "brain"]:
+    p = str(ROOT / "adapters" / adapter_sub)
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 try:
     from gracemo_voice.audio_engine import VoiceAdapter
 except Exception:
