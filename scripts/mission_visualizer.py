@@ -311,40 +311,55 @@ class MissionVisualizer:
             dy = ty - self.cur_y
             dist = math.hypot(dx, dy)
 
-            # Waypoint reached tolerance (0.55m)
-            if dist < 0.55:
+            # Waypoint reached tolerance (0.55m for intermediate, 0.40m for final)
+            is_final_wp = (self.wp_idx == len(self.active_waypoints) - 1)
+            reach_radius = 0.40 if is_final_wp else 0.55
+
+            if dist < reach_radius:
                 console.print(f"[green]  ✓ Waypoint {self.wp_idx+1}/{len(self.active_waypoints)} reached ({tx:.1f}, {ty:.1f})[/green]")
                 self.wp_idx += 1
                 continue
 
             target_yaw = math.atan2(dy, dx)
-            angle_err = target_yaw - self.cur_yaw
-            while angle_err > math.pi:
-                angle_err -= 2 * math.pi
-            while angle_err < -math.pi:
-                angle_err += 2 * math.pi
+            alpha = target_yaw - self.cur_yaw
+            while alpha > math.pi:
+                alpha -= 2 * math.pi
+            while alpha < -math.pi:
+                alpha += 2 * math.pi
 
-            # Obstacle & Wall Proximity Recovery:
-            # If directly against a wall (front obstacle < 0.28m), back up smoothly
+            # Regulated Pure Pursuit Controller
+            # 1. Front Obstacle Safety Recovery
             if self.min_obstacle_dist < 0.28:
-                vx = -0.22
-                wz = 0.40 if angle_err > 0 else -0.40
+                vx = -0.20
+                wz = 0.40 if alpha > 0 else -0.40
+                phase = "BACKUP"
+            # 2. Large Heading Error: Pivot on the spot
+            elif abs(alpha) > math.radians(40):
+                vx = 0.0
+                wz = 0.65 if alpha > 0 else -0.65
+                phase = "ALIGN"
+            # 3. Aligned: Smooth Curvature Arc Drive
             else:
-                # Smooth Pure Pursuit Motion:
-                # Linear velocity scales with alignment and distance
-                alignment_factor = max(0.0, math.cos(angle_err))
-                v_max = min(0.36, max(0.12, 0.45 * dist))
-                vx = v_max * (alignment_factor ** 1.5)
-                wz = float(np.clip(1.3 * angle_err, -0.65, 0.65))
+                lookahead = max(0.45, min(1.2, dist))
+                v_max = min(0.35, max(0.12, 0.45 * dist))
+                
+                # Slow down if approaching obstacles ahead
+                if self.min_obstacle_dist < 0.60:
+                    v_max = min(v_max, 0.18)
+                    
+                curvature = 2.0 * math.sin(alpha) / lookahead
+                vx = v_max * max(0.2, math.cos(alpha))
+                wz = float(np.clip(vx * curvature + 0.3 * alpha, -0.75, 0.75))
+                phase = "PURSUIT"
 
             self.publish_cmd(vx, wz)
 
             # Print navigation status every 1 second (20 ticks)
             if log_tick % 20 == 0:
                 console.print(
-                    f"[dim]  NAV wp={self.wp_idx+1}/{len(self.active_waypoints)} "
+                    f"[dim]  NAV [{phase}] wp={self.wp_idx+1}/{len(self.active_waypoints)} "
                     f"pos=({self.cur_x:+.1f},{self.cur_y:+.1f}) → target=({tx:.1f},{ty:.1f}) "
-                    f"dist={dist:.1f}m err={math.degrees(angle_err):+.0f}° "
+                    f"dist={dist:.1f}m err={math.degrees(alpha):+.0f}° "
                     f"cmd=(vx={vx:.2f}, wz={wz:.2f}) obs={self.min_obstacle_dist:.1f}m[/dim]"
                 )
 

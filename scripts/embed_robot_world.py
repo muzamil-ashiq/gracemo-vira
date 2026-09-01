@@ -20,8 +20,8 @@ with open(world_file, "r") as f:
     world_content = f.read()
 
 # Clean out any old robot models and comments
+world_content = re.sub(r'\s*<!--\s*={5,}.*?ROBOT MODEL.*?={5,}\s*-->', '', world_content, flags=re.DOTALL)
 world_content = re.sub(r'\s*<!--\s*🤖\s*GRaCEmo ViRa ROBOT MODEL\s*-->', '', world_content)
-world_content = re.sub(r'\s*<!--\s*ROBOT MODEL\s*-->', '', world_content)
 world_content = re.sub(r'\s*<model name=[\'"]gracemo_vira[\'"]>.*?</model>', '', world_content, flags=re.DOTALL)
 
 # Default 3D perspective camera looking at the hallway robot
