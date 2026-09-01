@@ -324,18 +324,18 @@ class MissionVisualizer:
             while angle_err < -math.pi:
                 angle_err += 2 * math.pi
 
-            # Continuous Smooth Cosine-Weighted Controller:
-            # - Smoothly slows down linear speed if heading error is large
-            # - Smoothly accelerates forward as robot points toward target
-            # - No hard if/else threshold chattering!
-            alignment_factor = max(0.0, math.cos(angle_err))
-            v_max = min(0.35, max(0.12, 0.45 * dist))
-            vx = v_max * (alignment_factor ** 2)
-            wz = float(np.clip(1.2 * angle_err, -0.65, 0.65))
-
-            # Obstacle safety slowdown from LiDAR
-            if self.min_obstacle_dist < 0.45:
-                vx = min(vx, 0.06)
+            # Obstacle & Wall Proximity Recovery:
+            # If directly against a wall (front obstacle < 0.28m), back up smoothly
+            if self.min_obstacle_dist < 0.28:
+                vx = -0.22
+                wz = 0.40 if angle_err > 0 else -0.40
+            else:
+                # Smooth Pure Pursuit Motion:
+                # Linear velocity scales with alignment and distance
+                alignment_factor = max(0.0, math.cos(angle_err))
+                v_max = min(0.36, max(0.12, 0.45 * dist))
+                vx = v_max * (alignment_factor ** 1.5)
+                wz = float(np.clip(1.3 * angle_err, -0.65, 0.65))
 
             self.publish_cmd(vx, wz)
 
