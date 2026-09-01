@@ -205,10 +205,13 @@ class MissionVisualizer:
         return False
 
     def _control_loop(self):
+        log_tick = 0
         while self.running:
             time.sleep(0.05)
             if not self.has_odom or not self.navigating:
                 continue
+
+            log_tick += 1
 
             # 1. 360-Degree Visual Survey Mode
             if self.surveying:
@@ -238,8 +241,9 @@ class MissionVisualizer:
             dy = ty - self.cur_y
             dist = math.hypot(dx, dy)
 
-            # Waypoint reached tolerance
-            if dist < 0.45:
+            # Waypoint reached tolerance (0.55m)
+            if dist < 0.55:
+                console.print(f"[green]  ✓ Waypoint {self.wp_idx+1}/{len(self.active_waypoints)} reached ({tx:.1f}, {ty:.1f})[/green]")
                 self.wp_idx += 1
                 continue
 
@@ -250,17 +254,29 @@ class MissionVisualizer:
             while angle_err < -math.pi:
                 angle_err += 2 * math.pi
 
-            # Two-Phase Stable Motion:
-            # Phase 1: Rotate on spot to align with target (heading error > 0.3 rad)
-            if abs(angle_err) > 0.30:
-                vx = 0.0
-                wz = np.clip(1.2 * angle_err, -0.65, 0.65)
-            else:
-                # Phase 2: Drive straight forward with gentle steering correction
-                vx = min(0.38, max(0.12, 0.5 * dist))
-                wz = 0.8 * angle_err
+            # Continuous Smooth Cosine-Weighted Controller:
+            # - Smoothly slows down linear speed if heading error is large
+            # - Smoothly accelerates forward as robot points toward target
+            # - No hard if/else threshold chattering!
+            alignment_factor = max(0.0, math.cos(angle_err))
+            v_max = min(0.35, max(0.12, 0.45 * dist))
+            vx = v_max * (alignment_factor ** 2)
+            wz = float(np.clip(1.2 * angle_err, -0.65, 0.65))
+
+            # Obstacle safety slowdown from LiDAR
+            if self.min_obstacle_dist < 0.45:
+                vx = min(vx, 0.06)
 
             self.publish_cmd(vx, wz)
+
+            # Print navigation status every 1 second (20 ticks)
+            if log_tick % 20 == 0:
+                console.print(
+                    f"[dim]  NAV wp={self.wp_idx+1}/{len(self.active_waypoints)} "
+                    f"pos=({self.cur_x:+.1f},{self.cur_y:+.1f}) → target=({tx:.1f},{ty:.1f}) "
+                    f"dist={dist:.1f}m err={math.degrees(angle_err):+.0f}° "
+                    f"cmd=(vx={vx:.2f}, wz={wz:.2f}) obs={self.min_obstacle_dist:.1f}m[/dim]"
+                )
 
 
 def print_help():
