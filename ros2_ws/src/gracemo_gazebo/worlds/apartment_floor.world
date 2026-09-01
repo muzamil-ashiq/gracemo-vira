@@ -313,34 +313,41 @@
       <!-- =====================================================================
          🤖 GRaCEmo ViRa ROBOT MODEL
          ===================================================================== -->
+
+      <!-- =====================================================================
+         🤖 GRaCEmo ViRa ROBOT MODEL
+         ===================================================================== -->
+
+      <!-- =====================================================================
+         🤖 GRaCEmo ViRa ROBOT MODEL
+         ===================================================================== -->
     <model name='gracemo_vira'>
     <link name='base_footprint'>
       <inertial>
-        <pose>-0.0035968379446640322 0 0.27562450592885379 0 0 0</pose>
-        <mass>12.65</mass>
+        <pose>-0.0027058823529411751 0 0.25017647058823528 0 0 0</pose>
+        <mass>8.5</mass>
         <inertia>
-          <ixx>0.50059346640316216</ixx>
-          <ixy>0</ixy>
-          <ixz>0.01397658498023715</ixz>
-          <iyy>0.48566121027667969</iyy>
+          <ixx>0.30760263529411758</ixx>
+          <ixy>-1.084202172485504e-19</ixy>
+          <ixz>0.0089209411764705881</ixz>
+          <iyy>0.30579999999999979</iyy>
           <iyz>0</iyz>
-          <izz>0.17725494387351781</izz>
+          <izz>0.08935816470588237</izz>
         </inertia>
       </inertial>
       <collision name='base_footprint_fixed_joint_lump__base_link_collision'>
-        <pose>0 0 0.13500000000000001 0 0 0</pose>
+        <pose>0 0 0.14499999999999999 0 0 0</pose>
         <geometry>
-          <cylinder>
-            <length>0.14000000000000001</length>
-            <radius>0.20000000000000001</radius>
-          </cylinder>
+          <box>
+            <size>0.26000000000000001 0.22 0.14000000000000001</size>
+          </box>
         </geometry>
       </collision>
       <collision name='base_footprint_fixed_joint_lump__front_caster_link_collision_1'>
-        <pose>0.14000000000000001 0 0.032000000000000001 0 0 0</pose>
+        <pose>0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
         <geometry>
           <sphere>
-            <radius>0.029999999999999999</radius>
+            <radius>0.025000000000000001</radius>
           </sphere>
         </geometry>
         <surface>
@@ -358,28 +365,11 @@
           </friction>
         </surface>
       </collision>
-      <collision name='base_footprint_fixed_joint_lump__lidar_link_collision_2'>
-        <pose>0.13 0 0.22500000000000001 0 0 0</pose>
-        <geometry>
-          <cylinder>
-            <length>0.040000000000000001</length>
-            <radius>0.044999999999999998</radius>
-          </cylinder>
-        </geometry>
-        <surface>
-          <contact>
-            <ode/>
-          </contact>
-          <friction>
-            <ode/>
-          </friction>
-        </surface>
-      </collision>
-      <collision name='base_footprint_fixed_joint_lump__rear_caster_link_collision_3'>
-        <pose>-0.14000000000000001 0 0.032000000000000001 0 0 0</pose>
+      <collision name='base_footprint_fixed_joint_lump__rear_caster_link_collision_2'>
+        <pose>-0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
         <geometry>
           <sphere>
-            <radius>0.029999999999999999</radius>
+            <radius>0.025000000000000001</radius>
           </sphere>
         </geometry>
         <surface>
@@ -396,45 +386,13 @@
             </ode>
           </friction>
         </surface>
-      </collision>
-      <collision name='base_footprint_fixed_joint_lump__torso_link_collision_4'>
-        <pose>-0.02 0 0.40500000000000003 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.17999999999999999 0.22 0.40000000000000002</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name='base_footprint_fixed_joint_lump__head_link_collision_5'>
-        <pose>-0.01 0 0.69500000000000006 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.14000000000000001 0.16 0.11</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name='base_footprint_fixed_joint_lump__left_arm_link_collision_6'>
-        <pose>0 0.13200000000000001 0.41500000000000009 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.059999999999999998 0.044999999999999998 0.29999999999999999</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name='base_footprint_fixed_joint_lump__right_arm_link_collision_7'>
-        <pose>0 -0.13200000000000001 0.41500000000000009 0 0 0</pose>
-        <geometry>
-          <box>
-            <size>0.059999999999999998 0.044999999999999998 0.29999999999999999</size>
-          </box>
-        </geometry>
       </collision>
       <visual name='base_footprint_fixed_joint_lump__base_link_visual'>
         <pose>0 0 0.13500000000000001 0 0 0</pose>
         <geometry>
           <cylinder>
             <length>0.14000000000000001</length>
-            <radius>0.20000000000000001</radius>
+            <radius>0.19</radius>
           </cylinder>
         </geometry>
         <material>
@@ -447,7 +405,7 @@
         <geometry>
           <cylinder>
             <length>0.049000000000000002</length>
-            <radius>0.20499999999999999</radius>
+            <radius>0.19500000000000001</radius>
           </cylinder>
         </geometry>
         <material>
@@ -460,7 +418,7 @@
         <geometry>
           <cylinder>
             <length>0.01</length>
-            <radius>0.17999999999999999</radius>
+            <radius>0.17100000000000001</radius>
           </cylinder>
         </geometry>
         <material>
@@ -469,10 +427,10 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__front_caster_link_visual_3'>
-        <pose>0.14000000000000001 0 0.032000000000000001 0 0 0</pose>
+        <pose>0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
         <geometry>
           <sphere>
-            <radius>0.032000000000000001</radius>
+            <radius>0.025000000000000001</radius>
           </sphere>
         </geometry>
         <material>
@@ -485,7 +443,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_4'>
-        <pose>0.13 0 0.22 0 0 0</pose>
+        <pose>0.11 0 0.22 0 0 0</pose>
         <geometry>
           <cylinder>
             <length>0.029999999999999999</length>
@@ -498,7 +456,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_5'>
-        <pose>0.13 0 0.23699999999999999 0 0 0</pose>
+        <pose>0.11 0 0.23699999999999999 0 0 0</pose>
         <geometry>
           <cylinder>
             <length>0.014999999999999999</length>
@@ -511,10 +469,10 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__rear_caster_link_visual_6'>
-        <pose>-0.14000000000000001 0 0.032000000000000001 0 0 0</pose>
+        <pose>-0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
         <geometry>
           <sphere>
-            <radius>0.032000000000000001</radius>
+            <radius>0.025000000000000001</radius>
           </sphere>
         </geometry>
         <material>
@@ -530,7 +488,7 @@
         <pose>-0.02 0 0.40500000000000003 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.17999999999999999 0.22 0.40000000000000002</size>
+            <size>0.16 0.20000000000000001 0.40000000000000002</size>
           </box>
         </geometry>
         <material>
@@ -539,10 +497,10 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__torso_link_visual_8'>
-        <pose>0.073999999999999996 0 0.44500000000000001 0 0 0</pose>
+        <pose>0.064000000000000001 0 0.44500000000000001 0 0 0</pose>
         <geometry>
           <box>
-            <size>0.0060000000000000001 0.14000000000000001 0.12</size>
+            <size>0.0060000000000000001 0.13 0.11</size>
           </box>
         </geometry>
         <material>
@@ -555,7 +513,7 @@
         <geometry>
           <cylinder>
             <length>0.040000000000000001</length>
-            <radius>0.040000000000000001</radius>
+            <radius>0.035000000000000003</radius>
           </cylinder>
         </geometry>
         <material>
@@ -601,7 +559,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_13'>
-        <pose>-0.02 0.13200000000000001 0.47499999999999998 0 0 0</pose>
+        <pose>-0.02 0.122 0.47499999999999998 0 0 0</pose>
         <geometry>
           <box>
             <size>0.044999999999999998 0.035000000000000003 0.17999999999999999</size>
@@ -613,7 +571,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_14'>
-        <pose>0.005000000000000001 0.13200000000000001 0.35499999999999998 0 0.20000000000000004 0</pose>
+        <pose>0.005000000000000001 0.122 0.35499999999999998 0 0.20000000000000004 0</pose>
         <geometry>
           <box>
             <size>0.040000000000000001 0.029999999999999999 0.13</size>
@@ -625,7 +583,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_15'>
-        <pose>0.035000000000000003 0.13200000000000001 0.29499999999999998 0 0.20000000000000004 0</pose>
+        <pose>0.035000000000000003 0.122 0.29499999999999998 0 0.20000000000000004 0</pose>
         <geometry>
           <box>
             <size>0.029999999999999999 0.025000000000000001 0.02</size>
@@ -637,7 +595,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__right_arm_link_visual_16'>
-        <pose>-0.02 -0.13200000000000001 0.47499999999999998 0 0 0</pose>
+        <pose>-0.02 -0.122 0.47499999999999998 0 0 0</pose>
         <geometry>
           <box>
             <size>0.044999999999999998 0.035000000000000003 0.17999999999999999</size>
@@ -649,7 +607,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__right_arm_link_visual_17'>
-        <pose>0.005000000000000001 -0.13200000000000001 0.35499999999999998 0 0.20000000000000004 0</pose>
+        <pose>0.005000000000000001 -0.122 0.35499999999999998 0 0.20000000000000004 0</pose>
         <geometry>
           <box>
             <size>0.040000000000000001 0.029999999999999999 0.13</size>
@@ -661,7 +619,7 @@
         </material>
       </visual>
       <visual name='base_footprint_fixed_joint_lump__right_arm_link_visual_18'>
-        <pose>0.035000000000000003 -0.13200000000000001 0.29499999999999998 0 0.20000000000000004 0</pose>
+        <pose>0.035000000000000003 -0.122 0.29499999999999998 0 0.20000000000000004 0</pose>
         <geometry>
           <box>
             <size>0.029999999999999999 0.025000000000000001 0.02</size>
@@ -699,7 +657,7 @@
         </ray>
         <always_on>true</always_on>
         <visualize>true</visualize>
-        <pose>0.13 0 0.20499999999999999 0 0 0</pose>
+        <pose>0.11 0 0.20499999999999999 0 0 0</pose>
       </sensor>
       <sensor name='camera' type='camera'>
         <topic>/camera/image_raw</topic>
@@ -722,20 +680,20 @@
       </sensor>
     </link>
     <joint name='left_wheel_joint' type='revolute'>
-      <pose relative_to='base_footprint'>0 0.16 0.065000000000000002 0 0 0</pose>
+      <pose relative_to='base_footprint'>0 0.17000000000000001 0.065000000000000002 0 0 0</pose>
       <parent>base_footprint</parent>
       <child>left_wheel_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <effort>150</effort>
-          <velocity>20</velocity>
+          <effort>40</effort>
+          <velocity>15</velocity>
           <lower>-inf</lower>
           <upper>inf</upper>
         </limit>
         <dynamics>
-          <damping>0.10000000000000001</damping>
-          <friction>0.10000000000000001</friction>
+          <damping>0.050000000000000003</damping>
+          <friction>0.050000000000000003</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -745,32 +703,35 @@
       <pose relative_to='left_wheel_joint'>0 0 0 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>0.59999999999999998</mass>
+        <mass>0.5</mass>
         <inertia>
           <ixx>0.001</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyy>0.001</iyy>
           <iyz>0</iyz>
-          <izz>0.0015</izz>
+          <izz>0.001</izz>
         </inertia>
       </inertial>
       <collision name='left_wheel_link_collision'>
         <pose>0 0 0 1.5707963267948959 0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.035000000000000003</length>
+            <length>0.029999999999999999</length>
             <radius>0.065000000000000002</radius>
           </cylinder>
         </geometry>
         <surface>
           <contact>
-            <ode/>
+            <ode>
+              <kp>1000000</kp>
+              <kd>100</kd>
+            </ode>
           </contact>
           <friction>
             <ode>
-              <mu>1.5</mu>
-              <mu2>1.5</mu2>
+              <mu>1.2</mu>
+              <mu2>1.2</mu2>
             </ode>
           </friction>
         </surface>
@@ -779,7 +740,7 @@
         <pose>0 0 0 1.5707963267948959 0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.035000000000000003</length>
+            <length>0.029999999999999999</length>
             <radius>0.065000000000000002</radius>
           </cylinder>
         </geometry>
@@ -796,7 +757,7 @@
         <pose>0 0 0 1.5707963267948959 0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.037000000000000012</length>
+            <length>0.032000000000000001</length>
             <radius>0.039</radius>
           </cylinder>
         </geometry>
@@ -811,20 +772,20 @@
       </visual>
     </link>
     <joint name='right_wheel_joint' type='revolute'>
-      <pose relative_to='base_footprint'>0 -0.16 0.065000000000000002 0 0 0</pose>
+      <pose relative_to='base_footprint'>0 -0.17000000000000001 0.065000000000000002 0 0 0</pose>
       <parent>base_footprint</parent>
       <child>right_wheel_link</child>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <effort>150</effort>
-          <velocity>20</velocity>
+          <effort>40</effort>
+          <velocity>15</velocity>
           <lower>-inf</lower>
           <upper>inf</upper>
         </limit>
         <dynamics>
-          <damping>0.10000000000000001</damping>
-          <friction>0.10000000000000001</friction>
+          <damping>0.050000000000000003</damping>
+          <friction>0.050000000000000003</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
@@ -834,32 +795,35 @@
       <pose relative_to='right_wheel_joint'>0 0 0 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>0.59999999999999998</mass>
+        <mass>0.5</mass>
         <inertia>
           <ixx>0.001</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyy>0.001</iyy>
           <iyz>0</iyz>
-          <izz>0.0015</izz>
+          <izz>0.001</izz>
         </inertia>
       </inertial>
       <collision name='right_wheel_link_collision'>
         <pose>0 0 0 1.5707963267948959 0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.035000000000000003</length>
+            <length>0.029999999999999999</length>
             <radius>0.065000000000000002</radius>
           </cylinder>
         </geometry>
         <surface>
           <contact>
-            <ode/>
+            <ode>
+              <kp>1000000</kp>
+              <kd>100</kd>
+            </ode>
           </contact>
           <friction>
             <ode>
-              <mu>1.5</mu>
-              <mu2>1.5</mu2>
+              <mu>1.2</mu>
+              <mu2>1.2</mu2>
             </ode>
           </friction>
         </surface>
@@ -868,7 +832,7 @@
         <pose>0 0 0 1.5707963267948959 0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.035000000000000003</length>
+            <length>0.029999999999999999</length>
             <radius>0.065000000000000002</radius>
           </cylinder>
         </geometry>
@@ -885,7 +849,7 @@
         <pose>0 0 0 1.5707963267948959 0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.037000000000000012</length>
+            <length>0.032000000000000001</length>
             <radius>0.039</radius>
           </cylinder>
         </geometry>
@@ -919,8 +883,9 @@
       <child_frame_id>base_footprint</child_frame_id>
       <odom_publish_frequency>50</odom_publish_frequency>
     </plugin>
+    <self_collide>false</self_collide>
     <frame name='front_caster_joint' attached_to='base_link'>
-      <pose>0.14000000000000001 0 -0.033000000000000002 0 0 0</pose>
+      <pose>0.14000000000000001 0 -0.040000000000000001 0 0 0</pose>
     </frame>
     <frame name='front_caster_link' attached_to='front_caster_joint'>
       <pose>0 0 0 0 0 0</pose>
@@ -932,13 +897,13 @@
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='lidar_joint' attached_to='base_link'>
-      <pose>0.13 0 0.14000000000000001 0 0 0</pose>
+      <pose>0.11 0 0.14000000000000001 0 0 0</pose>
     </frame>
     <frame name='lidar_link' attached_to='lidar_joint'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='rear_caster_joint' attached_to='base_link'>
-      <pose>-0.14000000000000001 0 -0.033000000000000002 0 0 0</pose>
+      <pose>-0.14000000000000001 0 -0.040000000000000001 0 0 0</pose>
     </frame>
     <frame name='rear_caster_link' attached_to='rear_caster_joint'>
       <pose>0 0 0 0 0 0</pose>
@@ -962,13 +927,13 @@
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='left_arm_joint' attached_to='torso_link'>
-      <pose>0 0.13200000000000001 0.35999999999999999 0 0 0</pose>
+      <pose>0 0.122 0.35999999999999999 0 0 0</pose>
     </frame>
     <frame name='left_arm_link' attached_to='left_arm_joint'>
       <pose>0 0 0 0 0 0</pose>
     </frame>
     <frame name='right_arm_joint' attached_to='torso_link'>
-      <pose>0 -0.13200000000000001 0.35999999999999999 0 0 0</pose>
+      <pose>0 -0.122 0.35999999999999999 0 0 0</pose>
     </frame>
     <frame name='right_arm_link' attached_to='right_arm_joint'>
       <pose>0 0 0 0 0 0</pose>
