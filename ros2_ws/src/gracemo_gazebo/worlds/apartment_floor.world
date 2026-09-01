@@ -1,8 +1,12 @@
 <?xml version="1.0" ?>
 <!--
-  GRaCEmo ViRa — 4-Room Apartment Home Simulation
-  Meshes loaded via absolute file:// paths from local Fuel cache.
-  No internet required. All models pre-downloaded to ~/.ignition/fuel/
+  GRACEmo ViRa — Home Apartment Simulation
+  Layout: Central hallway (Y=-1 to Y=1) connecting 4 rooms:
+    Bedroom  (Top-Left)   X:-9 to  0,  Y: 1 to 7
+    Study    (Top-Right)  X: 0 to  9,  Y: 1 to 7
+    Kitchen  (Bot-Left)   X:-9 to  0,  Y:-7 to -1
+    Living   (Bot-Right)  X: 0 to  9,  Y:-7 to -1
+  Robot spawns in hallway at (0,0).
 -->
 <sdf version="1.6">
   <world name="gracemo_home">
@@ -23,282 +27,316 @@
       <render_engine>ogre2</render_engine>
     </plugin>
 
-    <!-- Camera starting view — angled top-down over the apartment -->
+    <scene>
+      <ambient>0.45 0.42 0.40 1</ambient>
+      <background>0.3 0.3 0.35 1</background>
+      <shadows>false</shadows>
+    </scene>
+
     <gui fullscreen="0">
       <camera name="user_camera">
-        <pose>0.0 -2.0 14.0 0 1.2 1.57</pose>
+        <pose>0.0 0.0 22.0 0 1.5 0</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
 
-    <scene>
-      <ambient>0.40 0.38 0.36 1</ambient>
-      <background>0.4 0.4 0.45 1</background>
-      <shadows>true</shadows>
-    </scene>
-
-    <!-- ===================== LIGHTING ===================================== -->
-
-
     <light type="directional" name="sun">
-      <cast_shadows>true</cast_shadows>
+      <cast_shadows>false</cast_shadows>
       <pose>0 0 20 0 0 0</pose>
-      <diffuse>0.85 0.85 0.80 1</diffuse>
-      <specular>0.2 0.2 0.2 1</specular>
-      <direction>-0.3 0.2 -0.9</direction>
-      <attenuation>
-        <range>1000</range><constant>0.9</constant>
-        <linear>0.01</linear><quadratic>0.001</quadratic>
-      </attenuation>
-    </light>
-    <light type="point" name="room_fill">
-      <pose>0 0 3.5 0 0 0</pose>
-      <diffuse>0.4 0.38 0.35 1</diffuse>
+      <diffuse>0.9 0.88 0.85 1</diffuse>
       <specular>0.1 0.1 0.1 1</specular>
-      <attenuation><range>30</range><constant>0.5</constant><linear>0.05</linear></attenuation>
+      <direction>-0.3 0.2 -0.9</direction>
     </light>
 
-    <!-- ===================== FLOOR ======================================== -->
+    <!-- =====================================================================
+         FLOOR  18m x 14m
+         ===================================================================== -->
     <model name="floor">
       <static>true</static>
-      <pose>0 0 0 0 0 0</pose>
       <link name="link">
-        <collision name="c">
-          <geometry><box><size>18 14 0.05</size></box></geometry>
-        </collision>
+        <collision name="c"><geometry><box><size>18 14 0.05</size></box></geometry></collision>
         <visual name="v">
+          <pose>0 0 -0.025 0 0 0</pose>
           <geometry><box><size>18 14 0.05</size></box></geometry>
-          <material>
-            <ambient>0.68 0.55 0.40 1</ambient>
-            <diffuse>0.72 0.58 0.42 1</diffuse>
-            <specular>0.05 0.05 0.05 1</specular>
-          </material>
+          <material><ambient>0.72 0.60 0.45 1</ambient><diffuse>0.76 0.64 0.48 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <!-- ===================== WALLS ======================================== -->
-    <!-- Outer perimeter walls -->
-    <model name="wall_north"><static>true</static><pose>0 7.0 1.2 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>18.0 0.15 2.4</size></box></geometry></collision><visual name="v"><geometry><box><size>18.0 0.15 2.4</size></box></geometry><material><ambient>0.90 0.90 0.88 1</ambient><diffuse>0.92 0.92 0.90 1</diffuse></material></visual></link></model>
-    <model name="wall_south"><static>true</static><pose>0 -7.0 1.2 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>18.0 0.15 2.4</size></box></geometry></collision><visual name="v"><geometry><box><size>18.0 0.15 2.4</size></box></geometry><material><ambient>0.90 0.90 0.88 1</ambient><diffuse>0.92 0.92 0.90 1</diffuse></material></visual></link></model>
-    <model name="wall_east"><static>true</static><pose>9.0 0 1.2 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.15 14.0 2.4</size></box></geometry></collision><visual name="v"><geometry><box><size>0.15 14.0 2.4</size></box></geometry><material><ambient>0.90 0.90 0.88 1</ambient><diffuse>0.92 0.92 0.90 1</diffuse></material></visual></link></model>
-    <model name="wall_west"><static>true</static><pose>-9.0 0 1.2 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.15 14.0 2.4</size></box></geometry></collision><visual name="v"><geometry><box><size>0.15 14.0 2.4</size></box></geometry><material><ambient>0.90 0.90 0.88 1</ambient><diffuse>0.92 0.92 0.90 1</diffuse></material></visual></link></model>
-
-    <!-- Center dividers with doorways (3 wall segments per divider) -->
-    <!-- Horizontal center wall (N half): bedroom|kitchen split -->
-    <model name="div_h_n_w"><static>true</static><pose>-4.0 0 1.2 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>10.0 0.15 2.4</size></box></geometry></collision><visual name="v"><geometry><box><size>10.0 0.15 2.4</size></box></geometry><material><ambient>0.88 0.88 0.86 1</ambient><diffuse>0.90 0.90 0.88 1</diffuse></material></visual></link></model>
-    <!-- Doorway gap at x=0 (1.5m wide) -->
-    <model name="div_h_n_e"><static>true</static><pose>5.25 0 1.2 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>7.5 0.15 2.4</size></box></geometry></collision><visual name="v"><geometry><box><size>7.5 0.15 2.4</size></box></geometry><material><ambient>0.88 0.88 0.86 1</ambient><diffuse>0.90 0.90 0.88 1</diffuse></material></visual></link></model>
-
-    <!-- Vertical center wall: left|right split -->
-    <model name="div_v_top"><static>true</static><pose>0 4.25 1.2 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.15 5.5 2.4</size></box></geometry></collision><visual name="v"><geometry><box><size>0.15 5.5 2.4</size></box></geometry><material><ambient>0.88 0.88 0.86 1</ambient><diffuse>0.90 0.90 0.88 1</diffuse></material></visual></link></model>
-    <!-- Doorway gap at y=0 -->
-    <model name="div_v_bot"><static>true</static><pose>0 -4.25 1.2 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.15 5.5 2.4</size></box></geometry></collision><visual name="v"><geometry><box><size>0.15 5.5 2.4</size></box></geometry><material><ambient>0.88 0.88 0.86 1</ambient><diffuse>0.90 0.90 0.88 1</diffuse></material></visual></link></model>
+    <!-- =====================================================================
+         OUTER WALLS
+         ===================================================================== -->
+    <!-- North wall -->
+    <model name="wall_north"><static>true</static>
+      <link name="l"><pose>0 7.1 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>18.2 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>18.2 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- South wall -->
+    <model name="wall_south"><static>true</static>
+      <link name="l"><pose>0 -7.1 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>18.2 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>18.2 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- West wall -->
+    <model name="wall_west"><static>true</static>
+      <link name="l"><pose>-9.1 0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.2 14.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 14.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- East wall -->
+    <model name="wall_east"><static>true</static>
+      <link name="l"><pose>9.1 0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.2 14.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 14.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
 
     <!-- =====================================================================
-         🛏️  ROOM 1: MASTER BEDROOM  (Top-Left, center: -4.5, 3.5)
+         HALLWAY WALLS  (Y=1 top, Y=-1 bottom — 2m wide central corridor)
+         Each has two doorways, one per room side
          ===================================================================== -->
 
-    <!-- Bed (SDF geometry) -->
-    <model name="master_bed">
-      <static>true</static>
-      <pose>-5.5 5.0 0 0 0 0</pose>
+    <!-- North hallway wall (Y=1.0) — 3 segments with 2 doorways (1.2m each) -->
+    <!-- Left segment: X=-9 to X=-4.6 -->
+    <model name="hall_north_L"><static>true</static>
+      <link name="l"><pose>-6.8 1.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>4.4 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>4.4 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- Door arch above bedroom doorway (X=-4.6 to -3.4): gap left -->
+    <!-- Middle segment: X=-3.4 to X=3.4 — wall between bedroom and study minus center gap -->
+    <!-- Actually: X=-9 to -4.6, gap -4.6 to -3.4, X=-3.4 to -0.1, X=0.1 to 3.4, gap 3.4 to 4.6, X=4.6 to 9 -->
+    <!-- Centre divider top (between bedroom and study): X=-0.1 to 0.1 -->
+    <model name="hall_north_CL"><static>true</static>
+      <link name="l"><pose>-1.85 1.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>3.1 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.1 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="hall_north_CR"><static>true</static>
+      <link name="l"><pose>1.85 1.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>3.1 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.1 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- Right segment: X=4.6 to X=9 -->
+    <model name="hall_north_R"><static>true</static>
+      <link name="l"><pose>6.8 1.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>4.4 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>4.4 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- South hallway wall (Y=-1.0) — same pattern -->
+    <model name="hall_south_L"><static>true</static>
+      <link name="l"><pose>-6.8 -1.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>4.4 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>4.4 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="hall_south_CL"><static>true</static>
+      <link name="l"><pose>-1.85 -1.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>3.1 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.1 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="hall_south_CR"><static>true</static>
+      <link name="l"><pose>1.85 -1.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>3.1 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.1 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="hall_south_R"><static>true</static>
+      <link name="l"><pose>6.8 -1.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>4.4 0.2 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>4.4 0.2 2.6</size></box></geometry><material><ambient>0.88 0.86 0.82 1</ambient><diffuse>0.92 0.90 0.86 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- Centre divider (top half — between bedroom and study) -->
+    <model name="div_top"><static>true</static>
+      <link name="l"><pose>0 4.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.2 6.0 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 6.0 2.6</size></box></geometry><material><ambient>0.85 0.83 0.80 1</ambient><diffuse>0.90 0.88 0.84 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- Centre divider (bottom half — between kitchen and living room) -->
+    <model name="div_bot"><static>true</static>
+      <link name="l"><pose>0 -4.0 1.3 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.2 6.0 2.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 6.0 2.6</size></box></geometry><material><ambient>0.85 0.83 0.80 1</ambient><diffuse>0.90 0.88 0.84 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- =====================================================================
+         HALLWAY CEILING strip (visual only, makes hallway feel enclosed)
+         ===================================================================== -->
+    <model name="hallway_ceiling"><static>true</static>
+      <link name="l"><pose>0 0 2.62 0 0 0</pose>
+        <visual name="v"><geometry><box><size>18 2.0 0.05</size></box></geometry>
+          <material><ambient>0.92 0.90 0.88 1</ambient><diffuse>0.95 0.93 0.90 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- =====================================================================
+         🛏️  BEDROOM  (Top-Left: X -9 to 0,  Y 1 to 7,  centre: -4.5, 4)
+         ===================================================================== -->
+    <!-- Bed -->
+    <model name="master_bed"><static>true</static><pose>-6.5 5.0 0 0 0 0</pose>
       <link name="link">
-        <visual name="frame"><pose>0 0 0.2 0 0 0</pose><geometry><box><size>2.0 1.6 0.4</size></box></geometry><material><ambient>0.55 0.35 0.18 1</ambient><diffuse>0.60 0.38 0.20 1</diffuse></material></visual>
+        <visual name="frame"><pose>0 0 0.20 0 0 0</pose><geometry><box><size>2.0 1.6 0.40</size></box></geometry><material><ambient>0.55 0.35 0.18 1</ambient><diffuse>0.60 0.38 0.20 1</diffuse></material></visual>
         <visual name="mattress"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>1.9 1.5 0.12</size></box></geometry><material><ambient>0.92 0.92 0.95 1</ambient><diffuse>0.95 0.95 0.98 1</diffuse></material></visual>
-        <visual name="pillow1"><pose>0.55 0.4 0.53 0 0 0</pose><geometry><box><size>0.6 0.35 0.08</size></box></geometry><material><ambient>0.85 0.88 0.95 1</ambient><diffuse>0.88 0.90 0.98 1</diffuse></material></visual>
-        <visual name="pillow2"><pose>0.55 -0.4 0.53 0 0 0</pose><geometry><box><size>0.6 0.35 0.08</size></box></geometry><material><ambient>0.85 0.88 0.95 1</ambient><diffuse>0.88 0.90 0.98 1</diffuse></material></visual>
-        <visual name="headboard"><pose>-0.95 0 0.6 0 0 0</pose><geometry><box><size>0.08 1.6 0.7</size></box></geometry><material><ambient>0.50 0.32 0.16 1</ambient><diffuse>0.55 0.35 0.18 1</diffuse></material></visual>
-        <collision name="col"><pose>0 0 0.25 0 0 0</pose><geometry><box><size>2.0 1.6 0.5</size></box></geometry></collision>
+        <visual name="pillow1"><pose>0.55 0.38 0.53 0 0 0</pose><geometry><box><size>0.60 0.32 0.08</size></box></geometry><material><ambient>0.80 0.85 0.95 1</ambient></material></visual>
+        <visual name="pillow2"><pose>0.55 -0.38 0.53 0 0 0</pose><geometry><box><size>0.60 0.32 0.08</size></box></geometry><material><ambient>0.80 0.85 0.95 1</ambient></material></visual>
+        <visual name="headboard"><pose>-0.95 0 0.62 0 0 0</pose><geometry><box><size>0.08 1.6 0.65</size></box></geometry><material><ambient>0.50 0.32 0.16 1</ambient><diffuse>0.55 0.35 0.18 1</diffuse></material></visual>
+        <collision name="col"><pose>0 0 0.25 0 0 0</pose><geometry><box><size>2.0 1.6 0.50</size></box></geometry></collision>
       </link>
     </model>
-
     <!-- Wardrobe -->
-    <model name="wardrobe"><static>true</static><pose>-8.0 4.5 1.0 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.6 1.8 2.0</size></box></geometry></collision><visual name="v"><geometry><box><size>0.6 1.8 2.0</size></box></geometry><material><ambient>0.35 0.22 0.12 1</ambient><diffuse>0.40 0.26 0.15 1</diffuse></material></visual></link></model>
-
+    <model name="wardrobe"><static>true</static>
+      <link name="l"><pose>-8.6 4.0 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.6 2.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.6 2.2 2.0</size></box></geometry><material><ambient>0.35 0.22 0.12 1</ambient><diffuse>0.40 0.26 0.15 1</diffuse></material></visual>
+      </link>
+    </model>
     <!-- Nightstand -->
-    <model name="nightstand"><static>true</static><pose>-5.5 3.0 0.3 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.5 0.5 0.6</size></box></geometry></collision><visual name="v"><geometry><box><size>0.5 0.5 0.6</size></box></geometry><material><ambient>0.38 0.24 0.14 1</ambient><diffuse>0.42 0.28 0.16 1</diffuse></material></visual></link></model>
+    <model name="nightstand"><static>true</static>
+      <link name="l"><pose>-5.3 3.2 0.30 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.50 0.50 0.60</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.50 0.50 0.60</size></box></geometry><material><ambient>0.40 0.26 0.14 1</ambient><diffuse>0.44 0.28 0.16 1</diffuse></material></visual>
+      </link>
+    </model>
 
     <!-- =====================================================================
-         🍳  ROOM 2: KITCHEN & DINING  (Top-Right, center: 4.5, 3.5)
+         🍳  KITCHEN  (Bottom-Left: X -9 to 0,  Y -7 to -1,  centre: -4.5, -4)
          ===================================================================== -->
-
-    <!-- Dining Table (SDF geometry + wood texture — no DAE mesh for this model) -->
-    <model name="dining_table">
-      <static>true</static>
-      <pose>4.5 4.5 0 0 0 0</pose>
-      <link name="link">
-        <!-- Table top -->
-        <visual name="top">
-          <pose>0 0 1.0 0 0 0</pose>
-          <geometry><box><size>1.5 0.8 0.04</size></box></geometry>
-          
-        </visual>
-        <collision name="top_col"><pose>0 0 1.0 0 0 0</pose><geometry><box><size>1.5 0.8 0.04</size></box></geometry></collision>
-        <!-- Legs -->
-        <visual name="leg1"><pose>0.68 0.35 0.5 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>1.0</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <collision name="leg1_col"><pose>0.68 0.35 0.5 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>1.0</length></cylinder></geometry></collision>
-        <visual name="leg2"><pose>-0.68 0.35 0.5 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>1.0</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <collision name="leg2_col"><pose>-0.68 0.35 0.5 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>1.0</length></cylinder></geometry></collision>
-        <visual name="leg3"><pose>0.68 -0.35 0.5 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>1.0</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <collision name="leg3_col"><pose>0.68 -0.35 0.5 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>1.0</length></cylinder></geometry></collision>
-        <visual name="leg4"><pose>-0.68 -0.35 0.5 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>1.0</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <collision name="leg4_col"><pose>-0.68 -0.35 0.5 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>1.0</length></cylinder></geometry></collision>
+    <!-- Counter -->
+    <model name="kitchen_counter"><static>true</static>
+      <link name="l"><pose>-8.0 -4.0 0.45 0 0 0</pose>
+        <collision name="c"><geometry><box><size>1.6 4.5 0.90</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.6 4.5 0.90</size></box></geometry><material><ambient>0.85 0.85 0.88 1</ambient><diffuse>0.90 0.90 0.93 1</diffuse></material></visual>
       </link>
     </model>
-
-    <!-- Chair 1 — SDF geometry (Chair.obj also crashes OGRE2) -->
-    <model name="chair_1">
-      <static>true</static>
-      <pose>4.5 3.3 0 0 0 3.14</pose>
-      <link name="link">
-        <visual name="seat"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry><material><ambient>0.42 0.28 0.14 1</ambient><diffuse>0.48 0.32 0.16 1</diffuse></material></visual>
-        <collision name="seat_c"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry></collision>
-        <visual name="back"><pose>0 -0.22 0.74 0 0 0</pose><geometry><box><size>0.46 0.04 0.55</size></box></geometry><material><ambient>0.40 0.26 0.12 1</ambient></material></visual>
-        <collision name="back_c"><pose>0 -0.22 0.74 0 0 0</pose><geometry><box><size>0.46 0.04 0.55</size></box></geometry></collision>
-        <visual name="leg1"><pose>0.2 0.2 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <visual name="leg2"><pose>-0.2 0.2 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <visual name="leg3"><pose>0.2 -0.2 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <visual name="leg4"><pose>-0.2 -0.2 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-      </link>
-    </model>
-
-    <!-- Chair 2 -->
-    <model name="chair_2">
-      <static>true</static>
-      <pose>4.5 5.7 0 0 0 0</pose>
-      <link name="link">
-        <visual name="seat"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry><material><ambient>0.42 0.28 0.14 1</ambient><diffuse>0.48 0.32 0.16 1</diffuse></material></visual>
-        <collision name="seat_c"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry></collision>
-        <visual name="back"><pose>0 0.22 0.74 0 0 0</pose><geometry><box><size>0.46 0.04 0.55</size></box></geometry><material><ambient>0.40 0.26 0.12 1</ambient></material></visual>
-        <collision name="back_c"><pose>0 0.22 0.74 0 0 0</pose><geometry><box><size>0.46 0.04 0.55</size></box></geometry></collision>
-        <visual name="leg1"><pose>0.2 0.2 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <visual name="leg2"><pose>-0.2 0.2 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <visual name="leg3"><pose>0.2 -0.2 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-        <visual name="leg4"><pose>-0.2 -0.2 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.3 0.3 0.3 1</ambient></material></visual>
-      </link>
-    </model>
-
-    <!-- 3D Coke Can on table -->
-    <model name="coke_can">
-      <pose>4.5 4.5 0.80 0 0 0</pose>
-      <link name="link">
-        <visual name="can"><geometry><cylinder><radius>0.033</radius><length>0.12</length></cylinder></geometry><material><ambient>0.85 0.10 0.10 1</ambient><diffuse>0.90 0.12 0.12 1</diffuse></material></visual>
-        <collision name="col"><geometry><cylinder><radius>0.033</radius><length>0.12</length></cylinder></geometry></collision>
-        <inertial><mass>0.39</mass></inertial>
-      </link>
-    </model>
-
-    <!-- 3D Refrigerator mesh -->
-    <model name="refrigerator">
-      <static>true</static>
-      <pose>7.5 5.5 0 0 0 0</pose>
+    <!-- Refrigerator -->
+    <model name="refrigerator"><static>true</static><pose>-1.5 -6.2 0 0 0 0</pose>
       <link name="link">
         <visual name="body"><pose>0 0 0.87 0 0 0</pose><geometry><box><size>0.70 0.68 1.74</size></box></geometry><material><ambient>0.88 0.88 0.90 1</ambient><diffuse>0.92 0.92 0.94 1</diffuse></material></visual>
-        <visual name="handle"><pose>0.36 0 1.10 0 0 0</pose><geometry><box><size>0.03 0.04 0.35</size></box></geometry><material><ambient>0.65 0.65 0.68 1</ambient><diffuse>0.70 0.70 0.72 1</diffuse></material></visual>
-        <visual name="line"><pose>0.36 0 0.87 0 0 0</pose><geometry><box><size>0.02 0.62 0.02</size></box></geometry><material><ambient>0.55 0.55 0.58 1</ambient></material></visual>
-        <collision name="col"><pose>0 0 0.87 0 0 0</pose><geometry><box><size>0.73 0.72 1.74</size></box></geometry></collision>
+        <visual name="handle"><pose>0.36 0 1.10 0 0 0</pose><geometry><box><size>0.03 0.04 0.35</size></box></geometry><material><ambient>0.65 0.65 0.68 1</ambient></material></visual>
+        <collision name="col"><pose>0 0 0.87 0 0 0</pose><geometry><box><size>0.70 0.68 1.74</size></box></geometry></collision>
       </link>
     </model>
-
-    <!-- Kitchen counter -->
-    <model name="kitchen_counter"><static>true</static><pose>7.0 2.5 0.45 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>1.6 3.5 0.9</size></box></geometry></collision><visual name="v"><geometry><box><size>1.6 3.5 0.9</size></box></geometry><material><ambient>0.85 0.85 0.88 1</ambient><diffuse>0.90 0.90 0.93 1</diffuse></material></visual></link></model>
+    <!-- Dining table -->
+    <model name="dining_table"><static>true</static><pose>-4.5 -4.0 0 0 0 0</pose>
+      <link name="link">
+        <visual name="top"><pose>0 0 0.78 0 0 0</pose><geometry><box><size>1.5 0.9 0.04</size></box></geometry><material><ambient>0.55 0.36 0.18 1</ambient><diffuse>0.60 0.40 0.20 1</diffuse></material></visual>
+        <collision name="top_c"><pose>0 0 0.78 0 0 0</pose><geometry><box><size>1.5 0.9 0.04</size></box></geometry></collision>
+        <visual name="leg1"><pose>0.66 0.38 0.39 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>0.78</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg2"><pose>-0.66 0.38 0.39 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>0.78</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg3"><pose>0.66 -0.38 0.39 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>0.78</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg4"><pose>-0.66 -0.38 0.39 0 0 0</pose><geometry><cylinder><radius>0.025</radius><length>0.78</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+      </link>
+    </model>
+    <!-- Chairs -->
+    <model name="chair_1"><static>true</static><pose>-4.5 -2.8 0 0 0 3.14</pose>
+      <link name="link">
+        <visual name="seat"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry><material><ambient>0.42 0.28 0.14 1</ambient><diffuse>0.48 0.32 0.16 1</diffuse></material></visual>
+        <visual name="back"><pose>0 -0.22 0.74 0 0 0</pose><geometry><box><size>0.46 0.04 0.55</size></box></geometry><material><ambient>0.40 0.26 0.12 1</ambient></material></visual>
+        <visual name="leg1"><pose>0.20 0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg2"><pose>-0.20 0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg3"><pose>0.20 -0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg4"><pose>-0.20 -0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <collision name="c"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry></collision>
+      </link>
+    </model>
+    <model name="chair_2"><static>true</static><pose>-4.5 -5.2 0 0 0 0</pose>
+      <link name="link">
+        <visual name="seat"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry><material><ambient>0.42 0.28 0.14 1</ambient><diffuse>0.48 0.32 0.16 1</diffuse></material></visual>
+        <visual name="back"><pose>0 0.22 0.74 0 0 0</pose><geometry><box><size>0.46 0.04 0.55</size></box></geometry><material><ambient>0.40 0.26 0.12 1</ambient></material></visual>
+        <visual name="leg1"><pose>0.20 0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg2"><pose>-0.20 0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg3"><pose>0.20 -0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <visual name="leg4"><pose>-0.20 -0.20 0.22 0 0 0</pose><geometry><cylinder><radius>0.02</radius><length>0.44</length></cylinder></geometry><material><ambient>0.30 0.30 0.30 1</ambient></material></visual>
+        <collision name="c"><pose>0 0 0.44 0 0 0</pose><geometry><box><size>0.46 0.46 0.06</size></box></geometry></collision>
+      </link>
+    </model>
 
     <!-- =====================================================================
-         🛋️  ROOM 3: LIVING ROOM  (Bottom-Right, center: 4.5, -3.5)
+         🛋️  LIVING ROOM  (Bottom-Right: X 0 to 9,  Y -7 to -1,  centre: 4.5, -4)
          ===================================================================== -->
-
-    <!-- Sofa — SDF geometry (Sofa.obj crashes OGRE2 in Ignition Fortress) -->
-    <model name="living_sofa">
-      <static>true</static>
-      <pose>4.5 -4.5 0 0 0 0</pose>
+    <!-- Sofa -->
+    <model name="living_sofa"><static>true</static><pose>4.5 -5.5 0 0 0 0</pose>
       <link name="link">
-        <visual name="seat"><pose>0 0 0.22 0 0 0</pose>
-          <geometry><box><size>2.2 0.9 0.44</size></box></geometry>
-          <material><ambient>0.20 0.25 0.55 1</ambient><diffuse>0.22 0.28 0.60 1</diffuse></material>
-        </visual>
-        <collision name="seat_col"><pose>0 0 0.22 0 0 0</pose><geometry><box><size>2.2 0.9 0.44</size></box></geometry></collision>
-        <visual name="back"><pose>0 -0.42 0.60 0 0 0</pose>
-          <geometry><box><size>2.2 0.12 0.55</size></box></geometry>
-          <material><ambient>0.18 0.22 0.52 1</ambient><diffuse>0.20 0.25 0.58 1</diffuse></material>
-        </visual>
-        <collision name="back_col"><pose>0 -0.42 0.60 0 0 0</pose><geometry><box><size>2.2 0.12 0.55</size></box></geometry></collision>
-        <visual name="arm_l"><pose>1.08 0 0.44 0 0 0</pose>
-          <geometry><box><size>0.12 0.9 0.44</size></box></geometry>
-          <material><ambient>0.16 0.20 0.48 1</ambient><diffuse>0.18 0.22 0.52 1</diffuse></material>
-        </visual>
-        <visual name="arm_r"><pose>-1.08 0 0.44 0 0 0</pose>
-          <geometry><box><size>0.12 0.9 0.44</size></box></geometry>
-          <material><ambient>0.16 0.20 0.48 1</ambient><diffuse>0.18 0.22 0.52 1</diffuse></material>
-        </visual>
+        <visual name="seat"><pose>0 0 0.22 0 0 0</pose><geometry><box><size>2.2 0.9 0.44</size></box></geometry><material><ambient>0.20 0.25 0.55 1</ambient><diffuse>0.22 0.28 0.60 1</diffuse></material></visual>
+        <visual name="back"><pose>0 -0.42 0.60 0 0 0</pose><geometry><box><size>2.2 0.12 0.55</size></box></geometry><material><ambient>0.18 0.22 0.52 1</ambient></material></visual>
+        <visual name="arm_l"><pose>1.08 0 0.44 0 0 0</pose><geometry><box><size>0.12 0.9 0.44</size></box></geometry><material><ambient>0.16 0.20 0.48 1</ambient></material></visual>
+        <visual name="arm_r"><pose>-1.08 0 0.44 0 0 0</pose><geometry><box><size>0.12 0.9 0.44</size></box></geometry><material><ambient>0.16 0.20 0.48 1</ambient></material></visual>
+        <collision name="col"><pose>0 0 0.22 0 0 0</pose><geometry><box><size>2.2 0.9 0.44</size></box></geometry></collision>
       </link>
     </model>
-
     <!-- Coffee table -->
-    <model name="coffee_table"><static>true</static><pose>4.5 -2.8 0.22 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>1.1 0.6 0.44</size></box></geometry></collision><visual name="v"><geometry><box><size>1.1 0.6 0.44</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient><diffuse>0.48 0.32 0.18 1</diffuse></material></visual></link></model>
-
-    <!-- TV unit -->
-    <model name="tv_unit"><static>true</static><pose>8.0 -3.5 0 0 0 0</pose>
-      <link name="console"><pose>0 0 0.25 0 0 0</pose><collision name="c"><geometry><box><size>0.4 1.8 0.5</size></box></geometry></collision><visual name="v"><geometry><box><size>0.4 1.8 0.5</size></box></geometry><material><ambient>0.15 0.15 0.18 1</ambient><diffuse>0.18 0.18 0.20 1</diffuse></material></visual></link>
-      <link name="screen"><pose>0 0 0.95 0 0 0</pose><collision name="c"><geometry><box><size>0.06 1.3 0.75</size></box></geometry></collision><visual name="v"><geometry><box><size>0.06 1.3 0.75</size></box></geometry><material><ambient>0.03 0.03 0.04 1</ambient><diffuse>0.05 0.05 0.06 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual></link>
+    <model name="coffee_table"><static>true</static>
+      <link name="l"><pose>4.5 -3.5 0.22 0 0 0</pose>
+        <collision name="c"><geometry><box><size>1.1 0.6 0.44</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.1 0.6 0.44</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient><diffuse>0.48 0.32 0.18 1</diffuse></material></visual>
+      </link>
     </model>
-
-    <!-- Bowl on coffee table (SDF geometry) -->
-    <model name="bowl">
-      <pose>4.5 -2.8 0.48 0 0 0</pose>
+    <!-- TV unit -->
+    <model name="tv_unit"><static>true</static><pose>8.6 -4.0 0 0 0 0</pose>
+      <link name="console"><pose>0 0 0.25 0 0 0</pose><collision name="c"><geometry><box><size>0.4 2.0 0.5</size></box></geometry></collision><visual name="v"><geometry><box><size>0.4 2.0 0.5</size></box></geometry><material><ambient>0.15 0.15 0.18 1</ambient><diffuse>0.18 0.18 0.20 1</diffuse></material></visual></link>
+      <link name="screen"><pose>0 0 0.95 0 0 0</pose><collision name="c"><geometry><box><size>0.06 1.4 0.80</size></box></geometry></collision><visual name="v"><geometry><box><size>0.06 1.4 0.80</size></box></geometry><material><ambient>0.03 0.03 0.04 1</ambient><diffuse>0.05 0.05 0.06 1</diffuse></material></visual></link>
+    </model>
+    <!-- Bowl on coffee table -->
+    <model name="bowl"><pose>4.5 -3.5 0.48 0 0 0</pose>
       <link name="link">
-        <visual name="v"><geometry><cylinder><radius>0.09</radius><length>0.06</length></cylinder></geometry>
-          <material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.90 0.86 0.80 1</diffuse></material>
-        </visual>
+        <visual name="v"><geometry><cylinder><radius>0.09</radius><length>0.06</length></cylinder></geometry><material><ambient>0.85 0.82 0.78 1</ambient><diffuse>0.90 0.86 0.80 1</diffuse></material></visual>
         <collision name="c"><geometry><cylinder><radius>0.09</radius><length>0.06</length></cylinder></geometry></collision>
         <inertial><mass>0.2</mass></inertial>
       </link>
     </model>
 
     <!-- =====================================================================
-         💻  ROOM 4: HOME STUDY  (Bottom-Left, center: -4.5, -3.5)
+         💻  STUDY  (Top-Right: X 0 to 9,  Y 1 to 7,  centre: 4.5, 4)
          ===================================================================== -->
-
-    <!-- Bookshelf (solid wood-colored geometry) -->
-    <model name="bookshelf">
-      <static>true</static>
-      <pose>-7.5 -5.5 0 0 0 0</pose>
+    <!-- Bookshelf -->
+    <model name="bookshelf"><static>true</static><pose>8.6 5.5 0 0 0 0</pose>
       <link name="link">
-        <visual name="back"><pose>0 0 0.9 0 0 0</pose><geometry><box><size>0.1 1.8 1.8</size></box></geometry>
-          <material><ambient>0.38 0.24 0.14 1</ambient><diffuse>0.44 0.28 0.16 1</diffuse></material></visual>
-        <collision name="back_c"><pose>0 0 0.9 0 0 0</pose><geometry><box><size>0.1 1.8 1.8</size></box></geometry></collision>
-        <visual name="shelf1"><pose>0 0 0.3 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient><diffuse>0.48 0.32 0.18 1</diffuse></material></visual>
-        <visual name="shelf2"><pose>0 0 0.75 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient><diffuse>0.48 0.32 0.18 1</diffuse></material></visual>
-        <visual name="shelf3"><pose>0 0 1.2 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient><diffuse>0.48 0.32 0.18 1</diffuse></material></visual>
-        <visual name="shelf4"><pose>0 0 1.65 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient><diffuse>0.48 0.32 0.18 1</diffuse></material></visual>
+        <visual name="back"><pose>0 0 0.9 0 0 0</pose><geometry><box><size>0.1 1.8 1.8</size></box></geometry><material><ambient>0.38 0.24 0.14 1</ambient><diffuse>0.44 0.28 0.16 1</diffuse></material></visual>
+        <collision name="bc"><pose>0 0 0.9 0 0 0</pose><geometry><box><size>0.1 1.8 1.8</size></box></geometry></collision>
+        <visual name="shelf1"><pose>0 0 0.30 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient></material></visual>
+        <visual name="shelf2"><pose>0 0 0.75 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient></material></visual>
+        <visual name="shelf3"><pose>0 0 1.20 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient></material></visual>
+        <visual name="shelf4"><pose>0 0 1.65 0 0 0</pose><geometry><box><size>0.35 1.8 0.03</size></box></geometry><material><ambient>0.42 0.28 0.16 1</ambient></material></visual>
         <visual name="side_l"><pose>0 0.87 0.9 0 0 0</pose><geometry><box><size>0.35 0.04 1.8</size></box></geometry><material><ambient>0.36 0.22 0.12 1</ambient></material></visual>
         <visual name="side_r"><pose>0 -0.87 0.9 0 0 0</pose><geometry><box><size>0.35 0.04 1.8</size></box></geometry><material><ambient>0.36 0.22 0.12 1</ambient></material></visual>
-        <!-- Book spines -->
-        <visual name="books1"><pose>0 0.5 0.53 0 0 0</pose><geometry><box><size>0.3 0.7 0.4</size></box></geometry><material><ambient>0.6 0.2 0.2 1</ambient><diffuse>0.7 0.25 0.25 1</diffuse></material></visual>
-        <visual name="books2"><pose>0 -0.4 0.98 0 0 0</pose><geometry><box><size>0.3 0.8 0.4</size></box></geometry><material><ambient>0.2 0.4 0.6 1</ambient><diffuse>0.25 0.45 0.7 1</diffuse></material></visual>
-        <visual name="books3"><pose>0 0.3 1.43 0 0 0</pose><geometry><box><size>0.3 1.0 0.4</size></box></geometry><material><ambient>0.3 0.5 0.2 1</ambient><diffuse>0.35 0.55 0.25 1</diffuse></material></visual>
+        <visual name="books1"><pose>0 0.50 0.53 0 0 0</pose><geometry><box><size>0.30 0.70 0.40</size></box></geometry><material><ambient>0.6 0.2 0.2 1</ambient></material></visual>
+        <visual name="books2"><pose>0 -0.40 0.98 0 0 0</pose><geometry><box><size>0.30 0.80 0.40</size></box></geometry><material><ambient>0.2 0.4 0.6 1</ambient></material></visual>
+        <visual name="books3"><pose>0 0.30 1.43 0 0 0</pose><geometry><box><size>0.30 1.00 0.40</size></box></geometry><material><ambient>0.3 0.5 0.2 1</ambient></material></visual>
       </link>
     </model>
-
     <!-- Study desk -->
-    <model name="study_desk"><static>true</static><pose>-5.0 -4.5 0 0 0 0</pose>
+    <model name="study_desk"><static>true</static><pose>4.5 5.5 0 0 0 0</pose>
       <link name="top"><pose>0 0 0.73 0 0 0</pose><collision name="c"><geometry><box><size>1.8 0.8 0.04</size></box></geometry></collision><visual name="v"><geometry><box><size>1.8 0.8 0.04</size></box></geometry><material><ambient>0.38 0.24 0.14 1</ambient><diffuse>0.44 0.28 0.16 1</diffuse></material></visual></link>
-      <link name="leg1"><pose>0.8 0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
-      <link name="leg2"><pose>-0.8 0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
-      <link name="leg3"><pose>0.8 -0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
-      <link name="leg4"><pose>-0.8 -0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
+      <link name="leg1"><pose>0.80 0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
+      <link name="leg2"><pose>-0.80 0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
+      <link name="leg3"><pose>0.80 -0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
+      <link name="leg4"><pose>-0.80 -0.35 0.36 0 0 0</pose><collision name="c"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.025</radius><length>0.72</length></cylinder></geometry><material><ambient>0.2 0.2 0.2 1</ambient></material></visual></link>
     </model>
-
-    <!-- Monitor on desk -->
-    <model name="monitor"><static>true</static><pose>-5.0 -4.85 0.97 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.55 0.05 0.32</size></box></geometry></collision><visual name="v"><geometry><box><size>0.55 0.05 0.32</size></box></geometry><material><ambient>0.08 0.08 0.10 1</ambient><diffuse>0.10 0.10 0.12 1</diffuse><specular>0.5 0.5 0.5 1</specular></material></visual></link></model>
-
-    <!-- Cardboard box (SDF geometry) -->
-    <model name="cardboard_box">
-      <pose>-6.0 -3.5 0.12 0 0 0</pose>
+    <!-- Monitor -->
+    <model name="monitor"><static>true</static><pose>4.5 5.85 0.97 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.55 0.05 0.32</size></box></geometry></collision><visual name="v"><geometry><box><size>0.55 0.05 0.32</size></box></geometry><material><ambient>0.08 0.08 0.10 1</ambient><diffuse>0.10 0.10 0.12 1</diffuse></material></visual>
+      </link>
+    </model>
+    <!-- Cardboard box -->
+    <model name="cardboard_box"><pose>1.5 6.0 0.12 0 0 0</pose>
       <link name="link">
-        <visual name="v"><geometry><box><size>0.5 0.4 0.24</size></box></geometry>
-          <material><ambient>0.72 0.58 0.35 1</ambient><diffuse>0.78 0.62 0.38 1</diffuse></material></visual>
+        <visual name="v"><geometry><box><size>0.5 0.4 0.24</size></box></geometry><material><ambient>0.72 0.58 0.35 1</ambient><diffuse>0.78 0.62 0.38 1</diffuse></material></visual>
         <collision name="c"><geometry><box><size>0.5 0.4 0.24</size></box></geometry></collision>
         <inertial><mass>1.0</mass></inertial>
       </link>

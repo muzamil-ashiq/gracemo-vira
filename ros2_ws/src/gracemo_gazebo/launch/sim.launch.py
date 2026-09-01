@@ -1,7 +1,8 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, SetEnvironmentVariable
+from launch.actions import (IncludeLaunchDescription, DeclareLaunchArgument,
+                             SetEnvironmentVariable, TimerAction)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
@@ -48,21 +49,25 @@ def generate_launch_description():
             }]
         ),
 
-        # 3. Spawn GRaCEmo ViRa robot in Gazebo
-        # Harmonic's 'create' requires -world <world_name> (name from world SDF)
-        Node(
-            package="ros_gz_sim",
-            executable="create",
-            name="spawn_gracemo_vira",
-            output="screen",
-            arguments=[
-                "-world", "gracemo_home",
-                "-topic", "robot_description",
-                "-name", "gracemo_vira",
-                "-allow_renaming", "false",
-                "-x", "0.0",
-                "-y", "0.0",
-                "-z", "0.10"
+        # 3. Spawn GRACEmo ViRa — delayed 5s so Gazebo finishes loading world first
+        TimerAction(
+            period=5.0,
+            actions=[
+                Node(
+                    package="ros_gz_sim",
+                    executable="create",
+                    name="spawn_gracemo_vira",
+                    output="screen",
+                    arguments=[
+                        "-world", "gracemo_home",
+                        "-topic", "robot_description",
+                        "-name", "gracemo_vira",
+                        "-allow_renaming", "false",
+                        "-x", "0.0",
+                        "-y", "0.0",
+                        "-z", "0.10"
+                    ]
+                )
             ]
         ),
 
