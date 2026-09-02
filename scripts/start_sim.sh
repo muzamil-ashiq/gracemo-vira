@@ -50,6 +50,6 @@ echo "Launching Gazebo Harmonic..."
     export DISPLAY='${DISPLAY:-:0}'
     export WAYLAND_DISPLAY='${WAYLAND_DISPLAY:-}'
     export QT_X11_NO_MITSHM=1
-    export GZ_SIM_RESOURCE_PATH='$WS_DIR/install/gracemo_gazebo/share/gracemo_gazebo/models'
+    export GZ_SIM_RESOURCE_PATH='$WS_DIR/install/gracemo_gazebo/share/gracemo_gazebo/models:/opt/ros/humble/share'
     ros2 launch gracemo_gazebo sim.launch.py
 "

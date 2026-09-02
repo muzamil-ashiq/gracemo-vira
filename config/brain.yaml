@@ -7,7 +7,7 @@ llm:
   model: "google/diffusiongemma-26b-a4b-it"  # Active fast LLM model
   base_url: "https://integrate.api.nvidia.com/v1"
   api_key_env: "NVIDIA_API_KEY"
-  api_key: "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"
+  api_key: ""
   temperature: 0.2
   max_tokens: 35
   timeout_sec: 5.0

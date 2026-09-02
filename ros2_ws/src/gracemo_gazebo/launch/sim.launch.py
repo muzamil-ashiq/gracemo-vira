@@ -21,7 +21,8 @@ def generate_launch_description():
     xacro_file  = os.path.join(pkg_gracemo_description, "urdf", "gracemo_vira.urdf.xacro")
     models_path = os.path.join(pkg_gracemo_gazebo, "models")
     fuel_cache  = os.path.expanduser("~/.ignition/fuel/fuel.gazebosim.org/openrobotics/models")
-    resource_paths = f"{models_path}:{fuel_cache}"
+    ros_share   = "/opt/ros/humble/share"
+    resource_paths = f"{models_path}:{fuel_cache}:{ros_share}"
 
     os.environ["GZ_SIM_RESOURCE_PATH"] = resource_paths
 

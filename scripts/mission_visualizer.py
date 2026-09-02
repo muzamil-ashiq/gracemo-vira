@@ -42,14 +42,7 @@ try:
 except Exception:
     VoiceAdapter = None
 
-# 4-Room Apartment Waypoints (Doorways at X=±5.0, Hallway Y=±1.0)
-ROOM_WAYPOINTS = {
-    "bedroom":  [(-5.0, 0.0), (-5.0, 1.8), (-5.0, 4.0)],
-    "study":    [(5.0, 0.0),  (5.0, 1.8),  (5.0, 4.0)],
-    "kitchen":  [(-5.0, 0.0), (-5.0, -1.8), (-5.0, -4.0)],
-    "living":   [(5.0, 0.0),  (5.0, -1.8),  (5.0, -4.0)],
-    "hallway":  [(0.0, 0.0)]
-}
+from gracemo_brain.mission_planner import MissionPlanner, MissionPlan, MissionStep, SpatialKnowledgeGraph
 
 
 class MissionVisualizer:
@@ -68,14 +61,13 @@ class MissionVisualizer:
         self.has_odom = False
         self.min_obstacle_dist = 10.0
 
-        # State
+        # Mission Planner & State
+        self.planner = MissionPlanner()
+        self.active_mission: Optional[MissionPlan] = None
         self.target_room = "hallway"
         self.active_waypoints = []
         self.wp_idx = 0
         self.navigating = False
-        self.surveying = False
-        self.survey_start_yaw = 0.0
-        self.survey_start_time = 0.0
         self.current_room_label = "Central Hallway"
         self.detected_objects = set()
         self.room_inventory = {
@@ -105,6 +97,7 @@ class MissionVisualizer:
         self.latest_raw_frame = None
         self.latest_detections = []  # List of (xyxy, conf, cls_name)
         self.vision_lock = threading.Lock()
+        self.pose_lock = threading.Lock()
         
         # Start async background YOLO inference thread
         self.vision_thread = threading.Thread(target=self._vision_inference_loop, daemon=True)
@@ -181,17 +174,24 @@ class MissionVisualizer:
 
             # Top HUD Text
             room_color = (0, 220, 100) if self.current_room_label != "Central Hallway" else (255, 180, 0)
-            cv2.putText(annotated, f"ROOM: {self.current_room_label.upper()}", (15, 26), cv2.FONT_HERSHEY_DUPLEX, 0.65, room_color, 2)
-            cv2.putText(annotated, f"POS: ({self.cur_x:+.2f}m, {self.cur_y:+.2f}m) | HEADING: {math.degrees(self.cur_yaw):.0f}deg", (15, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (220, 220, 220), 1)
+            cv2.putText(annotated, f"ROOM: {self.current_room_label.upper()}", (15, 24), cv2.FONT_HERSHEY_DUPLEX, 0.60, room_color, 2)
+            
+            # Mission Step Text
+            if self.active_mission and self.active_mission.current_step():
+                step = self.active_mission.current_step()
+                plan_str = f"STEP {step.step_num}/{len(self.active_mission.steps)}: {step.description}"
+                cv2.putText(annotated, plan_str, (15, 48), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (100, 220, 255), 1)
+            else:
+                cv2.putText(annotated, f"POS: ({self.cur_x:+.2f}m, {self.cur_y:+.2f}m) | HEADING: {math.degrees(self.cur_yaw):.0f}deg", (15, 48), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (220, 220, 220), 1)
 
             # Status Badge Top Right
-            if self.navigating:
-                status_text = f"NAV -> {self.target_room.upper()}"
+            if self.navigating and self.active_mission:
+                status_text = f"PLAN: {self.target_room.upper()}"
                 badge_color = (0, 160, 255)
             else:
                 status_text = "STATIONED"
                 badge_color = (0, 230, 100)
-            cv2.putText(annotated, status_text, (w - 180, 36), cv2.FONT_HERSHEY_DUPLEX, 0.55, badge_color, 2)
+            cv2.putText(annotated, status_text, (w - 180, 32), cv2.FONT_HERSHEY_DUPLEX, 0.55, badge_color, 2)
 
             # Bottom HUD Bar: Active Detections
             det_str = " | ".join(sorted(current_frame_classes)) if current_frame_classes else "Scanning Field of View"
@@ -204,19 +204,22 @@ class MissionVisualizer:
 
     def _on_odom(self, msg: GzOdometry):
         pos = msg.pose.position
-        self.cur_x = pos.x
-        self.cur_y = pos.y
         q = msg.pose.orientation
         siny_cosp = 2 * (q.w * q.z + q.x * q.y)
         cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z)
-        self.cur_yaw = math.atan2(siny_cosp, cosy_cosp)
-        self.has_odom = True
+        yaw = math.atan2(siny_cosp, cosy_cosp)
+
+        with self.pose_lock:
+            self.cur_x = pos.x
+            self.cur_y = pos.y
+            self.cur_yaw = yaw
+            self.has_odom = True
 
         # Update current room label based on spatial position
-        if self.cur_y > 1.2:
-            self.current_room_label = "Master Bedroom" if self.cur_x < 0 else "Home Study"
-        elif self.cur_y < -1.2:
-            self.current_room_label = "Kitchen & Dining" if self.cur_x < 0 else "Living Room"
+        if pos.y > 1.2:
+            self.current_room_label = "Master Bedroom" if pos.x < 0 else "Home Study"
+        elif pos.y < -1.2:
+            self.current_room_label = "Kitchen & Dining" if pos.x < 0 else "Living Room"
         else:
             self.current_room_label = "Central Hallway"
 
@@ -281,94 +284,123 @@ class MissionVisualizer:
 
         return clean_wps
 
-    def navigate_to_room(self, room_name: str):
-        key = room_name.lower().strip()
-        matched = None
-        for k in ["bedroom", "study", "kitchen", "living", "hallway"]:
-            if k in key:
-                matched = k
-                break
+    def execute_mission(self, user_command: str) -> bool:
+        """
+        Decomposes command into an explicit MissionPlan, displays the plan table, and begins step-by-step execution.
+        """
+        # Ensure latest odom pose is available before planning
+        if not self.has_odom:
+            t_wait = time.time()
+            while not self.has_odom and time.time() - t_wait < 2.0:
+                time.sleep(0.05)
 
-        if matched:
-            self.target_room = matched
-            self.active_waypoints = self.plan_path_to_room(matched)
-            self.wp_idx = 0
-            self.navigating = True
-            self.surveying = False
-            console.print(f"[bold green]🚀 [NAVIGATOR] Generated {len(self.active_waypoints)}-point doorway route to {matched.upper()}...[/bold green]")
-            for i, wp in enumerate(self.active_waypoints):
-                console.print(f"[dim]    WP {i+1}: ({wp[0]:+.1f}, {wp[1]:+.1f})[/dim]")
-            self.speak(f"Navigating to {matched.title()}.")
-            return True
+        plan = self.planner.create_mission(user_command, (self.cur_x, self.cur_y, self.cur_yaw))
+        if not plan or not plan.steps:
+            console.print(f"[bold red]❌ Could not generate valid mission plan for: {user_command}[/bold red]")
+            return False
 
-        console.print(f"[bold red]❌ Unknown target room: {room_name}[/bold red]")
-        return False
+        self.active_mission = plan
+        self.target_room = plan.target_room
+        self.navigating = True
+
+        console.print("\n")
+        console.print(plan.render_table())
+        console.print(f"[bold cyan]🤖 ViRa Planner:[/bold cyan] [yellow]Generated {len(plan.steps)}-step plan for '{plan.goal}'. Beginning execution...[/yellow]\n")
+        self.speak(f"Mission plan confirmed. {len(plan.steps)} steps scheduled. Starting execution.")
+        return True
+
+    def navigate_to_room(self, room_name: str) -> bool:
+        return self.execute_mission(f"Go to {room_name}")
 
     def _control_loop(self):
         log_tick = 0
         while self.running:
             time.sleep(0.05)
-            if not self.has_odom or not self.navigating:
+            if not self.has_odom or not self.navigating or not self.active_mission:
                 continue
 
             log_tick += 1
+            step = self.active_mission.current_step()
 
-            # 1. Check All Waypoints Reached -> Clean Arrival & Stop
-            if self.wp_idx >= len(self.active_waypoints):
+            # Mission finished
+            if not step:
                 self.navigating = False
-                self.surveying = False
                 self.publish_cmd(0.0, 0.0)
-                found = ", ".join(self.room_inventory.get(self.current_room_label, ["objects"])) or "furniture objects"
-                console.print(f"[bold magenta]📍 [ARRIVED] Reached {self.target_room.upper()} center. Stationed & Monitoring.[/bold magenta]")
-                self.speak(f"Arrived at {self.target_room.title()}. Monitoring {found}.")
                 continue
 
-            # 2. Target Waypoint Vector
-            tx, ty = self.active_waypoints[self.wp_idx]
-            dx = tx - self.cur_x
-            dy = ty - self.cur_y
+            # 1. Action: Perceptual Scan & Verification
+            if step.action_type == "SCAN":
+                found = [o for o in step.expected_objects if o in self.detected_objects]
+                found_str = ", ".join(found) if found else "room furniture"
+                console.print(f"[bold green]✓ [STEP {step.step_num} COMPLETE] Scanned {step.target_room.title()}: Detected {found_str}[/bold green]")
+                self.active_mission.advance()
+                continue
+
+            # 2. Action: Verbal Report
+            if step.action_type == "REPORT":
+                found = ", ".join(self.room_inventory.get(self.current_room_label, ["objects"])) or "furniture"
+                console.print(f"[bold magenta]🏁 [MISSION COMPLETE] {self.active_mission.goal.upper()}[/bold magenta]")
+                self.speak(f"Mission complete. I am stationed in {self.current_room_label} with {found} in view.")
+                self.active_mission.advance()
+                self.navigating = False
+                self.publish_cmd(0.0, 0.0)
+                continue
+
+            # 3. Action: Motion Navigation (TRANSIT, ENTER_DOOR, STATION, APPROACH)
+            with self.pose_lock:
+                cur_x = self.cur_x
+                cur_y = self.cur_y
+                cur_yaw = self.cur_yaw
+
+            tx, ty = step.target_pos
+            dx = tx - cur_x
+            dy = ty - cur_y
             dist = math.hypot(dx, dy)
 
-            # Strict Waypoint Reach Tolerance (0.28m for doorways, 0.35m for final target)
-            is_final_wp = (self.wp_idx == len(self.active_waypoints) - 1)
-            reach_radius = 0.35 if is_final_wp else 0.28
+            # Reach Tolerance: 0.25m for corridor doorway transitions, 0.35m for stations
+            reach_radius = 0.35 if step.action_type in ("ENTER_DOOR", "STATION") else 0.25
 
             if dist < reach_radius:
-                console.print(f"[green]  ✓ Waypoint {self.wp_idx+1}/{len(self.active_waypoints)} reached ({tx:.1f}, {ty:.1f})[/green]")
-                self.wp_idx += 1
+                console.print(f"[green]  ✓ Step {step.step_num}/{len(self.active_mission.steps)} Reached: {step.description}[/green]")
+                has_next = self.active_mission.advance()
+                if not has_next:
+                    self.navigating = False
+                    self.publish_cmd(0.0, 0.0)
                 continue
 
+            # Shortest-signed-angle tracking with symmetry-broken 180-deg rear pivot
             target_yaw = math.atan2(dy, dx)
-            alpha = target_yaw - self.cur_yaw
+            alpha = target_yaw - cur_yaw
             while alpha > math.pi:
                 alpha -= 2 * math.pi
             while alpha < -math.pi:
                 alpha += 2 * math.pi
 
-            # Mathematically Clean Regulated Pure Pursuit Controller
-            # Mode 1: Strict Orientation Gating (vx = 0 while turning in place)
-            if abs(alpha) > math.radians(20):
+            if abs(abs(alpha) - math.pi) < 0.15:
+                alpha = math.pi
+
+            # Strict heading alignment before forward motion prevents diagonal wall drift
+            if abs(alpha) > math.radians(6):
                 vx = 0.0
-                wz = float(np.clip(1.5 * alpha, -1.0, 1.0))
-                phase = "ALIGN"
-            # Mode 2: Clean Pure Pursuit Arc Driving (Aligned within 20 deg)
+                wz = float(np.clip(0.50 * alpha, -0.35, 0.35))
             else:
-                lookahead = max(0.60, min(1.5, dist))
-                v_max = min(0.38, max(0.12, 0.45 * dist))
-                curvature = 2.0 * math.sin(alpha) / lookahead
-                vx = v_max * max(0.4, math.cos(alpha))
-                wz = float(np.clip(vx * curvature, -0.75, 0.75))
-                phase = "PURSUIT"
+                align = max(0.0, math.cos(alpha))
+                v_max = min(0.35, max(0.15, 0.45 * dist))
+                vx = v_max * (align ** 2)
+                if abs(alpha) > math.radians(2):
+                    wz = float(np.clip(0.35 * alpha, -0.10, 0.10))
+                else:
+                    wz = 0.0
 
             self.publish_cmd(vx, wz)
 
             # Print navigation status every 1 second (20 ticks)
             if log_tick % 20 == 0:
                 console.print(
-                    f"[dim]  NAV [{phase}] wp={self.wp_idx+1}/{len(self.active_waypoints)} "
-                    f"pos=({self.cur_x:+.1f},{self.cur_y:+.1f}) → target=({tx:.1f},{ty:.1f}) "
+                    f"[dim]  MISSION [Step {step.step_num}/{len(self.active_mission.steps)}: {step.action_type}] "
+                    f"pos=({cur_x:+.1f},{cur_y:+.1f}) → target=({tx:.1f},{ty:.1f}) "
                     f"dist={dist:.1f}m err={math.degrees(alpha):+.0f}° "
-                    f"cmd=(vx={vx:.2f}, wz={wz:.2f}) obs={self.min_obstacle_dist:.1f}m[/dim]"
+                    f"cmd=(vx={vx:.2f}, wz={wz:.2f})[/dim]"
                 )
 
 
