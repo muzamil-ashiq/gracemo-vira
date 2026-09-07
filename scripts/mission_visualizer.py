@@ -23,6 +23,7 @@ from gz.msgs10.image_pb2 import Image as GzImage
 from gz.msgs10.twist_pb2 import Twist as GzTwist
 from gz.msgs10.odometry_pb2 import Odometry as GzOdometry
 from gz.msgs10.laserscan_pb2 import LaserScan as GzLaserScan
+from gz.msgs10.double_pb2 import Double as GzDouble
 
 from ultralytics import YOLO
 from rich.console import Console
@@ -90,6 +91,10 @@ class MissionVisualizer:
         # Publisher
         self.cmd_pub = self.node.advertise("/cmd_vel", GzTwist)
 
+        # Arm Joint Publishers (Keep arm securely resting in natural hand-DOWN STANCE_HOME)
+        self.arm_pubs = [self.node.advertise(f"/arm/joint_{i+1}/cmd_pos", GzDouble) for i in range(7)]
+        threading.Thread(target=self._init_arm_stance, daemon=True).start()
+
         # TTS voice
         self.voice = None
         if VoiceAdapter:
@@ -119,6 +124,18 @@ class MissionVisualizer:
         console.print(f"\n[bold cyan]🗣️ ViRa:[/bold cyan] [italic yellow]\"{text}\"[/italic yellow]")
         if self.voice:
             threading.Thread(target=self.voice.speak, args=(text,), daemon=True).start()
+
+    def _init_arm_stance(self):
+        """Holds the 7-DOF arm safely down along the torso in STANCE_HOME throughout navigation."""
+        time.sleep(0.5)
+        # STANCE_HOME: shoulder yaw=0, shoulder pitch=+75 deg (+1.31 rad), roll=+14 deg (+0.25 rad), elbow=-11 deg (-0.20 rad)
+        home_q = [0.0, 1.31, 0.25, -0.20, -0.10, 0.0, 0.0]
+        while self.running:
+            for i, val in enumerate(home_q):
+                msg = GzDouble()
+                msg.data = float(val)
+                self.arm_pubs[i].publish(msg)
+            time.sleep(1.0)
 
     def _vision_inference_loop(self):
         """Asynchronous background worker running YOLO without blocking the 30 FPS video transport."""

@@ -301,7 +301,8 @@
       <cmd_min>-120</cmd_min>
     </plugin>
 
-    <!-- Dynamic DetachableJoint Plugin for guaranteed slip-free picking -->
+    <!-- Dynamic DetachableJoint Plugin (Enable when running dedicated manipulation tests) -->
+    <!--
     <plugin
       filename="gz-sim-detachable-joint-system"
       name="gz::sim::systems::DetachableJoint">
@@ -312,6 +313,7 @@
       <attach_topic>/gracemo_vira/detachable_joint/attach</attach_topic>
       <output_topic>/gracemo_vira/detachable_joint/state</output_topic>
     </plugin>
+    -->
 
   </gazebo>
 

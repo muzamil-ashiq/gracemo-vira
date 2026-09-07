@@ -438,7 +438,7 @@
          🤖 GRaCEmo ViRa ROBOT MODEL
          ===================================================================== -->
     <model name='gracemo_vira'>
-    <pose>-4.322 2.50 0.025 0 0 1.570796</pose>
+    <pose>0.0 0.0 0.025 0 0 0</pose>
 
     <link name='base_footprint'>
       <inertial>
@@ -1891,14 +1891,6 @@
       <d_gain>30</d_gain>
       <cmd_max>120</cmd_max>
       <cmd_min>-120</cmd_min>
-    </plugin>
-    <plugin name='gz::sim::systems::DetachableJoint' filename='gz-sim-detachable-joint-system'>
-      <parent_link>right_palm_link</parent_link>
-      <child_model>book_math</child_model>
-      <child_link>link</child_link>
-      <detach_topic>/gracemo_vira/detachable_joint/detach</detach_topic>
-      <attach_topic>/gracemo_vira/detachable_joint/attach</attach_topic>
-      <output_topic>/gracemo_vira/detachable_joint/state</output_topic>
     </plugin>
     <self_collide>false</self_collide>
     <frame name='bumper_joint' attached_to='base_link'>
