@@ -2,6 +2,7 @@
 members = [
     "gracemo-types",
     "gracemo-kernel",
+    "gracemo-k",
 ]
 
 resolver = "2"

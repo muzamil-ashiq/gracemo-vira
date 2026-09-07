@@ -140,12 +140,48 @@ class SpatialKnowledgeGraph:
             "station_yaw": -math.pi / 2,  # -90 deg: Face South directly toward Sofa, Coffee Table & TV
             "furniture": ["sofa", "coffee table", "tv", "bowl"],
             "targets": {
-                "sofa": (5.0, -2.2),
-                "coffee table": (5.0, -2.2),
                 "tv": (5.0, -2.2)
             }
         }
     }
+
+    CANONICAL_ROOMS = {
+        "bedroom": "bedroom", "master bedroom": "bedroom", "bed": "bedroom",
+        "study": "study", "home study": "study", "office": "study",
+        "kitchen": "kitchen", "kitchen & dining": "kitchen", "dining": "kitchen",
+        "living": "living", "living room": "living", "lounge": "living",
+        "hallway": "hallway", "central hallway": "hallway"
+    }
+
+    @classmethod
+    def get_room_node(cls, room_name: str) -> Dict[str, Any]:
+        """Dynamically query MNSE Knowledge Graph (graph.db) or fallback to topology."""
+        canonical = cls.CANONICAL_ROOMS.get(room_name.lower().strip(), room_name.lower().strip())
+        try:
+            import requests
+            resp = requests.get("http://127.0.0.1:7780/graph", timeout=0.5)
+            if resp.status_code == 200:
+                data = resp.json()
+                nodes = data.get("nodes", [])
+                for n in nodes:
+                    if n.get("type") == "Room":
+                        label = n.get("label", "").lower()
+                        if canonical in label or label in canonical:
+                            props = n.get("properties", {})
+                            if "center_x" in props and "door_x" in props:
+                                return {
+                                    "name": n.get("label"),
+                                    "center": (props["center_x"], props["center_y"]),
+                                    "door_x": props["door_x"],
+                                    "door_threshold_y": props["door_threshold_y"],
+                                    "station_pose": (props["center_x"], props["center_y"]),
+                                    "station_yaw": props.get("station_yaw", 0.0),
+                                    "furniture": props.get("furniture", []),
+                                    "targets": props.get("targets", {})
+                                }
+        except Exception:
+            pass
+        return cls.ROOM_NODES.get(canonical, cls.ROOM_NODES.get("hallway"))
 
     @classmethod
     def get_room_from_position(cls, x: float, y: float) -> str:
@@ -175,21 +211,28 @@ class SpatialKnowledgeGraph:
             # 1b. Step into central hallway
             waypoints.append((door_x, 0.0))
 
-        # Stage 2: Hallway transit to target room and entry
+        # Stage 2: Target room approach and entry
         if target_room in cls.ROOM_NODES and target_room != "hallway":
             tgt_info = cls.ROOM_NODES[target_room]
             tgt_door_x = tgt_info["door_x"]
             tgt_threshold_y = tgt_info["door_threshold_y"]
 
-            # 2a. Hallway approach at target room doorway (along Y=0.0 centerline)
-            waypoints.append((tgt_door_x, 0.0))
-            # 2b. Perpendicular doorway entrance
-            waypoints.append((tgt_door_x, tgt_threshold_y))
-            # 2c. Final room station pose (or specific object approach)
-            if target_object and target_object in tgt_info.get("targets", {}):
-                waypoints.append(tgt_info["targets"][target_object])
+            if cur_room == target_room:
+                # Already inside target room: proceed straight to station pose
+                if target_object and target_object in tgt_info.get("targets", {}):
+                    waypoints.append(tgt_info["targets"][target_object])
+                else:
+                    waypoints.append(tgt_info["station_pose"])
             else:
-                waypoints.append(tgt_info["station_pose"])
+                # 2a. Hallway approach at target room doorway (along Y=0.0 centerline)
+                waypoints.append((tgt_door_x, 0.0))
+                # 2b. Perpendicular doorway entrance
+                waypoints.append((tgt_door_x, tgt_threshold_y))
+                # 2c. Final room station pose (or specific object approach)
+                if target_object and target_object in tgt_info.get("targets", {}):
+                    waypoints.append(tgt_info["targets"][target_object])
+                else:
+                    waypoints.append(tgt_info["station_pose"])
 
         elif target_room == "hallway":
             waypoints.append((0.0, 0.0))

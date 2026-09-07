@@ -6,6 +6,9 @@
   <!-- ======================================================================== -->
 
   <gazebo>
+    <!-- Contact Sensor System -->
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact" />
+
     <!-- Joint State Publisher -->
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher" />
 
@@ -85,6 +88,29 @@
   </gazebo>
 
   <!-- ======================================================================== -->
+  <!-- 3D Depth Camera Sensor Definition (Registered Volumetric Perception)     -->
+  <!-- ======================================================================== -->
+  <gazebo reference="camera_link">
+    <sensor name="depth_camera" type="depth_camera">
+      <pose>0 0 0 0 0 0</pose>
+      <topic>/camera/depth_image</topic>
+      <update_rate>15.0</update_rate>
+      <camera>
+        <horizontal_fov>1.15</horizontal_fov>
+        <image>
+          <width>320</width>
+          <height>240</height>
+        </image>
+        <clip>
+          <near>0.10</near>
+          <far>10.0</far>
+        </clip>
+      </camera>
+      <always_on>1</always_on>
+    </sensor>
+  </gazebo>
+
+  <!-- ======================================================================== -->
   <!-- IMU Sensor Definition                                                    -->
   <!-- ======================================================================== -->
   <gazebo reference="imu_link">
@@ -93,6 +119,200 @@
       <update_rate>50.0</update_rate>
       <always_on>1</always_on>
     </sensor>
+  </gazebo>
+
+  <!-- ======================================================================== -->
+  <!-- 360° Tactile Bumper Contact Sensor (Physical Collision Defense)           -->
+  <!-- ======================================================================== -->
+  <gazebo reference="bumper_link">
+    <sensor name="bumper_contact" type="contact">
+      <contact>
+        <collision>bumper_collision</collision>
+      </contact>
+      <topic>/bumper/contacts</topic>
+      <update_rate>50.0</update_rate>
+      <always_on>1</always_on>
+    </sensor>
+  </gazebo>
+
+  <!-- ======================================================================== -->
+  <!-- Corner ToF / Ultrasonic Proximity Sensors                                 -->
+  <!-- ======================================================================== -->
+  <xacro:macro name="tof_proximity_sensor" params="name reference topic">
+    <gazebo reference="${reference}">
+      <sensor name="${name}" type="gpu_lidar">
+        <pose>0 0 0 0 0 0</pose>
+        <topic>${topic}</topic>
+        <update_rate>25.0</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>5</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.15</min_angle>
+              <max_angle>0.15</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.02</min>
+            <max>2.0</max>
+            <resolution>0.005</resolution>
+          </range>
+        </ray>
+        <always_on>1</always_on>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:tof_proximity_sensor name="tof_front_left" reference="tof_front_left_link" topic="/tof/front_left" />
+  <xacro:tof_proximity_sensor name="tof_front_right" reference="tof_front_right_link" topic="/tof/front_right" />
+  <xacro:tof_proximity_sensor name="tof_rear" reference="tof_rear_link" topic="/tof/rear" />
+
+  <!-- ======================================================================== -->
+  <!-- Hand Subsystem Plugins & Contacts                                        -->
+  <!-- ======================================================================== -->
+  <gazebo reference="finger_left_link">
+    <sensor name="hand_contact_left" type="contact">
+      <contact>
+        <collision>finger_left_collision</collision>
+      </contact>
+      <topic>/hand/contacts/left</topic>
+      <update_rate>50.0</update_rate>
+    </sensor>
+  </gazebo>
+  <gazebo reference="finger_right_link">
+    <sensor name="hand_contact_right" type="contact">
+      <contact>
+        <collision>finger_right_collision</collision>
+      </contact>
+      <topic>/hand/contacts/right</topic>
+      <update_rate>50.0</update_rate>
+    </sensor>
+  </gazebo>
+
+  <gazebo>
+    <!-- 6-DOF Right Arm Joint Position Controllers (Milestones M2 / M3) -->
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_shoulder_yaw_joint</joint_name>
+      <topic>/arm/joint_1/cmd_pos</topic>
+      <initial_position>0.0</initial_position>
+      <p_gain>800</p_gain>
+      <i_gain>10</i_gain>
+      <d_gain>30</d_gain>
+      <cmd_max>50</cmd_max>
+      <cmd_min>-50</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_shoulder_pitch_joint</joint_name>
+      <topic>/arm/joint_2/cmd_pos</topic>
+      <initial_position>0.20</initial_position>
+      <p_gain>800</p_gain>
+      <i_gain>10</i_gain>
+      <d_gain>30</d_gain>
+      <cmd_max>50</cmd_max>
+      <cmd_min>-50</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_shoulder_roll_joint</joint_name>
+      <topic>/arm/joint_3/cmd_pos</topic>
+      <initial_position>0.0</initial_position>
+      <p_gain>800</p_gain>
+      <i_gain>10</i_gain>
+      <d_gain>30</d_gain>
+      <cmd_max>50</cmd_max>
+      <cmd_min>-50</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_elbow_pitch_joint</joint_name>
+      <topic>/arm/joint_4/cmd_pos</topic>
+      <initial_position>-1.80</initial_position>
+      <p_gain>600</p_gain>
+      <i_gain>8</i_gain>
+      <d_gain>20</d_gain>
+      <cmd_max>40</cmd_max>
+      <cmd_min>-40</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_wrist_pitch_joint</joint_name>
+      <topic>/arm/joint_5/cmd_pos</topic>
+      <initial_position>0.60</initial_position>
+      <p_gain>400</p_gain>
+      <i_gain>5</i_gain>
+      <d_gain>10</d_gain>
+      <cmd_max>25</cmd_max>
+      <cmd_min>-25</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_wrist_yaw_joint</joint_name>
+      <topic>/arm/joint_6/cmd_pos</topic>
+      <initial_position>0.0</initial_position>
+      <p_gain>400</p_gain>
+      <i_gain>5</i_gain>
+      <d_gain>10</d_gain>
+      <cmd_max>25</cmd_max>
+      <cmd_min>-25</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>right_wrist_roll_joint</joint_name>
+      <topic>/arm/joint_7/cmd_pos</topic>
+      <initial_position>0.0</initial_position>
+      <p_gain>400</p_gain>
+      <i_gain>5</i_gain>
+      <d_gain>10</d_gain>
+      <cmd_max>25</cmd_max>
+      <cmd_min>-25</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>finger_left_joint</joint_name>
+      <topic>/hand/left_finger/cmd_pos</topic>
+      <initial_position>0.001</initial_position>
+      <p_gain>2200</p_gain>
+      <i_gain>15</i_gain>
+      <d_gain>30</d_gain>
+      <cmd_max>120</cmd_max>
+      <cmd_min>-120</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>finger_right_joint</joint_name>
+      <topic>/hand/right_finger/cmd_pos</topic>
+      <initial_position>0.001</initial_position>
+      <p_gain>2200</p_gain>
+      <i_gain>15</i_gain>
+      <d_gain>30</d_gain>
+      <cmd_max>120</cmd_max>
+      <cmd_min>-120</cmd_min>
+    </plugin>
+
+    <!-- Dynamic DetachableJoint Plugin for guaranteed slip-free picking -->
+    <plugin
+      filename="gz-sim-detachable-joint-system"
+      name="gz::sim::systems::DetachableJoint">
+      <parent_link>right_palm_link</parent_link>
+      <child_model>book_math</child_model>
+      <child_link>link</child_link>
+      <detach_topic>/gracemo_vira/detachable_joint/detach</detach_topic>
+      <attach_topic>/gracemo_vira/detachable_joint/attach</attach_topic>
+      <output_topic>/gracemo_vira/detachable_joint/state</output_topic>
+    </plugin>
+
   </gazebo>
 
 </robot>

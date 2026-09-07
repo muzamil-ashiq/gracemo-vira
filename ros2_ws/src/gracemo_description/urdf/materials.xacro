@@ -25,4 +25,16 @@
     <color rgba="0.95 0.45 0.05 1.0"/>
   </material>
 
+  <material name="cyan_glow">
+    <color rgba="0.0 0.83 1.0 1.0"/>
+  </material>
+
+  <material name="matte_dark_titanium">
+    <color rgba="0.12 0.14 0.17 1.0"/>
+  </material>
+
+  <material name="safety_orange">
+    <color rgba="1.0 0.40 0.0 1.0"/>
+  </material>
+
 </robot>

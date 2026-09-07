@@ -48,6 +48,13 @@ ros2_ws/install/
 ros2_ws/log/
 COLCON_IGNORE
 
+# Local Architecture & Workflows (Local only, not committed to git)
+blueprints/
+*.blueprint
+.blueprint/
+/*.jpg
+/*.png
+
 # IDE & OS
 .vscode/
 .idea/

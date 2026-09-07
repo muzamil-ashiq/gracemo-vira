@@ -43,20 +43,23 @@ class BrainAdapter:
         self._init_llm_client()
 
     def _init_llm_client(self):
-        if self.provider in ["nvidia", "openai", "ollama", "vllm"]:
-            from openai import OpenAI
-            if self.api_key or self.provider == "ollama":
-                key = self.api_key if self.api_key else "ollama"
-                self.llm_client = OpenAI(base_url=self.base_url, api_key=key, timeout=self.timeout_sec)
+        try:
+            if self.provider in ["nvidia", "openai", "ollama", "vllm"]:
+                from openai import OpenAI
+                if self.api_key or self.provider == "ollama":
+                    key = self.api_key if self.api_key else "ollama"
+                    self.llm_client = OpenAI(base_url=self.base_url, api_key=key, timeout=self.timeout_sec)
+                else:
+                    self.llm_client = None
+            elif self.provider == "gemini":
+                from google import genai
+                if self.api_key:
+                    self.llm_client = genai.Client(api_key=self.api_key)
+                else:
+                    self.llm_client = None
             else:
                 self.llm_client = None
-        elif self.provider == "gemini":
-            from google import genai
-            if self.api_key:
-                self.llm_client = genai.Client(api_key=self.api_key)
-            else:
-                self.llm_client = None
-        else:
+        except ImportError:
             self.llm_client = None
 
     def think_and_respond(self, user_query: str) -> Optional[str]:
@@ -67,21 +70,27 @@ class BrainAdapter:
         if len(cleaned_query) < 2:
             return None
 
-        # 1. Fetch current grounded world snapshot from Kernel
-        snapshot = self.client.get_snapshot() or {}
-        vision_info = snapshot.get("last_vision_detection")
+        # 1. Fetch compiled contextual truth (NOW + PAST + RELATIONS) from MNSE Context Compiler
+        context = self.client.get_context(history_limit=5) or {}
+        now_state = context.get("now", {})
+        recent_events = context.get("recent_history", [])
+        env_graph = context.get("environment_graph", {})
 
-        # 2. Build multi-turn context
+        # 2. Build multi-turn context grounded in authoritative MNSE state
         history_text = ""
         if self.dialogue_history:
             for turn in self.dialogue_history[-2:]:
                 history_text += f"Person: {turn['user']}\nViRa: {turn['bot']}\n"
 
         context_prompt = (
-            f"Sensory state: Vision={json.dumps(vision_info)}\n"
+            f"Authoritative MNSE Context:\n"
+            f"- Current State: {json.dumps(now_state)}\n"
+            f"- Environment Knowledge: {json.dumps(env_graph)}\n"
+            f"- Recent Observations: {len(recent_events)} ledger entries\n\n"
+            f"Dialogue History:\n"
             f"{history_text}"
             f"Person: \"{cleaned_query}\"\n"
-            f"ViRa (1 short spoken sentence):"
+            f"ViRa (1 short spoken sentence grounded in truth):"
         )
 
         try:

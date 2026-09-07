@@ -42,12 +42,17 @@ try:
 except Exception:
     VoiceAdapter = None
 
+from gracemo_sdk import AdapterClient, VisionNoiseGate
 from gracemo_brain.mission_planner import MissionPlanner, MissionPlan, MissionStep, SpatialKnowledgeGraph
 
 
 class MissionVisualizer:
     def __init__(self):
         self.node = gz_transport.Node()
+
+        # Kernel connection & Noise Gate
+        self.client = AdapterClient(adapter_name="mission_visualizer", base_url="http://127.0.0.1:7780")
+        self.noise_gate = VisionNoiseGate(confidence_threshold=0.30, cooldown_sec=3.0)
 
         # Load YOLO model
         model_path = str(ROOT / "yolo11n.pt") if (ROOT / "yolo11n.pt").exists() else "yolo11n.pt"
@@ -138,6 +143,16 @@ class MissionVisualizer:
                     if self.current_room_label in self.room_inventory:
                         self.room_inventory[self.current_room_label].add(cls_name)
 
+                    # Emit grounded observation to MNSE Kernel
+                    if self.noise_gate.should_emit(cls_name, conf, self.current_room_label):
+                        cx = float((xyxy[0] + xyxy[2]) / 2.0)
+                        cy = float((xyxy[1] + xyxy[3]) / 2.0)
+                        self.client.emit(
+                            "ObjectDetected",
+                            {"class_name": cls_name, "confidence": conf, "x": cx, "y": cy},
+                            source="Vision"
+                        )
+
                 with self.vision_lock:
                     self.latest_detections = detections
             except Exception:
@@ -216,12 +231,26 @@ class MissionVisualizer:
             self.has_odom = True
 
         # Update current room label based on spatial position
+        prev_room = self.current_room_label
         if pos.y > 1.2:
-            self.current_room_label = "Master Bedroom" if pos.x < 0 else "Home Study"
+            new_room = "Master Bedroom" if pos.x < 0 else "Home Study"
         elif pos.y < -1.2:
-            self.current_room_label = "Kitchen & Dining" if pos.x < 0 else "Living Room"
+            new_room = "Kitchen & Dining" if pos.x < 0 else "Living Room"
         else:
-            self.current_room_label = "Central Hallway"
+            new_room = "Central Hallway"
+
+        self.current_room_label = new_room
+        if new_room != prev_room:
+            self.client.emit(
+                "NavigationArrived",
+                {"destination": new_room, "success": True},
+                source="RobotBridge"
+            )
+            self.client.emit(
+                "RobotPosition",
+                {"x": pos.x, "y": pos.y, "theta": yaw, "speed": 0.0},
+                source="RobotBridge"
+            )
 
     def _on_scan(self, msg: GzLaserScan):
         # Scan range is -pi to +pi (360 samples). Center index (180) is straight ahead (0 deg).
@@ -328,13 +357,26 @@ class MissionVisualizer:
                 self.publish_cmd(0.0, 0.0)
                 continue
 
-            # 1. Action: Perceptual Scan & Verification
+            # 1. Action: Perceptual Scan & Verification (360° Panoramic Camera Survey)
             if step.action_type == "SCAN":
-                found = [o for o in step.expected_objects if o in self.detected_objects]
-                found_str = ", ".join(found) if found else "room furniture"
-                console.print(f"[bold green]✓ [STEP {step.step_num} COMPLETE] Scanned {step.target_room.title()}: Detected {found_str}[/bold green]")
-                self.active_mission.advance()
-                continue
+                if not hasattr(self, "_scan_start_time") or self._scan_start_time is None:
+                    self._scan_start_time = time.time()
+                    self.speak(f"Entering scan mode in {step.target_room.title()}. Surveying environment.")
+                    console.print(f"[bold cyan]🔄 [SCANNING] Performing 360° visual survey of {step.target_room.title()}...[/bold cyan]")
+
+                elapsed_scan = time.time() - self._scan_start_time
+                if elapsed_scan < 7.0:
+                    self.publish_cmd(0.0, 0.45)
+                    continue
+                else:
+                    self.publish_cmd(0.0, 0.0)
+                    self._scan_start_time = None
+                    room_key = self.current_room_label
+                    found_items = list(self.room_inventory.get(room_key, []))
+                    found_str = ", ".join(found_items) if found_items else "room furniture"
+                    console.print(f"[bold green]✓ [STEP {step.step_num} COMPLETE] Scanned {step.target_room.title()}: Cataloged {found_str}[/bold green]")
+                    self.active_mission.advance()
+                    continue
 
             # 2. Action: Verbal Report
             if step.action_type == "REPORT":
@@ -392,6 +434,15 @@ class MissionVisualizer:
                 else:
                     wz = 0.0
 
+            # 360° Safety Reflex & Obstacle Deceleration
+            if self.min_obstacle_dist < 0.28:
+                vx = 0.0
+                if log_tick % 20 == 0:
+                    console.print(f"[bold red]⚠️ Proximity cushion active ({self.min_obstacle_dist:.2f}m). Pausing forward translation.[/bold red]")
+            elif self.min_obstacle_dist < 0.45:
+                cushion_scale = (self.min_obstacle_dist - 0.28) / 0.17
+                vx = vx * max(0.15, min(1.0, cushion_scale))
+
             self.publish_cmd(vx, wz)
 
             # Print navigation status every 1 second (20 ticks)
@@ -420,6 +471,12 @@ def print_help():
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="GRaCEmo ViRa Real-Time Mission Visualizer & Control")
+    parser.add_argument("--auto", "--tour", action="store_true", help="Start full autonomous tour immediately")
+    parser.add_argument("--room", type=str, default=None, help="Navigate to specific room immediately")
+    args, _ = parser.parse_known_args()
+
     vis = MissionVisualizer()
 
     console.print(Panel.fit(
@@ -442,7 +499,13 @@ def main():
 
     patrol_order = ["bedroom", "study", "living", "kitchen", "hallway"]
     patrol_idx = 0
-    auto_tour = False
+    auto_tour = bool(args.auto)
+
+    if args.auto:
+        vis.navigate_to_room(patrol_order[patrol_idx])
+        vis.speak("Starting full autonomous apartment tour.")
+    elif args.room:
+        vis.navigate_to_room(args.room)
 
     def handle_command(cmd_str: str):
         nonlocal auto_tour, patrol_idx

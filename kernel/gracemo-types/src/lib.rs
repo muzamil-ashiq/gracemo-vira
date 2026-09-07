@@ -20,6 +20,7 @@ pub enum EventSource {
 pub enum RobotAction {
     Speak { text: String },
     NavigateTo { x: f64, y: f64 },
+    NavigateToRoom { room: String },
     LookAt { x: f32, y: f32, z: f32 },
     Express { emotion: String },
     Stop,

@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Callable, Dict, Generator, Optional
+from typing import Any, Callable, Dict, Generator, Optional, List
 import uuid
 import requests
 
@@ -33,7 +33,7 @@ class AdapterClient:
             return False
 
     def get_snapshot(self) -> Optional[Dict[str, Any]]:
-        """Fetch current live state snapshot from Kernel."""
+        """Fetch current live state snapshot from Kernel (InspectorState)."""
         try:
             resp = requests.get(f"{self.base_url}/snapshot", timeout=2.0)
             if resp.status_code == 200:
@@ -41,6 +41,33 @@ class AdapterClient:
         except Exception:
             pass
         return None
+
+    def get_context(self, history_limit: int = 10) -> Optional[Dict[str, Any]]:
+        """Fetch compiled contextual truth (NOW + PAST + RELATIONS) from Kernel Context Compiler."""
+        try:
+            resp = requests.get(f"{self.base_url}/context?limit={history_limit}", timeout=2.0)
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception:
+            pass
+        return None
+
+    def get_graph(self) -> Optional[Dict[str, Any]]:
+        """Fetch full Knowledge Graph from Kernel."""
+        try:
+            resp = requests.get(f"{self.base_url}/graph", timeout=2.0)
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception:
+            pass
+        return None
+
+    def get_graph_nodes(self) -> List[Dict[str, Any]]:
+        """Fetch list of all nodes in Knowledge Graph."""
+        graph = self.get_graph()
+        if graph and "nodes" in graph:
+            return graph["nodes"]
+        return []
 
     def listen_actions(self) -> Generator[Dict[str, Any], None, None]:
         """Listen to live SSE stream for ActionRequested events."""

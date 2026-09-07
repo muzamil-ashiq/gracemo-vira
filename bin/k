@@ -29,6 +29,31 @@ ROOM_COORDS = {
 }
 
 
+def ensure_kernel_running():
+    try:
+        resp = requests.get(f"{KERNEL_URL}/health", timeout=0.5)
+        if resp.status_code == 200:
+            return True
+    except Exception:
+        pass
+
+    bin_path = ROOT / "kernel" / "target" / "debug" / "gracemo-kernel"
+    if not bin_path.exists():
+        bin_path = ROOT / "kernel" / "target" / "release" / "gracemo-kernel"
+
+    if bin_path.exists():
+        subprocess.Popen([str(bin_path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for _ in range(12):
+            time.sleep(0.2)
+            try:
+                resp = requests.get(f"{KERNEL_URL}/health", timeout=0.3)
+                if resp.status_code == 200:
+                    return True
+            except Exception:
+                pass
+    return False
+
+
 def drive_in_container(linear_x: float, angular_z: float, duration_sec: float):
     """Execute direct 20Hz rclpy velocity stream inside Distrobox container."""
     py_code = f"""
@@ -57,7 +82,7 @@ rclpy.shutdown()
     cmd = [
         os.path.expanduser("~/.local/bin/distrobox"),
         "enter",
-        "gracemo-ros2",
+        "gracemo-harmonic",
         "--",
         "bash",
         "-c",
@@ -98,7 +123,7 @@ rclpy.shutdown()
     cmd = [
         os.path.expanduser("~/.local/bin/distrobox"),
         "enter",
-        "gracemo-ros2",
+        "gracemo-harmonic",
         "--",
         "bash",
         "-c",
@@ -210,7 +235,7 @@ def cmd_status(args):
     except Exception:
         state = {}
 
-    pos = state.get("last_robot_position", {})
+    pos = state.get("last_robot_position") or {}
     x = pos.get("x", 0.0)
     y = pos.get("y", 0.0)
 
@@ -220,8 +245,8 @@ def cmd_status(args):
     elif y < -1.3:
         current_room = "Home Study" if x < -0.5 else "Living Room"
 
-    vision = state.get("last_vision_detection", {})
-    voice = state.get("last_voice_command", {})
+    vision = state.get("last_vision_detection") or {}
+    voice = state.get("last_voice_command") or {}
 
     output = {
         "status": "ONLINE" if state else "OFFLINE",
@@ -244,17 +269,10 @@ def cmd_status(args):
 
 
 def cmd_goto(args):
-    """Dispatch closed-loop dynamic feedback navigation to a room."""
+    """Dispatch closed-loop navigation through Level 2 Navigation Skill."""
     room = args.room.lower().strip()
-    if room not in ROOM_COORDS:
-        print(f"Error: Unknown room '{room}'. Available: {list(ROOM_COORDS.keys())}")
-        return
-
-    gx, gy = ROOM_COORDS.get(room, (0.0, 0.0))
-    print(f"🎯 [CLOSED-LOOP NAV] Navigating to {room.upper()} ({gx:.1f}, {gy:.1f}) with 20Hz LiDAR APF repulsion...")
-
     try:
-        payload = {"action": "Navigate", "params": {"room": room, "target_x": gx, "target_y": gy}}
+        payload = {"action": "Navigate", "params": {"room": room}}
         requests.post(f"{KERNEL_URL}/emit", json={"event_type": "ActionRequested", "payload": payload, "source": "k-cli"}, timeout=1.0)
     except Exception:
         pass
@@ -262,14 +280,27 @@ def cmd_goto(args):
     cmd = [
         os.path.expanduser("~/.local/bin/distrobox"),
         "enter",
-        "gracemo-ros2",
+        "gracemo-harmonic",
         "--",
         "bash",
         "-c",
-        f"source /opt/ros/humble/setup.bash && python3 /home/mab/Applications/lpu-project/gracemo-vira/scripts/closed_loop_nav.py {room}"
+        f"export PYTHONPATH=/home/mab/Applications/lpu-project/gracemo-vira/adapters/sdk:/home/mab/Applications/lpu-project/gracemo-vira/adapters/motion:$PYTHONPATH; python3 /home/mab/Applications/lpu-project/gracemo-vira/adapters/brain/gracemo_brain/skills/navigation_skill.py {room}"
     ]
     subprocess.run(cmd)
-    print(f"✅ Arrived in {room.upper()}! Robot centered in room with zero wall collision.")
+
+
+def cmd_explore(args):
+    """Run Autonomous First Walk discovery patrol across unmapped apartment."""
+    cmd = [
+        os.path.expanduser("~/.local/bin/distrobox"),
+        "enter",
+        "gracemo-harmonic",
+        "--",
+        "bash",
+        "-c",
+        "python3 /home/mab/Applications/lpu-project/gracemo-vira/adapters/motion/gracemo_base_controller.py explore"
+    ]
+    subprocess.run(cmd)
 
 
 def cmd_speak(args):
@@ -283,28 +314,161 @@ def cmd_speak(args):
 
 
 def cmd_scan(args):
-    """Run real-time vision scan on the current room."""
+    """Run real-time vision scan on the current room using live Knowledge Graph."""
     print("👁️ Scanning environment with YOLOv11...")
-    time.sleep(0.5)
+    ensure_kernel_running()
     try:
-        resp = requests.get(f"{KERNEL_URL}/state", timeout=1.0)
-        state = resp.json() if resp.status_code == 200 else {}
-        vision = state.get("last_vision_detection", {})
-        objects = vision.get("objects", ["dining_table", "chair", "refrigerator"])
-        print(f"✓ Detected {len(objects)} objects:")
-        for obj in objects:
-            print(f"  • {obj} (distance: 1.2m, confidence: 0.88)")
+        resp = requests.get(f"{KERNEL_URL}/context", timeout=1.5)
+        if resp.status_code == 200:
+            ctx = resp.json()
+            now = ctx.get("now", {})
+            room = now.get("current_room", "Central Hallway")
+            graph = ctx.get("graph", {})
+            edges = graph.get("edges", [])
+
+            located_edges = [e for e in edges if e.get("relation") == "LOCATED_IN"]
+
+            print(f"📍 Robot Stationed: {room}")
+            if located_edges:
+                print(f"✓ Visually Verified Entities in Knowledge Graph ({len(located_edges)}):")
+                for e in located_edges:
+                    src = e.get("source", "").replace("object:", "")
+                    target = e.get("target", "").replace("room:", "").replace("_", " ").title()
+                    conf = e.get("confidence", 1.0) * 100
+                    print(f"  • {src.upper():<16} ──[LOCATED_IN]──> {target} (conf: {conf:.1f}%)")
+            else:
+                print(f"  (No objects visually sighted in {room} yet)")
+        else:
+            print(f"Kernel returned status {resp.status_code}")
     except Exception as e:
         print(f"Error: {e}")
 
 
+def cmd_hud(args):
+    """Launch interactive real-time Vision HUD window with live Gazebo camera & YOLO bounding boxes."""
+    print("🎥 Opening GRaCEmo ViRa Live Vision HUD window...")
+    cmd = [
+        os.path.expanduser("~/.local/bin/distrobox"),
+        "enter",
+        "gracemo-harmonic",
+        "--",
+        "bash",
+        "-c",
+        "export DISPLAY='${DISPLAY:-:0}' && export WAYLAND_DISPLAY='${WAYLAND_DISPLAY:-}' && python3 /home/mab/Applications/lpu-project/gracemo-vira/scripts/mission_visualizer.py"
+    ]
+    subprocess.run(cmd)
+
+
+def cmd_reset(args):
+    """Instantly reset ViRa back to dead center (0.0, 0.0) of Central Hallway."""
+    print("🔄 Resetting ViRa to dead center of Central Hallway (0.0, 0.0)...")
+    cmd = [
+        os.path.expanduser("~/.local/bin/distrobox"),
+        "enter",
+        "gracemo-harmonic",
+        "--",
+        "bash",
+        "-c",
+        "gz service -s /world/gracemo_home/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 2000 --req 'reset: {all: true}'"
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    if "data: true" in res.stdout:
+        print("✓ ViRa reset to Central Hallway (0.0, 0.0) with zero heading error!")
+    else:
+        print(f"Result: {res.stdout.strip() or res.stderr.strip()}")
+
+
+def cmd_reflex(args):
+    """Run the Autonomous LiDAR Reflex Shield test against a wall."""
+    cmd_reset(args)
+    cmd = [
+        os.path.expanduser("~/.local/bin/distrobox"),
+        "enter",
+        "gracemo-harmonic",
+        "--",
+        "python3",
+        str(ROOT / "scripts" / "test_wall_reflex.py")
+    ]
+    subprocess.run(cmd)
+
+
+def cmd_pipe(args):
+    """Execute a stream of piped .k commands via native Rust K Engine."""
+    pipe_str = " ".join(args.pipeline)
+    ensure_kernel_running()
+    from gracemo_sdk.k_client import KClient
+    client = KClient(KERNEL_URL)
+    print(f"⚡ [K ENGINE] Executing pipeline: {pipe_str}")
+    res = client.execute(pipe_str)
+    if res.get("success"):
+        summary = res.get("result", {})
+        print(f"✓ Pipeline succeeded! Completed {summary.get('completed_stages')}/{summary.get('total_stages')} stages.")
+        for st in summary.get("stage_results", []):
+            print(f"  • {st.get('noun')}::{st.get('verb')} -> {st.get('output')} ({st.get('execution_time_ms')}ms)")
+    else:
+        print(f"⚠️ K Engine dispatch error: {res.get('error')}")
+        from gracemo_sdk.workflow_engine import WorkflowEngine
+        engine = WorkflowEngine()
+        engine.execute_pipe(pipe_str)
+
+
+def cmd_run(args):
+    """Execute a .k workflow script file."""
+    filepath = args.file
+    try:
+        with open(filepath, "r") as f:
+            content = f.read().strip()
+        cmd_pipe(argparse.Namespace(pipeline=[content]))
+    except Exception as e:
+        print(f"Error reading workflow file: {e}")
+
+
 def cmd_memory_query(args):
     """Query episodic memory ledger."""
-    query = " ".join(args.query)
+    query = " ".join(args.query).lower().strip()
     print(f"🔍 Querying Kernel Episodic Memory for: \"{query}\"...")
     try:
-        resp = requests.get(f"{KERNEL_URL}/state", timeout=1.0)
-        print(f"✓ Memory Result: Observed in Kitchen Dining Area at (4.2, 3.8) [confidence: 0.92]")
+        resp = requests.get(f"{KERNEL_URL}/history?limit=50", timeout=2.0)
+        if resp.status_code != 200:
+            print("⚠️ Kernel is offline or unreachable.")
+            return
+
+        events = resp.json()
+        matches = []
+        for ev in events:
+            ev_str = json.dumps(ev).lower()
+            if query in ev_str:
+                matches.append(ev)
+
+        if not matches:
+            print(f"No ledger records matching '{query}' found.")
+            return
+
+        print(f"✓ Found {len(matches)} matching event(s) in Ledger:")
+        for m in matches[:10]:
+            ts_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(m.get("timestamp", time.time())))
+            print(f"  • [{ts_str}] {m.get('event_type')}: {m.get('payload')}")
+    except Exception as e:
+        print(f"Error querying ledger: {e}")
+
+
+def cmd_context(args):
+    """Fetch and display compiled truth context from ViRa Chrono-Spatial Compiler (VCSC)."""
+    fmt = getattr(args, "format", None)
+    if getattr(args, "json", False):
+        fmt = "json"
+    fmt = fmt or "toon"
+
+    try:
+        resp = requests.get(f"{KERNEL_URL}/context?format={fmt}", timeout=2.0)
+        if resp.status_code == 200:
+            if fmt == "json":
+                print(json.dumps(resp.json(), indent=2))
+            else:
+                print(f"🧠 [VCSC COMPILED CONTEXT ({fmt.upper()})]:\n")
+                print(resp.text)
+        else:
+            print(f"Kernel returned status {resp.status_code}")
     except Exception as e:
         print(f"Error: {e}")
 
@@ -313,33 +477,75 @@ def cmd_memory_remember(args):
     """Remember a fact in the kernel ledger."""
     fact = " ".join(args.fact)
     source = getattr(args, "source", "gemini-cli")
-    payload = {"fact": fact, "source": source, "timestamp": time.time()}
     try:
-        requests.post(f"{KERNEL_URL}/emit", json={"event_type": "FactRemembered", "payload": payload, "source": source}, timeout=1.0)
-        print(f"✓ Remembered in Kernel Ledger: \"{fact}\" (source: {source})")
+        from gracemo_sdk import AdapterClient
+        client = AdapterClient(adapter_name="k-cli", base_url=KERNEL_URL)
+        ok = client.emit("Custom", {"name": "FactRemembered", "payload": {"fact": fact, "source": source}}, source="System")
+        if ok:
+            print(f"✓ Remembered in Kernel Ledger: \"{fact}\" (source: {source})")
+        else:
+            print(f"⚠️ Failed to record in Kernel Ledger (is Kernel running at {KERNEL_URL}?)")
     except Exception as e:
         print(f"Error: {e}")
 
 
 def cmd_graph(args):
-    """Display the Spatial Knowledge Graph."""
-    print("🕸️ ── GRaCEmo ViRa Spatial Knowledge Graph ──")
-    print("  [Apartment Floorplan (16m x 12m)]")
-    print("    ├── 🍳 Kitchen & Dining Area (4.0, 3.6)")
-    print("    │     ├── 🪑 Dining Table (4.2, 3.8)")
-    print("    │     ├── 🧊 Refrigerator (7.4, 2.2)")
-    print("    │     └── 🍽️ Kitchen Counter (6.8, 4.2)")
-    print("    ├── 🛏️ Master Bedroom (-4.5, 4.0)")
-    print("    │     ├── 🛌 Double Bed (-5.2, 4.4)")
-    print("    │     ├── 🚪 Wardrobe (-7.4, 3.0)")
-    print("    │     └── 📖 Study Desk (-2.2, 4.8)")
-    print("    ├── 🛋️ Living Room (4.0, -4.0)")
-    print("    │     ├── 🛋️ Sectional Sofa (4.2, -4.6)")
-    print("    │     ├── ☕ Coffee Table (4.0, -3.0)")
-    print("    │     └── 📺 Media TV Console (7.4, -3.6)")
-    print("    └── 💻 Home Study & Robot Lab (-4.5, -4.0)")
-    print("          ├── 🖥️ Executive Work Desk (-4.5, -4.4)")
-    print("          └── 📚 Bookshelf (-7.4, -3.5)")
+    """Display the live Relational Knowledge Graph from SQLite GraphDb."""
+    target_obj = getattr(args, "object", None)
+    if target_obj:
+        print(f"🕸️ Querying Knowledge Graph for: \"{target_obj}\"...")
+        try:
+            resp = requests.get(f"{KERNEL_URL}/graph?object={target_obj}", timeout=2.0)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get("found"):
+                    res = data["result"]
+                    ts_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(res.get("timestamp", time.time())))
+                    print(f"✓ Found in Knowledge Graph:")
+                    print(f"  • Entity:       {res.get('object')}")
+                    print(f"  • Relation:     {res.get('relation')} -> {res.get('location')}")
+                    print(f"  • Confidence:   {res.get('confidence', 1.0) * 100:.1f}%")
+                    print(f"  • Last Seen:    {ts_str}")
+                else:
+                    print(f"ℹ️ {data.get('message')}")
+            else:
+                print(f"Error querying graph: HTTP {resp.status_code}")
+        except Exception as e:
+            print(f"Error: {e}")
+        return
+
+    print("🕸️ ── GRaCEmo ViRa Live Knowledge Graph (SQLite GraphDb) ──")
+    try:
+        resp = requests.get(f"{KERNEL_URL}/graph", timeout=2.0)
+        if resp.status_code != 200:
+            print("⚠️ Kernel is offline or unreachable.")
+            return
+
+        data = resp.json()
+        nodes = data.get("nodes", [])
+        edges = data.get("edges", [])
+
+        print(f"  Total Entities: {len(nodes)} nodes | Relational Connections: {len(edges)} edges\n")
+
+        rooms = [n for n in nodes if n.get("type") == "Room"]
+        objects = [n for n in nodes if n.get("type") == "Object"]
+
+        print("  [Apartment Floorplan Topology]")
+        for room in rooms:
+            room_edges = [e for e in edges if e.get("target") == room.get("id")]
+            print(f"    ├── 📍 {room.get('label')}")
+            if room_edges:
+                for edge in room_edges:
+                    src = edge.get("source", "").replace("object:", "")
+                    print(f"    │     └── 👁️ [{edge.get('relation')}] {src} (conf: {edge.get('confidence', 1.0)*100:.0f}%)")
+            else:
+                print(f"    │     └── (No objects detected here yet)")
+
+        if not edges:
+            print("\n  💡 Tip: When ViRa navigates and inspects rooms in Gazebo, live camera YOLOv11 detections populate this graph dynamically!")
+
+    except Exception as e:
+        print(f"Error querying graph: {e}")
 
 
 def main():
@@ -389,8 +595,36 @@ def main():
     # k scan
     subparsers.add_parser("scan", help="Scan current room with YOLOv11 vision")
 
+    # k hud / k view
+    subparsers.add_parser("hud", help="Open live 30 FPS camera video HUD with real-time YOLO bounding boxes")
+    subparsers.add_parser("view", help="Open live 30 FPS camera video HUD with real-time YOLO bounding boxes")
+
     # k graph
-    subparsers.add_parser("graph", help="Show Spatial Knowledge Graph")
+    p_graph = subparsers.add_parser("graph", help="Show Spatial Knowledge Graph")
+    p_graph.add_argument("--object", "-o", help="Query specific object location in knowledge graph")
+
+    # k verify / k test
+    subparsers.add_parser("verify", help="Run 1-click full system, perception & brain verification")
+    subparsers.add_parser("test", help="Run 1-click full system, perception & brain verification")
+
+    # k reset / k center
+    subparsers.add_parser("reset", help="Reset ViRa to dead center (0.0, 0.0) of Central Hallway")
+    subparsers.add_parser("center", help="Reset ViRa to dead center (0.0, 0.0) of Central Hallway")
+
+    # k reflex
+    subparsers.add_parser("reflex", help="Test Autonomous LiDAR Reflex Shield (Spinal Cord Obstacle Avoidance)")
+
+    # k explore / k patrol
+    subparsers.add_parser("explore", help="Autonomous First Walk discovery patrol to map unknown apartment")
+    subparsers.add_parser("patrol", help="Autonomous First Walk discovery patrol to map unknown apartment")
+
+    # k pipe (Execute stream of .k pipes)
+    p_pipe = subparsers.add_parser("pipe", help="Execute stream of piped .k commands")
+    p_pipe.add_argument("pipeline", nargs="+", help="Pipeline string (e.g. 'nav::goto[bedroom] | vision::scan')")
+
+    # k run (Execute .k workflow file)
+    p_run = subparsers.add_parser("run", help="Execute .k workflow script file")
+    p_run.add_argument("file", help="Path to .k script file")
 
     # k memory
     p_mem = subparsers.add_parser("memory", help="Memory operations")
@@ -400,8 +634,17 @@ def main():
     p_mem_q.add_argument("query", nargs="+", help="Search query")
 
     p_mem_r = mem_sub.add_parser("remember", help="Store memory fact")
-    p_mem_r.add_argument("fact", nargs="+", help="Fact to store")
     p_mem_r.add_argument("--source", default="gemini-cli", help="Source attribution")
+    p_mem_r.add_argument("fact", nargs="+", help="Fact to store")
+
+    p_mem_u = mem_sub.add_parser("update", help="Update memory fact")
+    p_mem_u.add_argument("--source", default="gemini-cli", help="Source attribution")
+    p_mem_u.add_argument("fact", nargs="+", help="Fact to update")
+
+    # k context
+    p_ctx = subparsers.add_parser("context", help="Fetch compiled context from ViRa Chrono-Spatial Compiler (VCSC)")
+    p_ctx.add_argument("--format", "-f", default="toon", choices=["toon", "kpipe", "json"], help="Output format: toon (default), kpipe, json")
+    p_ctx.add_argument("--json", action="store_true", help="Output raw JSON")
 
     args = parser.parse_args()
 
@@ -417,6 +660,8 @@ def main():
         cmd_arm(args)
     elif args.command == "status":
         cmd_status(args)
+    elif args.command == "context":
+        cmd_context(args)
     elif args.command == "reload":
         cmd_reload(args)
     elif args.command == "goto":
@@ -425,12 +670,30 @@ def main():
         cmd_speak(args)
     elif args.command == "scan":
         cmd_scan(args)
+    elif args.command in ("hud", "view"):
+        cmd_hud(args)
     elif args.command == "graph":
         cmd_graph(args)
+    elif args.command in ("verify", "test"):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("verify_all", str(ROOT / "scripts" / "verify_all.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.main()
+    elif args.command in ("reset", "center"):
+        cmd_reset(args)
+    elif args.command == "reflex":
+        cmd_reflex(args)
+    elif args.command in ("explore", "patrol"):
+        cmd_explore(args)
+    elif args.command == "pipe":
+        cmd_pipe(args)
+    elif args.command == "run":
+        cmd_run(args)
     elif args.command == "memory":
         if args.mem_cmd == "query":
             cmd_memory_query(args)
-        elif args.mem_cmd == "remember":
+        elif args.mem_cmd == "remember" or args.mem_cmd == "update":
             cmd_memory_remember(args)
         else:
             p_mem.print_help()

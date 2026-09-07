@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 GRaCEmo ViRa — ROS 2 to Kernel Bridge Node
 Bridges ROS 2 sensory streams (/camera/image_raw, /odom, /scan) and motor commands (/cmd_vel)
@@ -18,15 +19,6 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan, Image
 
 
-ROOM_WAYPOINTS = {
-    "kitchen":  [(3.6, 0.0), (3.6, 2.0), (4.2, 3.6)],
-    "bedroom":  [(-2.3, 0.0), (-2.3, 2.0), (-4.5, 4.0)],
-    "living":   [(4.0, 0.0), (4.0, -2.0), (4.2, -4.0)],
-    "study":    [(-1.3, 0.0), (-1.3, -2.0), (-4.5, -4.0)],
-    "hallway":  [(0.0, 0.0)]
-}
-
-
 class KernelBridgeNode(Node):
     def __init__(self):
         super().__init__("gracemo_kernel_bridge")
@@ -34,7 +26,7 @@ class KernelBridgeNode(Node):
         self.declare_parameter("kernel_url", "http://127.0.0.1:7780")
         self.kernel_url = self.get_parameter("kernel_url").get_parameter_value().string_value
 
-        self.get_logger().info(f"Starting GRaCEmo ROS 2 Bridge connected to: {self.kernel_url}")
+        self.get_logger().info(f"Starting GRaCEmo ROS 2 <-> MNSE Bridge connected to: {self.kernel_url}")
 
         # 1. Motor Command Publisher (/cmd_vel)
         self.cmd_pub = self.create_publisher(Twist, "/cmd_vel", 10)
@@ -50,7 +42,6 @@ class KernelBridgeNode(Node):
         self.current_yaw_rad = 0.0
         self.last_emit_time = 0.0
         self.running = True
-        self.nav_thread = None
 
         # 4. Start Kernel Action Listener thread
         threading.Thread(target=self._listen_kernel_actions, daemon=True).start()
@@ -67,11 +58,16 @@ class KernelBridgeNode(Node):
         self.current_yaw_rad = math.atan2(siny_cosp, cosy_cosp)
 
         now = time.time()
-        if now - self.last_emit_time > 0.5:
+        if now - self.last_emit_time > 0.2:
             vel = msg.twist.twist.linear
+            speed = math.hypot(vel.x, vel.y)
             self._emit_event("RobotStateUpdated", {
-                "position": {"x": round(self.current_x, 2), "y": round(self.current_y, 2)},
-                "linear_velocity": round(vel.x, 2)
+                "position": {
+                    "x": round(self.current_x, 3),
+                    "y": round(self.current_y, 3),
+                    "theta": round(self.current_yaw_rad, 3),
+                    "speed": round(speed, 3)
+                }
             })
             self.last_emit_time = now
 
@@ -94,7 +90,7 @@ class KernelBridgeNode(Node):
             pass
 
     def _listen_kernel_actions(self):
-        """Listen to SSE live event stream from Kernel."""
+        """Listen to SSE live event stream from MNSE Kernel."""
         while self.running and rclpy.ok():
             try:
                 resp = requests.get(f"{self.kernel_url}/events/live", stream=True, timeout=10)
@@ -125,44 +121,11 @@ class KernelBridgeNode(Node):
 
         elif action == "Stop":
             self.cmd_pub.publish(Twist())
-            self.get_logger().info("Executing Stop")
+            self.get_logger().info("🛑 Executed Motor Stop from MNSE Action")
 
         elif action == "Navigate":
             room = params.get("room", "").lower()
-            if room in ROOM_WAYPOINTS:
-                self.get_logger().info(f"🚀 Navigating to {room.upper()} via Doorway Waypoints...")
-                waypoints = ROOM_WAYPOINTS[room]
-                threading.Thread(target=self._execute_waypoints, args=(waypoints, room), daemon=True).start()
-
-    def _execute_waypoints(self, waypoints: list, room_name: str):
-        """Drive through doorway waypoints smoothly into target room."""
-        for wx, wy in waypoints:
-            while rclpy.ok() and self.running:
-                dx = wx - self.current_x
-                dy = wy - self.current_y
-                dist = math.hypot(dx, dy)
-
-                if dist < 0.40:
-                    break
-
-                target_heading = math.atan2(dy, dx)
-                angle_diff = (target_heading - self.current_yaw_rad + math.pi) % (2 * math.pi) - math.pi
-
-                twist = Twist()
-                if abs(angle_diff) > 0.45:
-                    twist.angular.z = 1.2 if angle_diff > 0 else -1.2
-                    twist.linear.x = 0.05
-                else:
-                    twist.linear.x = 0.60
-                    twist.angular.z = 0.9 * angle_diff
-
-                self.cmd_pub.publish(twist)
-                time.sleep(0.05)
-
-        # Arrived at final waypoint
-        self.cmd_pub.publish(Twist())
-        self.get_logger().info(f"✅ Arrived in {room_name.upper()}!")
-        self._emit_event("RobotArrived", {"room": room_name})
+            self.get_logger().info(f"📍 Navigation Intent Received for: {room.upper()}")
 
 
 def main(args=None):
