@@ -83,6 +83,11 @@ class MissionVisualizer:
             "Home Study": set()
         }
 
+        # Active Wall-Unstick Reflex & Stall Detection
+        self.stall_count = 0
+        self.last_pos = None
+        self.recovering = 0
+
         # Subscriptions
         self.node.subscribe(GzImage, "/camera/image_raw", self._on_image)
         self.node.subscribe(GzOdometry, "/odom", self._on_odom)
@@ -405,6 +410,12 @@ class MissionVisualizer:
                 self.publish_cmd(0.0, 0.0)
                 continue
 
+            # 0. Active Wall Unstick Reflex: If recovering, execute smooth backoff and disengagement
+            if self.recovering > 0:
+                self.recovering -= 1
+                self.publish_cmd(-0.20, 0.45)
+                continue
+
             # 3. Action: Motion Navigation (TRANSIT, ENTER_DOOR, STATION, APPROACH)
             with self.pose_lock:
                 cur_x = self.cur_x
@@ -416,13 +427,8 @@ class MissionVisualizer:
             dy = ty - cur_y
             dist = math.hypot(dx, dy)
 
-            # Reach Tolerance: 0.60m for fluid hallway turns, 0.35m for doorway entry, 0.25m for final station
-            if step.action_type == "TRANSIT":
-                reach_radius = 0.60
-            elif step.action_type == "ENTER_DOOR":
-                reach_radius = 0.35
-            else:
-                reach_radius = 0.25
+            # Reach Tolerance: 0.25m ensures robot enters the exact doorway center (X=-5.0) before turning
+            reach_radius = 0.25
 
             if dist < reach_radius:
                 console.print(f"[green]  ✓ Step {step.step_num}/{len(self.active_mission.steps)} Reached: {step.description}[/green]")
@@ -453,6 +459,22 @@ class MissionVisualizer:
 
                 # Proactive angular steering authority keeps robot tracking straight without drifting
                 wz = float(np.clip(2.2 * alpha, -0.55, 0.55))
+
+            # Stall & Wall Contact Detection: If commanded forward but physically stationary, trigger reflex
+            if vx > 0.12:
+                if self.last_pos is not None:
+                    moved = math.hypot(cur_x - self.last_pos[0], cur_y - self.last_pos[1])
+                    if moved < 0.015:
+                        self.stall_count += 1
+                    else:
+                        self.stall_count = 0
+                self.last_pos = (cur_x, cur_y)
+
+                if self.stall_count >= 8:  # Stalled against surface for ~0.4s
+                    console.print("[bold yellow]⚡ [WALL REFLEX] Surface contact detected! Reversing and disengaging...[/bold yellow]")
+                    self.recovering = 15  # Back up and pivot away for 0.75s
+                    self.stall_count = 0
+                    continue
 
             # Adaptive Proximity Cushion: prevents doorway freeze while protecting against collisions
             if self.min_obstacle_dist < 0.22:
