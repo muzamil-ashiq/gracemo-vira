@@ -416,8 +416,13 @@ class MissionVisualizer:
             dy = ty - cur_y
             dist = math.hypot(dx, dy)
 
-            # Reach Tolerance: 0.25m for corridor doorway transitions, 0.35m for stations
-            reach_radius = 0.35 if step.action_type in ("ENTER_DOOR", "STATION") else 0.25
+            # Reach Tolerance: 0.60m for fluid hallway turns, 0.35m for doorway entry, 0.25m for final station
+            if step.action_type == "TRANSIT":
+                reach_radius = 0.60
+            elif step.action_type == "ENTER_DOOR":
+                reach_radius = 0.35
+            else:
+                reach_radius = 0.25
 
             if dist < reach_radius:
                 console.print(f"[green]  ✓ Step {step.step_num}/{len(self.active_mission.steps)} Reached: {step.description}[/green]")
@@ -427,7 +432,7 @@ class MissionVisualizer:
                     self.publish_cmd(0.0, 0.0)
                 continue
 
-            # Shortest-signed-angle tracking with symmetry-broken 180-deg rear pivot
+            # Shortest-signed-angle tracking (-pi to +pi)
             target_yaw = math.atan2(dy, dx)
             alpha = target_yaw - cur_yaw
             while alpha > math.pi:
@@ -435,30 +440,28 @@ class MissionVisualizer:
             while alpha < -math.pi:
                 alpha += 2 * math.pi
 
-            if abs(abs(alpha) - math.pi) < 0.15:
-                alpha = math.pi
-
-            # Strict heading alignment before forward motion prevents diagonal wall drift
-            if abs(alpha) > math.radians(6):
+            # Continuous Unicycle Navigation:
+            # Quick, responsive in-place turn only for large initial turns (> 40 degrees)
+            if abs(alpha) > math.radians(40):
                 vx = 0.0
-                wz = float(np.clip(0.50 * alpha, -0.35, 0.35))
+                wz = float(np.clip(1.8 * alpha, -0.65, 0.65))
             else:
-                align = max(0.0, math.cos(alpha))
-                v_max = min(0.35, max(0.15, 0.45 * dist))
-                vx = v_max * (align ** 2)
-                if abs(alpha) > math.radians(2):
-                    wz = float(np.clip(0.35 * alpha, -0.10, 0.10))
-                else:
-                    wz = 0.0
+                # Drive forward continuously with cosine speed scaling during gentle curves
+                align = max(0.20, math.cos(alpha))
+                v_max = min(0.38, max(0.18, 0.50 * dist))
+                vx = v_max * align
 
-            # 360° Safety Reflex & Obstacle Deceleration
-            if self.min_obstacle_dist < 0.28:
+                # Proactive angular steering authority keeps robot tracking straight without drifting
+                wz = float(np.clip(2.2 * alpha, -0.55, 0.55))
+
+            # Adaptive Proximity Cushion: prevents doorway freeze while protecting against collisions
+            if self.min_obstacle_dist < 0.22:
                 vx = 0.0
                 if log_tick % 20 == 0:
                     console.print(f"[bold red]⚠️ Proximity cushion active ({self.min_obstacle_dist:.2f}m). Pausing forward translation.[/bold red]")
-            elif self.min_obstacle_dist < 0.45:
-                cushion_scale = (self.min_obstacle_dist - 0.28) / 0.17
-                vx = vx * max(0.15, min(1.0, cushion_scale))
+            elif self.min_obstacle_dist < 0.36:
+                cushion_scale = (self.min_obstacle_dist - 0.22) / 0.14
+                vx = vx * max(0.20, min(1.0, cushion_scale))
 
             self.publish_cmd(vx, wz)
 
