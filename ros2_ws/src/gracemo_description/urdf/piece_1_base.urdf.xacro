@@ -1,0 +1,237 @@
+<?xml version="1.0"?>
+<!-- ============================================================================== -->
+<!-- GRaCEmo ViRa — Clean Rebuild                                                   -->
+<!-- Piece 1: Mobile Base Subsystem                                                 -->
+<!-- ============================================================================== -->
+<robot name="gracemo_vira_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Include Shared Materials -->
+  <xacro:include filename="$(find gracemo_description)/urdf/materials.xacro" />
+
+  <!-- ======================================================================== -->
+  <!-- Mathematical Parameters & Dimensions                                     -->
+  <!-- ======================================================================== -->
+  <xacro:property name="wheel_radius"     value="0.065" />  <!-- 130mm diameter -->
+  <xacro:property name="wheel_width"      value="0.030" />  <!-- 30mm thickness -->
+  <xacro:property name="wheelbase"        value="0.340" />  <!-- 340mm track width -->
+  <xacro:property name="chassis_radius"   value="0.190" />  <!-- 380mm diameter -->
+  <xacro:property name="chassis_height"   value="0.140" />  <!-- 140mm height -->
+  <xacro:property name="bumper_radius"    value="0.205" />  <!-- 410mm diameter ring -->
+  <xacro:property name="bumper_height"    value="0.040" />  <!-- 40mm ring thickness -->
+  <xacro:property name="caster_radius"    value="0.025" />  <!-- 50mm ball diameter -->
+  <xacro:property name="caster_x_offset"  value="0.140" />  <!-- 140mm fore/aft from axle -->
+
+  <!-- ======================================================================== -->
+  <!-- Base Footprint (Ground Projection: Z = 0.000m)                           -->
+  <!-- ======================================================================== -->
+  <link name="base_footprint" />
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0" />
+  </joint>
+
+  <!-- ======================================================================== -->
+  <!-- Base Link: Cylindrical Mobile Chassis & Balanced Core                    -->
+  <!-- ======================================================================== -->
+  <link name="base_link">
+    <!-- Visual 1: Main Cylindrical Outer Hull (Chassis Blue) -->
+    <visual>
+      <origin xyz="0 0 ${chassis_height / 2.0}" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${chassis_radius}" length="${chassis_height}" />
+      </geometry>
+      <material name="chassis_blue" />
+    </visual>
+
+    <!-- Visual 2: Lower Protective Ground Skirt (Dark Grey) -->
+    <visual>
+      <origin xyz="0 0 ${chassis_height * 0.18}" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${chassis_radius + 0.004}" length="${chassis_height * 0.36}" />
+      </geometry>
+      <material name="dark_grey" />
+    </visual>
+
+    <!-- Visual 3: Top Deck Plate (Matte Dark Titanium flush deck) -->
+    <visual>
+      <origin xyz="0 0 ${chassis_height + 0.004}" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${chassis_radius * 0.94}" length="0.008" />
+      </geometry>
+      <material name="matte_dark_titanium" />
+    </visual>
+
+    <!-- Physical Collision: Tight non-overlapping bounding cylinder -->
+    <collision name="base_chassis_collision">
+      <origin xyz="0 0 ${chassis_height / 2.0}" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${chassis_radius}" length="${chassis_height}" />
+      </geometry>
+    </collision>
+
+    <!-- Balanced Inertia: Heavy 8.0kg low CoM placed strictly on axle centerline -->
+    <inertial>
+      <origin xyz="0.0 0.0 0.020" rpy="0 0 0" />
+      <mass value="8.0" />
+      <inertia ixx="0.085" ixy="0.0" ixz="0.0" iyy="0.085" iyz="0.0" izz="0.144" />
+    </inertial>
+  </link>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <!-- ======================================================================== -->
+  <!-- 360° Tactile Bumper Ring (Physical Collision Sensor & Accent Halo)       -->
+  <!-- ======================================================================== -->
+  <link name="bumper_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${bumper_radius}" length="${bumper_height}" />
+      </geometry>
+      <material name="cyan_glow" />
+    </visual>
+    <collision name="bumper_collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${bumper_radius}" length="${bumper_height}" />
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.25" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.002" />
+    </inertial>
+  </link>
+
+  <joint name="bumper_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="bumper_link" />
+    <origin xyz="0 0 0.040" rpy="0 0 0" />
+  </joint>
+
+  <gazebo reference="bumper_link">
+    <material>Gazebo/TurquoiseGlow</material>
+  </gazebo>
+
+  <!-- ======================================================================== -->
+  <!-- Drive Wheels (Left & Right with Rubber Tread & Metallic Rim)             -->
+  <!-- ======================================================================== -->
+  <xacro:macro name="drive_wheel" params="prefix y_offset flip_sign">
+    <link name="${prefix}_wheel_link">
+      <!-- Rubber Tire Tread -->
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}" />
+        </geometry>
+        <material name="rubber_black" />
+      </visual>
+      <!-- Metallic Silver Wheel Hub Rim -->
+      <visual>
+        <origin xyz="0 ${flip_sign * 0.002} 0" rpy="${pi/2} 0 0" />
+        <geometry>
+          <cylinder radius="${wheel_radius * 0.70}" length="${wheel_width * 1.05}" />
+        </geometry>
+        <material name="metallic_silver" />
+      </visual>
+      <!-- Central Axle Nut -->
+      <visual>
+        <origin xyz="0 ${flip_sign * (wheel_width / 2.0 + 0.004)} 0" rpy="${pi/2} 0 0" />
+        <geometry>
+          <cylinder radius="0.015" length="0.008" />
+        </geometry>
+        <material name="matte_dark_titanium" />
+      </visual>
+      <!-- Collision Cylinder -->
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}" />
+        </geometry>
+      </collision>
+      <!-- Inertia: solid cylinder m=0.6kg, r=0.065m, h=0.03m -->
+      <inertial>
+        <mass value="0.60" />
+        <inertia ixx="0.00067" ixy="0.0" ixz="0.0" iyy="0.00067" iyz="0.0" izz="0.00126" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link" />
+      <child link="${prefix}_wheel_link" />
+      <origin xyz="0 ${y_offset} 0" rpy="0 0 0" />
+      <axis xyz="0 1 0" />
+      <dynamics damping="0.1" friction="0.05" />
+    </joint>
+
+    <gazebo reference="${prefix}_wheel_link">
+      <mu1>1.5</mu1>
+      <mu2>1.5</mu2>
+      <kp>1000000.0</kp>
+      <kd>10.0</kd>
+      <minDepth>0.001</minDepth>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:drive_wheel prefix="left"  y_offset="${wheelbase / 2.0}"  flip_sign="1" />
+  <xacro:drive_wheel prefix="right" y_offset="${-wheelbase / 2.0}" flip_sign="-1" />
+
+  <!-- ======================================================================== -->
+  <!-- Support Casters (Front & Rear Ground-Tangent Frictionless Gliders)        -->
+  <!-- ======================================================================== -->
+  <xacro:macro name="support_caster" params="prefix x_offset">
+    <link name="${prefix}_caster_link">
+      <!-- Rolling Metallic Ball -->
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="${caster_radius}" />
+        </geometry>
+        <material name="metallic_silver" />
+      </visual>
+      <!-- Structural Stanchion / Caster Bracket bolted into chassis underside -->
+      <visual>
+        <origin xyz="0 0 0.022" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="0.022" length="0.035" />
+        </geometry>
+        <material name="matte_dark_titanium" />
+      </visual>
+      <!-- Floor Tangent Collision: Sphere touches at exactly Z = 0.000m -->
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="${caster_radius}" />
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.10" />
+        <inertia ixx="0.000025" ixy="0.0" ixz="0.0" iyy="0.000025" iyz="0.0" izz="0.000025" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_caster_joint" type="fixed">
+      <parent link="base_link" />
+      <child link="${prefix}_caster_link" />
+      <!-- Z offset: wheel_radius (0.065) - caster_radius (0.025) = 0.040 downward -->
+      <origin xyz="${x_offset} 0 ${-wheel_radius + caster_radius}" rpy="0 0 0" />
+    </joint>
+
+    <gazebo reference="${prefix}_caster_link">
+      <mu1>0.0</mu1>
+      <mu2>0.0</mu2>
+      <kp>1000000.0</kp>
+      <kd>10.0</kd>
+      <minDepth>0.0001</minDepth>
+      <material>Gazebo/Grey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:support_caster prefix="front" x_offset="${caster_x_offset}" />
+  <xacro:support_caster prefix="rear"  x_offset="${-caster_x_offset}" />
+
+</robot>
