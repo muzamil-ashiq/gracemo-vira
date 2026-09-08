@@ -133,8 +133,8 @@ class MissionVisualizer:
     def _init_arm_stance(self):
         """Holds the 7-DOF arm in natural mid-torso tucked rest stance (Z=0.45m, safely 25cm above base footprint)."""
         time.sleep(0.5)
-        # Tucked Natural Rest Stance: shoulder pitch=0.90, roll=0.20, elbow=-1.25, wrist pitch=0.60
-        home_q = [0.0, 0.90, 0.20, -1.25, 0.60, 0.0, 0.0]
+        # Tucked Natural Rest Stance: shoulder yaw=-0.15, pitch=0.90, roll=0.25, elbow=-1.25, wrist pitch=0.60
+        home_q = [-0.15, 0.90, 0.25, -1.25, 0.60, 0.0, 0.0]
         while self.running:
             for i, val in enumerate(home_q):
                 msg = GzDouble()
@@ -285,8 +285,8 @@ class MissionVisualizer:
         else:
             front_ranges = list(msg.ranges)
 
-        # Ignore chassis edge (chassis front is at 0.08m from lidar) by requiring r > 0.10m
-        valid = [r for r in front_ranges if not math.isnan(r) and r > 0.10]
+        # Ignore robot self-reflection (chassis, bumper & 7-DOF arm extend to ~0.38m from lidar)
+        valid = [r for r in front_ranges if not math.isnan(r) and r > 0.40]
         self.min_obstacle_dist = min(valid) if valid else 10.0
 
     def publish_cmd(self, vx: float, wz: float):
@@ -465,7 +465,16 @@ class MissionVisualizer:
                 # Proactive angular steering authority keeps robot tracking straight without drifting
                 wz = float(np.clip(2.2 * alpha, -0.55, 0.55))
 
-            # Stall & Wall Contact Detection: Only trigger if commanded forward but physically motionless for > 1.2s
+            # 1. Adaptive Environmental Proximity Cushion (Slows or pauses if real obstacles are ahead)
+            if self.min_obstacle_dist < 0.45:
+                vx = 0.0
+                if log_tick % 20 == 0:
+                    console.print(f"[bold red]⚠️ Proximity cushion active ({self.min_obstacle_dist:.2f}m). Pausing forward translation.[/bold red]")
+            elif self.min_obstacle_dist < 0.70:
+                cushion_scale = (self.min_obstacle_dist - 0.45) / 0.25
+                vx = vx * max(0.35, min(1.0, cushion_scale))
+
+            # 2. Stall & Wall Contact Detection: Only trigger if commanded forward (AFTER cushion) but physically motionless for > 1.2s
             if vx > 0.12:
                 if self.last_pos is not None:
                     moved = math.hypot(cur_x - self.last_pos[0], cur_y - self.last_pos[1])
@@ -480,15 +489,9 @@ class MissionVisualizer:
                     self.recovering = 15  # Back up and pivot away for 0.75s
                     self.stall_count = 0
                     continue
-
-            # Adaptive Proximity Cushion: prevents doorway freeze while protecting against collisions
-            if self.min_obstacle_dist < 0.22:
-                vx = 0.0
-                if log_tick % 20 == 0:
-                    console.print(f"[bold red]⚠️ Proximity cushion active ({self.min_obstacle_dist:.2f}m). Pausing forward translation.[/bold red]")
-            elif self.min_obstacle_dist < 0.32:
-                cushion_scale = (self.min_obstacle_dist - 0.22) / 0.10
-                vx = vx * max(0.40, min(1.0, cushion_scale))
+            else:
+                self.stall_count = 0
+                self.last_pos = (cur_x, cur_y)
 
             self.publish_cmd(vx, wz)
 
