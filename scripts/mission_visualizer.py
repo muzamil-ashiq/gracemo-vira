@@ -131,10 +131,10 @@ class MissionVisualizer:
             threading.Thread(target=self.voice.speak, args=(text,), daemon=True).start()
 
     def _init_arm_stance(self):
-        """Holds the 7-DOF arm safely down along the torso in STANCE_HOME throughout navigation."""
+        """Holds the 7-DOF arm in natural mid-torso tucked rest stance (Z=0.45m, safely 25cm above base footprint)."""
         time.sleep(0.5)
-        # STANCE_HOME: shoulder yaw=0, shoulder pitch=+75 deg (+1.31 rad), roll=+14 deg (+0.25 rad), elbow=-11 deg (-0.20 rad)
-        home_q = [0.0, 1.31, 0.25, -0.20, -0.10, 0.0, 0.0]
+        # Tucked Natural Rest Stance: shoulder pitch=0.90, roll=0.20, elbow=-1.25, wrist pitch=0.60
+        home_q = [0.0, 0.90, 0.20, -1.25, 0.60, 0.0, 0.0]
         while self.running:
             for i, val in enumerate(home_q):
                 msg = GzDouble()
@@ -285,8 +285,8 @@ class MissionVisualizer:
         else:
             front_ranges = list(msg.ranges)
 
-        # Ignore robot self-reflection (chassis radius is 0.19m) by requiring r > 0.24m
-        valid = [r for r in front_ranges if not math.isnan(r) and r > 0.24]
+        # Ignore chassis edge (chassis front is at 0.08m from lidar) by requiring r > 0.10m
+        valid = [r for r in front_ranges if not math.isnan(r) and r > 0.10]
         self.min_obstacle_dist = min(valid) if valid else 10.0
 
     def publish_cmd(self, vx: float, wz: float):
@@ -379,24 +379,29 @@ class MissionVisualizer:
                 self.publish_cmd(0.0, 0.0)
                 continue
 
-            # 1. Action: Perceptual Scan & Verification (360° Panoramic Camera Survey)
+            # 1. Action: Perceptual Verification — Orient cleanly to face room furniture (No door back-facing spin!)
             if step.action_type == "SCAN":
-                if not hasattr(self, "_scan_start_time") or self._scan_start_time is None:
-                    self._scan_start_time = time.time()
-                    self.speak(f"Entering scan mode in {step.target_room.title()}. Surveying environment.")
-                    console.print(f"[bold cyan]🔄 [SCANNING] Performing 360° visual survey of {step.target_room.title()}...[/bold cyan]")
+                with self.pose_lock:
+                    cur_yaw = self.cur_yaw
+                    cur_y = self.cur_y
 
-                elapsed_scan = time.time() - self._scan_start_time
-                if elapsed_scan < 7.0:
-                    self.publish_cmd(0.0, 0.45)
+                # Canonical orientation: face North (+90 deg) toward bedroom/study furniture, South (-90 deg) toward kitchen/living
+                desired_yaw = step.target_yaw if step.target_yaw is not None else (math.pi / 2 if cur_y > 0 else -math.pi / 2)
+                yaw_err = desired_yaw - cur_yaw
+                while yaw_err > math.pi: yaw_err -= 2 * math.pi
+                while yaw_err < -math.pi: yaw_err += 2 * math.pi
+
+                if abs(yaw_err) > math.radians(5):
+                    # Cleanly pivot to face room furniture (Bed, Wardrobe, Nightstand)
+                    wz = float(np.clip(1.6 * yaw_err, -0.45, 0.45))
+                    self.publish_cmd(0.0, wz)
                     continue
                 else:
                     self.publish_cmd(0.0, 0.0)
-                    self._scan_start_time = None
                     room_key = self.current_room_label
                     found_items = list(self.room_inventory.get(room_key, []))
                     found_str = ", ".join(found_items) if found_items else "room furniture"
-                    console.print(f"[bold green]✓ [STEP {step.step_num} COMPLETE] Scanned {step.target_room.title()}: Cataloged {found_str}[/bold green]")
+                    console.print(f"[bold green]✓ [STEP {step.step_num} COMPLETE] Stationed & Facing {step.target_room.title()}: Cataloged {found_str}[/bold green]")
                     self.active_mission.advance()
                     continue
 
@@ -460,17 +465,17 @@ class MissionVisualizer:
                 # Proactive angular steering authority keeps robot tracking straight without drifting
                 wz = float(np.clip(2.2 * alpha, -0.55, 0.55))
 
-            # Stall & Wall Contact Detection: If commanded forward but physically stationary, trigger reflex
+            # Stall & Wall Contact Detection: Only trigger if commanded forward but physically motionless for > 1.2s
             if vx > 0.12:
                 if self.last_pos is not None:
                     moved = math.hypot(cur_x - self.last_pos[0], cur_y - self.last_pos[1])
-                    if moved < 0.015:
+                    if moved < 0.002:  # Less than 2mm per 50ms tick (< 4cm/s) indicates physical obstruction
                         self.stall_count += 1
                     else:
                         self.stall_count = 0
                 self.last_pos = (cur_x, cur_y)
 
-                if self.stall_count >= 8:  # Stalled against surface for ~0.4s
+                if self.stall_count >= 24:  # Physically blocked for > 1.2s
                     console.print("[bold yellow]⚡ [WALL REFLEX] Surface contact detected! Reversing and disengaging...[/bold yellow]")
                     self.recovering = 15  # Back up and pivot away for 0.75s
                     self.stall_count = 0

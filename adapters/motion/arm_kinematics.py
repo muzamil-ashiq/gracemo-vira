@@ -72,9 +72,9 @@ class ArmKinematics:
         [-math.pi,             math.pi],              # Joint 7: wrist_roll     (-180° to +180°)
     ], dtype=float)
 
-    # Canonical Stances (7-DOF: natural human posture with arm DOWN along body and outward flare)
-    STANCE_HOME: np.ndarray = np.array([0.0, -0.35, 0.15, -0.20, -0.10, 0.0, 0.0], dtype=float)       # Hand comfortably DOWN by side
-    STANCE_TRAVEL: np.ndarray = np.array([0.0, -0.35, 0.15, -0.20, -0.10, 0.0, 0.0], dtype=float)     # Alias to HOME
+    # Canonical Stances (7-DOF: natural human posture with arm tucked at mid-torso height)
+    STANCE_HOME: np.ndarray = np.array([0.0, 0.90, 0.20, -1.25, 0.60, 0.0, 0.0], dtype=float)       # Hand comfortably folded at mid-torso (well clear of base)
+    STANCE_TRAVEL: np.ndarray = np.array([0.0, 0.90, 0.20, -1.25, 0.60, 0.0, 0.0], dtype=float)     # Alias to HOME
     STANCE_PREPARE: np.ndarray = np.array([0.10, -0.10, 0.50, -0.35, 0.0, -0.05, -0.20], dtype=float)  # Arm swings outward/side to clear body
     STANCE_CARRY: np.ndarray = np.array([0.15, 0.35, 0.45, -1.20, 0.85, -0.08, -0.30], dtype=float)   # In-hand chest level carry
     STANCE_TABLE_REACH: np.ndarray = np.array([0.25, 0.35, 0.50, -0.80, 0.45, -0.05, -0.35], dtype=float)

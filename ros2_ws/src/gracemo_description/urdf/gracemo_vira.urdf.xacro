@@ -185,11 +185,21 @@
   <!-- ======================================================================== -->
   <xacro:macro name="caster" params="prefix x_offset">
     <link name="${prefix}_caster_link">
+      <!-- Rolling Caster Ball -->
       <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <sphere radius="0.025" />
         </geometry>
         <material name="metallic_silver" />
+      </visual>
+      <!-- Caster Mounting Housing / Bracket (solidly connects ball to chassis underside) -->
+      <visual>
+        <origin xyz="0 0 0.022" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="0.022" length="0.035" />
+        </geometry>
+        <material name="dark_grey" />
       </visual>
       <collision>
         <geometry>

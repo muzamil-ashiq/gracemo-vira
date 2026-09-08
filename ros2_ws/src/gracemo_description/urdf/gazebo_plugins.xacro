@@ -209,7 +209,7 @@
       name="gz::sim::systems::JointPositionController">
       <joint_name>right_shoulder_pitch_joint</joint_name>
       <topic>/arm/joint_2/cmd_pos</topic>
-      <initial_position>0.20</initial_position>
+      <initial_position>0.90</initial_position>
       <p_gain>800</p_gain>
       <i_gain>10</i_gain>
       <d_gain>30</d_gain>
@@ -221,7 +221,7 @@
       name="gz::sim::systems::JointPositionController">
       <joint_name>right_shoulder_roll_joint</joint_name>
       <topic>/arm/joint_3/cmd_pos</topic>
-      <initial_position>0.0</initial_position>
+      <initial_position>0.20</initial_position>
       <p_gain>800</p_gain>
       <i_gain>10</i_gain>
       <d_gain>30</d_gain>
@@ -233,7 +233,7 @@
       name="gz::sim::systems::JointPositionController">
       <joint_name>right_elbow_pitch_joint</joint_name>
       <topic>/arm/joint_4/cmd_pos</topic>
-      <initial_position>-1.80</initial_position>
+      <initial_position>-1.25</initial_position>
       <p_gain>600</p_gain>
       <i_gain>8</i_gain>
       <d_gain>20</d_gain>

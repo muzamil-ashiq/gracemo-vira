@@ -584,7 +584,24 @@
           <ambient>0.9375 0.9375 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_5'>
+      <visual name='base_footprint_fixed_joint_lump__front_caster_link_visual_5'>
+        <pose>0.14000000000000001 0 0.047 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.035000000000000003</length>
+            <radius>0.021999999999999999</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_6'>
         <pose>0.11 0 0.22 0 0 0</pose>
         <geometry>
           <cylinder>
@@ -597,7 +614,7 @@
           <ambient>0.25 0.25 0.25 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_6'>
+      <visual name='base_footprint_fixed_joint_lump__lidar_link_visual_7'>
         <pose>0.11 0 0.23699999999999999 0 0 0</pose>
         <geometry>
           <cylinder>
@@ -610,7 +627,7 @@
           <ambient>0 0 0 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__rear_caster_link_visual_7'>
+      <visual name='base_footprint_fixed_joint_lump__rear_caster_link_visual_8'>
         <pose>-0.14000000000000001 0 0.025000000000000001 0 0 0</pose>
         <geometry>
           <sphere>
@@ -626,7 +643,24 @@
           <ambient>0.9375 0.9375 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__torso_link_visual_8'>
+      <visual name='base_footprint_fixed_joint_lump__rear_caster_link_visual_9'>
+        <pose>-0.14000000000000001 0 0.047 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.035000000000000003</length>
+            <radius>0.021999999999999999</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Grey</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__torso_link_visual_10'>
         <pose>-0.02 0 0.40500000000000003 0 0 0</pose>
         <geometry>
           <box>
@@ -638,7 +672,7 @@
           <ambient>0.125 0.5 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__torso_link_visual_9'>
+      <visual name='base_footprint_fixed_joint_lump__torso_link_visual_11'>
         <pose>0.064000000000000001 0 0.44500000000000001 0 0 0</pose>
         <geometry>
           <box>
@@ -650,7 +684,7 @@
           <ambient>0 0 0 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__head_link_visual_10'>
+      <visual name='base_footprint_fixed_joint_lump__head_link_visual_12'>
         <pose>-0.02 0 0.625 0 0 0</pose>
         <geometry>
           <cylinder>
@@ -663,7 +697,7 @@
           <ambient>0.25 0.25 0.25 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__head_link_visual_11'>
+      <visual name='base_footprint_fixed_joint_lump__head_link_visual_13'>
         <pose>-0.01 0 0.69500000000000006 0 0 0</pose>
         <geometry>
           <box>
@@ -675,7 +709,7 @@
           <ambient>0 0 0 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__head_link_visual_12'>
+      <visual name='base_footprint_fixed_joint_lump__head_link_visual_14'>
         <pose>0.060999999999999999 0 0.69500000000000006 0 0 0</pose>
         <geometry>
           <box>
@@ -687,7 +721,7 @@
           <ambient>0 0 0 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__camera_link_visual_13'>
+      <visual name='base_footprint_fixed_joint_lump__camera_link_visual_15'>
         <pose>0.065000000000000002 0 0.69500000000000006 0 1.5707963267948966 0</pose>
         <geometry>
           <cylinder>
@@ -700,7 +734,7 @@
           <ambient>0.9375 0.9375 1 1</ambient>
         </material>
       </visual>
-      <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_14'>
+      <visual name='base_footprint_fixed_joint_lump__left_arm_link_visual_16'>
         <pose>-0.02 0.122 0.47499999999999998 0 0 0</pose>
         <geometry>
           <box>
@@ -1815,7 +1849,7 @@
     <plugin name='gz::sim::systems::JointPositionController' filename='gz-sim-joint-position-controller-system'>
       <joint_name>right_shoulder_pitch_joint</joint_name>
       <topic>/arm/joint_2/cmd_pos</topic>
-      <initial_position>0.20</initial_position>
+      <initial_position>0.90</initial_position>
       <p_gain>800</p_gain>
       <i_gain>10</i_gain>
       <d_gain>30</d_gain>
@@ -1825,7 +1859,7 @@
     <plugin name='gz::sim::systems::JointPositionController' filename='gz-sim-joint-position-controller-system'>
       <joint_name>right_shoulder_roll_joint</joint_name>
       <topic>/arm/joint_3/cmd_pos</topic>
-      <initial_position>0.0</initial_position>
+      <initial_position>0.20</initial_position>
       <p_gain>800</p_gain>
       <i_gain>10</i_gain>
       <d_gain>30</d_gain>
@@ -1835,7 +1869,7 @@
     <plugin name='gz::sim::systems::JointPositionController' filename='gz-sim-joint-position-controller-system'>
       <joint_name>right_elbow_pitch_joint</joint_name>
       <topic>/arm/joint_4/cmd_pos</topic>
-      <initial_position>-1.80</initial_position>
+      <initial_position>-1.25</initial_position>
       <p_gain>600</p_gain>
       <i_gain>8</i_gain>
       <d_gain>20</d_gain>
