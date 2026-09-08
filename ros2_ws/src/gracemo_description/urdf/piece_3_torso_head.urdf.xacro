@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+<!-- ============================================================================== -->
+<!-- GRaCEmo ViRa — Clean Rebuild                                                   -->
+<!-- Piece 3: Humanoid Torso, Neck & Stereo RGB-D Perception Head ("The Eyes")     -->
+<!-- ============================================================================== -->
+<robot name="gracemo_vira_piece_3" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Include Piece 2: Mobile Base & Sensor Deck -->
+  <xacro:include filename="piece_2_sensors.urdf.xacro" />
+
+  <!-- ======================================================================== -->
+  <!-- Dimensions & Proportions                                                 -->
+  <!-- ======================================================================== -->
+  <xacro:property name="torso_width"   value="0.200" />  <!-- 200mm chest width -->
+  <xacro:property name="torso_depth"   value="0.160" />  <!-- 160mm chest depth -->
+  <xacro:property name="torso_height"  value="0.400" />  <!-- 400mm torso height -->
+
+  <!-- ======================================================================== -->
+  <!-- Humanoid Torso (Compute Spine & Electronics Housing)                     -->
+  <!-- ======================================================================== -->
+  <link name="torso_link">
+    <!-- Main Upper Body Shell (Chassis Blue) -->
+    <visual>
+      <origin xyz="0 0 ${torso_height / 2.0}" rpy="0 0 0" />
+      <geometry>
+        <box size="${torso_depth} ${torso_width} ${torso_height}" />
+      </geometry>
+      <material name="chassis_blue" />
+    </visual>
+
+    <!-- Chest Protective Plate (Matte Dark Titanium) -->
+    <visual>
+      <origin xyz="${torso_depth / 2.0 + 0.003} 0 ${torso_height * 0.60}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.140 0.180" />
+      </geometry>
+      <material name="matte_dark_titanium" />
+    </visual>
+
+    <!-- Status Glow Bar / Cybernetic Heartbeat (Cyan Glow) -->
+    <visual>
+      <origin xyz="${torso_depth / 2.0 + 0.006} 0 ${torso_height * 0.72}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.090 0.016" />
+      </geometry>
+      <material name="cyan_glow" />
+    </visual>
+
+    <!-- Right Shoulder Socket Collar (where 7-DOF arm will bolt on) -->
+    <visual>
+      <origin xyz="0.0 -0.112 ${torso_height - 0.040}" rpy="${pi/2} 0 0" />
+      <geometry>
+        <cylinder radius="0.038" length="0.024" />
+      </geometry>
+      <material name="matte_dark_titanium" />
+    </visual>
+
+    <!-- Left Arm Mount Collar -->
+    <visual>
+      <origin xyz="0.0 0.112 ${torso_height - 0.040}" rpy="${pi/2} 0 0" />
+      <geometry>
+        <cylinder radius="0.038" length="0.024" />
+      </geometry>
+      <material name="matte_dark_titanium" />
+    </visual>
+
+    <!-- Collision box -->
+    <collision>
+      <origin xyz="0 0 ${torso_height / 2.0}" rpy="0 0 0" />
+      <geometry>
+        <box size="${torso_depth} ${torso_width} ${torso_height}" />
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 ${torso_height / 2.0}" rpy="0 0 0" />
+      <mass value="2.50" />
+      <inertia ixx="0.041" ixy="0.0" ixz="0.0" iyy="0.038" iyz="0.0" izz="0.015" />
+    </inertial>
+  </link>
+
+  <joint name="torso_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="torso_link" />
+    <!-- Mounted on chassis top deck: slightly aft (X = -20mm) to balance front LiDAR -->
+    <origin xyz="-0.020 0.0 ${chassis_height}" rpy="0 0 0" />
+  </joint>
+
+  <gazebo reference="torso_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <!-- ======================================================================== -->
+  <!-- Sensor Head & Face Visor ("The Robot's Eyes")                            -->
+  <!-- ======================================================================== -->
+  <link name="head_link">
+    <!-- Neck Articulation Column (Dark Grey) -->
+    <visual>
+      <origin xyz="0 0 0.020" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.035" length="0.040" />
+      </geometry>
+      <material name="dark_grey" />
+    </visual>
+
+    <!-- Head Helmet Shell (Chassis Blue) -->
+    <visual>
+      <origin xyz="0.010 0 0.090" rpy="0 0 0" />
+      <geometry>
+        <box size="0.140 0.160 0.110" />
+      </geometry>
+      <material name="chassis_blue" />
+    </visual>
+
+    <!-- Dark Face Visor (Camera Lens Black) -->
+    <visual>
+      <origin xyz="0.081 0 0.090" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.130 0.070" />
+      </geometry>
+      <material name="camera_lens_black" />
+    </visual>
+
+    <!-- Left Eye Optical Aperture (Metallic Silver Rim) -->
+    <visual>
+      <origin xyz="0.085 0.035 0.090" rpy="0 ${pi/2} 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.006" />
+      </geometry>
+      <material name="metallic_silver" />
+    </visual>
+
+    <!-- Right Eye Optical Aperture (Metallic Silver Rim) -->
+    <visual>
+      <origin xyz="0.085 -0.035 0.090" rpy="0 ${pi/2} 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.006" />
+      </geometry>
+      <material name="metallic_silver" />
+    </visual>
+
+    <!-- Glowing Cybernetic Eye Pupils (Cyan Glow) -->
+    <visual>
+      <origin xyz="0.088 0.035 0.090" rpy="0 ${pi/2} 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.002" />
+      </geometry>
+      <material name="cyan_glow" />
+    </visual>
+    <visual>
+      <origin xyz="0.088 -0.035 0.090" rpy="0 ${pi/2} 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.002" />
+      </geometry>
+      <material name="cyan_glow" />
+    </visual>
+
+    <collision>
+      <origin xyz="0.010 0 0.080" rpy="0 0 0" />
+      <geometry>
+        <box size="0.140 0.160 0.120" />
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0.010 0 0.080" rpy="0 0 0" />
+      <mass value="0.60" />
+      <inertia ixx="0.0015" ixy="0.0" ixz="0.0" iyy="0.0015" iyz="0.0" izz="0.0015" />
+    </inertial>
+  </link>
+
+  <joint name="head_joint" type="fixed">
+    <parent link="torso_link" />
+    <child link="head_link" />
+    <!-- Mounted on top of torso neck ring: Z = torso_height (0.40m) -->
+    <!-- Pitched slightly downward (0.18 rad ~ 10 deg) to look at floor obstacles & tables -->
+    <origin xyz="0.0 0.0 ${torso_height}" rpy="0 0.18 0" />
+  </joint>
+
+  <!-- ======================================================================== -->
+  <!-- Stereo RGB-D Perception Sensor ("The Eyes")                              -->
+  <!-- ======================================================================== -->
+  <link name="camera_link">
+    <inertial>
+      <mass value="0.05" />
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="head_link" />
+    <child link="camera_link" />
+    <origin xyz="0.088 0 0.090" rpy="0 0 0" />
+  </joint>
+
+  <!-- Optical Link for ROS Camera Frame Convention (Z-forward, X-right, Y-down) -->
+  <link name="camera_optical_link" />
+
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link" />
+    <child link="camera_optical_link" />
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+  </joint>
+
+  <!-- Gazebo RGB Visual Camera Sensor -->
+  <gazebo reference="camera_link">
+    <sensor name="camera" type="camera">
+      <pose>0 0 0 0 0 0</pose>
+      <topic>/camera/image_raw</topic>
+      <update_rate>30.0</update_rate>
+      <camera>
+        <horizontal_fov>1.30</horizontal_fov>
+        <image>
+          <width>1280</width>
+          <height>720</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.08</near>
+          <far>15.0</far>
+        </clip>
+      </camera>
+      <always_on>1</always_on>
+      <visualize>true</visualize>
+    </sensor>
+  </gazebo>
+
+  <!-- Gazebo 3D Depth Perception Sensor (Captures Obstacle 3D Contours & Shapes) -->
+  <gazebo reference="camera_link">
+    <sensor name="depth_camera" type="depth_camera">
+      <pose>0 0 0 0 0 0</pose>
+      <topic>/camera/depth_image</topic>
+      <update_rate>20.0</update_rate>
+      <camera>
+        <horizontal_fov>1.30</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>360</height>
+        </image>
+        <clip>
+          <near>0.15</near>
+          <far>10.0</far>
+        </clip>
+      </camera>
+      <always_on>1</always_on>
+    </sensor>
+  </gazebo>
+
+</robot>

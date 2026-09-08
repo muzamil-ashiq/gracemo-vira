@@ -141,5 +141,6 @@ def render_piece(sdf_path: str, output_image_path: str, camera_pose="0.75 -0.75 
 if __name__ == "__main__":
     sdf = sys.argv[1] if len(sys.argv) > 1 else "/tmp/piece_1.sdf"
     out = sys.argv[2] if len(sys.argv) > 2 else "/tmp/piece_1_render.jpg"
-    success = render_piece(sdf, out)
+    cam = sys.argv[3] if len(sys.argv) > 3 else "0.75 -0.75 0.45 0 0.38 2.356"
+    success = render_piece(sdf, out, camera_pose=cam)
     sys.exit(0 if success else 1)
