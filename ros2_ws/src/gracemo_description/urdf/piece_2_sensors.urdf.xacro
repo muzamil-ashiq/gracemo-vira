@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<!-- ============================================================================== -->
+<!-- GRaCEmo ViRa — Clean Rebuild                                                   -->
+<!-- Piece 2: Sensor Deck & Elevated Optical LiDAR Pedestal                         -->
+<!-- ============================================================================== -->
+<robot name="gracemo_vira_piece_2" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Include Piece 1: Mobile Base Subsystem -->
+  <xacro:include filename="piece_1_base.urdf.xacro" />
+
+  <!-- ======================================================================== -->
+  <!-- 2D Planar LiDAR Sensor (Elevated Optical Lens: Z_ground = 0.240m)        -->
+  <!-- ======================================================================== -->
+  <link name="lidar_link">
+    <!-- Pedestal Mounting Base (Dark Titanium) -->
+    <visual>
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.045" length="0.030" />
+      </geometry>
+      <material name="matte_dark_titanium" />
+    </visual>
+    <!-- Rotating Optical Turret Drum (LiDAR Orange Accent) -->
+    <visual>
+      <origin xyz="0 0 0.032" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.040" length="0.015" />
+      </geometry>
+      <material name="lidar_orange" />
+    </visual>
+    <!-- Top Aerodynamic Cap (Dark Grey) -->
+    <visual>
+      <origin xyz="0 0 0.042" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.042" length="0.006" />
+      </geometry>
+      <material name="dark_grey" />
+    </visual>
+
+    <inertial>
+      <origin xyz="0 0 0.025" rpy="0 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
+    </inertial>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="lidar_link" />
+    <!-- Mounted on front of chassis deck: X = +110mm, Z = chassis_height (140mm) -->
+    <origin xyz="0.110 0.0 ${chassis_height}" rpy="0 0 0" />
+  </joint>
+
+  <!-- Gazebo GPU LiDAR Sensor: Ray origin at Z=0.035m (Z_ground = 0.240m) -->
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="gpu_lidar">
+      <pose>0 0 0.035 0 0 0</pose>
+      <topic>/scan</topic>
+      <update_rate>20.0</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.08</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+      <always_on>1</always_on>
+      <visualize>true</visualize>
+    </sensor>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <!-- ======================================================================== -->
+  <!-- Corner Time-of-Flight (ToF) Ultrasonic Proximity Sensor Bezels           -->
+  <!-- ======================================================================== -->
+  <xacro:macro name="tof_sensor_mount" params="prefix x y z yaw">
+    <link name="${prefix}_link">
+      <!-- Sensor Bezel Housing (Matte Dark Titanium) -->
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <box size="0.015 0.028 0.018" />
+        </geometry>
+        <material name="matte_dark_titanium" />
+      </visual>
+      <!-- Dual Emitter/Receiver Lenses (Camera Lens Black) -->
+      <visual>
+        <origin xyz="0.008 0.006 0" rpy="0 ${pi/2} 0" />
+        <geometry>
+          <cylinder radius="0.005" length="0.003" />
+        </geometry>
+        <material name="camera_lens_black" />
+      </visual>
+      <visual>
+        <origin xyz="0.008 -0.006 0" rpy="0 ${pi/2} 0" />
+        <geometry>
+          <cylinder radius="0.005" length="0.003" />
+        </geometry>
+        <material name="camera_lens_black" />
+      </visual>
+      <inertial>
+        <mass value="0.01" />
+        <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_joint" type="fixed">
+      <parent link="base_link" />
+      <child link="${prefix}_link" />
+      <origin xyz="${x} ${y} ${z}" rpy="0 0 ${yaw}" />
+    </joint>
+
+    <gazebo reference="${prefix}_link">
+      <sensor name="${prefix}" type="gpu_lidar">
+        <pose>0 0 0 0 0 0</pose>
+        <topic>/tof/${prefix}</topic>
+        <update_rate>25.0</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>5</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.20</min_angle>
+              <max_angle>0.20</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.02</min>
+            <max>2.0</max>
+            <resolution>0.005</resolution>
+          </range>
+        </ray>
+        <always_on>1</always_on>
+      </sensor>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Front-Left 45° Corner ToF -->
+  <xacro:tof_sensor_mount prefix="tof_front_left"  x="0.160" y="0.120"  z="0.080" yaw="${pi/4}" />
+  <!-- Front-Right -45° Corner ToF -->
+  <xacro:tof_sensor_mount prefix="tof_front_right" x="0.160" y="-0.120" z="0.080" yaw="${-pi/4}" />
+  <!-- Rear 180° Backup ToF -->
+  <xacro:tof_sensor_mount prefix="tof_rear"        x="-0.180" y="0.0"   z="0.080" yaw="${pi}" />
+
+  <!-- ======================================================================== -->
+  <!-- Central IMU Sensor (Inertial Navigation Core)                            -->
+  <!-- ======================================================================== -->
+  <link name="imu_link">
+    <inertial>
+      <mass value="0.01" />
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001" />
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="imu_link" />
+    <origin xyz="0 0 0.080" rpy="0 0 0" />
+  </joint>
+
+  <gazebo reference="imu_link">
+    <sensor name="imu" type="imu">
+      <topic>/imu/data</topic>
+      <update_rate>50.0</update_rate>
+      <always_on>1</always_on>
+    </sensor>
+  </gazebo>
+
+</robot>
