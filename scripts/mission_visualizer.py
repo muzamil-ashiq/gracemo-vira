@@ -271,11 +271,11 @@ class MissionVisualizer:
 
     def _on_scan(self, msg: GzLaserScan):
         # Scan range is -pi to +pi (360 samples). Center index (180) is straight ahead (0 deg).
-        # Inspect direct forward 50-degree cone (-25 deg to +25 deg: indices 155 to 205)
+        # Inspect direct forward driving cone (-15 deg to +15 deg: 30-deg path clearance)
         n = len(msg.ranges)
         if n >= 360:
             mid = n // 2
-            front_span = int(n * (25.0 / 360.0))
+            front_span = int(n * (15.0 / 360.0))
             front_ranges = [msg.ranges[i] for i in range(mid - front_span, mid + front_span + 1)]
         else:
             front_ranges = list(msg.ranges)
@@ -459,9 +459,9 @@ class MissionVisualizer:
                 vx = 0.0
                 if log_tick % 20 == 0:
                     console.print(f"[bold red]⚠️ Proximity cushion active ({self.min_obstacle_dist:.2f}m). Pausing forward translation.[/bold red]")
-            elif self.min_obstacle_dist < 0.36:
-                cushion_scale = (self.min_obstacle_dist - 0.22) / 0.14
-                vx = vx * max(0.20, min(1.0, cushion_scale))
+            elif self.min_obstacle_dist < 0.32:
+                cushion_scale = (self.min_obstacle_dist - 0.22) / 0.10
+                vx = vx * max(0.40, min(1.0, cushion_scale))
 
             self.publish_cmd(vx, wz)
 
