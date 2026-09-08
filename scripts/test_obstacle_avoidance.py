@@ -1,30 +1,33 @@
 #!/usr/bin/env python3
 """
-Sensor-Driven Obstacle Avoidance Demo for Piece 2 (Mobile Base + Elevated LiDAR).
-Uses Euclidean Robot Footprint Filtering to reject self-hits while detecting obstacles down to +2.5cm clearance.
+Continuous Obstacle Avoidance Navigator for Piece 2 (Mobile Base + Elevated LiDAR).
+Runs indefinitely, exploring the multi-obstacle arena and weaving through obstacles smoothly.
 """
 import time
 import math
 import sys
+import argparse
 import gz.transport13 as gz_transport
 from gz.msgs10.laserscan_pb2 import LaserScan
 from gz.msgs10.twist_pb2 import Twist
 
-class ObstacleAvoidanceController:
+class ContinuousNavigator:
     def __init__(self):
         self.node = gz_transport.Node()
         self.pub_cmd = self.node.advertise("/cmd_vel", Twist)
         self.node.subscribe(LaserScan, "/scan", self.on_scan)
 
-        # Footprint filter parameters
-        self.x_lidar = 0.110    # LiDAR X offset from robot axle
-        self.r_self = 0.215     # Outer bumper radius + 1cm margin (205mm + 10mm)
+        self.x_lidar = 0.110
+        self.r_self = 0.215
 
-        # Clearance distances (meters)
         self.min_center = 99.0
         self.min_left = 99.0
         self.min_right = 99.0
         self.last_scan_time = 0.0
+
+        # State tracking
+        self.preferred_steer = 1.0
+        self.last_pivot_time = 0.0
 
     def on_scan(self, msg: LaserScan):
         n = len(msg.ranges)
@@ -40,27 +43,25 @@ class ObstacleAvoidanceController:
 
         for i in range(n):
             r = msg.ranges[i]
-            if math.isnan(r) or math.isinf(r) or r < 0.05 or r > 10.0:
+            if math.isnan(r) or math.isinf(r) or r < 0.05 or r > 12.0:
                 continue
 
             theta = angle_min + i * angle_step
 
-            # Transform ray endpoint into robot base frame
+            # Euclidean footprint transformation
             x_rob = self.x_lidar + r * math.cos(theta)
             y_rob = r * math.sin(theta)
             d_center = math.hypot(x_rob, y_rob)
 
-            # Rejection: strictly inside physical robot bumper
             if d_center <= self.r_self:
                 continue
 
-            # Legitimate physical obstacle detected!
             deg = math.degrees(theta)
-            if -18.0 <= deg <= 18.0:
+            if -20.0 <= deg <= 20.0:
                 c_dists.append(r)
-            elif 18.0 < deg <= 75.0:
+            elif 20.0 < deg <= 80.0:
                 l_dists.append(r)
-            elif -75.0 <= deg < -18.0:
+            elif -80.0 <= deg < -20.0:
                 r_dists.append(r)
 
         self.min_center = min(c_dists) if c_dists else 99.0
@@ -68,46 +69,76 @@ class ObstacleAvoidanceController:
         self.min_right  = min(r_dists) if r_dists else 99.0
         self.last_scan_time = time.time()
 
-    def run(self, max_duration=25.0):
+    def run(self, max_duration=None):
+        mode_str = f"Continuous ({max_duration}s limit)" if max_duration else "Continuous (Indefinite — press Ctrl+C to stop)"
         print("==================================================================")
-        print("  GRaCEmo ViRa — Piece 2 Sensor Obstacle Avoidance Live Controller")
-        print("  Algorithm: Euclidean Footprint Filter + Regulated Unicycle Avoidance")
+        print("  GRaCEmo ViRa — Continuous Obstacle Navigation Controller")
+        print(f"  Mode: {mode_str}")
+        print("  Footprint Filter: Euclidean (R_self = 0.215m)")
         print("==================================================================")
         print("Waiting for /scan stream...")
         while self.last_scan_time == 0.0:
             time.sleep(0.1)
-        print("✓ LiDAR /scan stream active!")
+        print("✓ Sensor stream active! Navigating arena...\n")
 
         t_start = time.time()
         last_log = 0.0
+        is_pivoting = False
 
         try:
-            while time.time() - t_start < max_duration:
-                # Controller decisions
+            while True:
+                now = time.time()
+                if max_duration and (now - t_start >= max_duration):
+                    break
+
                 dc = self.min_center
                 dl = self.min_left
                 dr = self.min_right
 
-                # 1. Wide Clear Ahead -> Cruise forward
-                if dc > 1.20:
-                    vx = 0.35
-                    wz = 0.00
-                    state = "CRUISE FORWARD"
+                # 1. Trapped in a tight corner / pocket (all close) -> Reverse back
+                if dc < 0.35 and dl < 0.40 and dr < 0.40:
+                    vx = -0.18
+                    wz = 0.60 * self.preferred_steer
+                    state = "POCKET REVERSE ESCAPE"
 
-                # 2. Approaching Obstacle (0.50m - 1.20m) -> Decelerate & smoothly steer toward open side
-                elif dc > 0.48:
-                    vx = 0.12 + 0.20 * ((dc - 0.48) / (1.20 - 0.48))
-                    # Steer away from closest obstacle
-                    steer_dir = 1.0 if dl >= dr else -1.0
-                    wz = steer_dir * 0.75
-                    state = f"SMOOTH STEER ({'LEFT' if steer_dir > 0 else 'RIGHT'})"
-
-                # 3. Close Proximity Cushion (<= 0.48m) -> Stop forward motion, pivot in place to clear path
-                else:
+                # 2. Obstacle ahead within close cushion (<= 0.52m) or currently pivoting
+                elif dc <= 0.52 or is_pivoting:
+                    is_pivoting = True
                     vx = 0.00
+                    # Pick clearer side and lock it for smooth turning
+                    if now - self.last_pivot_time > 1.2:
+                        self.preferred_steer = 1.0 if dl >= dr else -1.0
+                        self.last_pivot_time = now
+
+                    wz = self.preferred_steer * 0.95
+                    state = f"PIVOT CLEARANCE ({'LEFT' if self.preferred_steer > 0 else 'RIGHT'})"
+
+                    # Exit pivot when ahead has opened up to a wide corridor
+                    if dc > 0.95 and min(dl, dr) > 0.45:
+                        is_pivoting = False
+
+                # 3. Approaching Obstacle (0.52m - 1.20m) -> Decelerate & weave
+                elif dc <= 1.20:
+                    is_pivoting = False
+                    vx = 0.14 + 0.20 * ((dc - 0.52) / (1.20 - 0.52))
                     steer_dir = 1.0 if dl >= dr else -1.0
-                    wz = steer_dir * 0.90
-                    state = f"PROXIMITY PIVOT ({'LEFT' if steer_dir > 0 else 'RIGHT'})"
+                    wz = steer_dir * 0.70
+                    state = f"WEAVE AVOID ({'LEFT' if steer_dir > 0 else 'RIGHT'})"
+
+                # 4. Wide Open Space (> 1.20m) -> Full cruise speed
+                else:
+                    is_pivoting = False
+                    vx = 0.35
+                    # Gentle centering bias away from whichever wall is closer
+                    if dl < 0.75:
+                        wz = -0.25
+                        state = "CRUISE (BIAS RIGHT)"
+                    elif dr < 0.75:
+                        wz = +0.25
+                        state = "CRUISE (BIAS LEFT)"
+                    else:
+                        wz = 0.00
+                        state = "FULL CRUISE FORWARD"
 
                 # Publish command
                 cmd = Twist()
@@ -115,22 +146,24 @@ class ObstacleAvoidanceController:
                 cmd.angular.z = float(wz)
                 self.pub_cmd.publish(cmd)
 
-                now = time.time()
-                if now - last_log >= 0.35:
-                    print(f"[{now - t_start:4.1f}s] {state:<22s} | Clear: Center={dc:4.2f}m Left={dl:4.2f}m Right={dr:4.2f}m | Cmd: vx={vx:.2f} wz={wz:+.2f}")
+                if now - last_log >= 0.40:
+                    print(f"[{now - t_start:5.1f}s] {state:<24s} | Dist: C={dc:4.2f}m L={dl:4.2f}m R={dr:4.2f}m | cmd: vx={vx:.2f} wz={wz:+.2f}")
                     last_log = now
 
-                time.sleep(0.05)
+                time.sleep(0.04)
 
         except KeyboardInterrupt:
-            pass
+            print("\nOperator requested stop.")
 
         # Stop at the end
         cmd = Twist()
         self.pub_cmd.publish(cmd)
-        print("✓ Avoidance demo completed. Robot stopped.")
+        print("✓ Navigator stopped cleanly.")
 
 if __name__ == "__main__":
-    dur = float(sys.argv[1]) if len(sys.argv) > 1 else 20.0
-    ctrl = ObstacleAvoidanceController()
-    ctrl.run(dur)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--duration", type=float, default=None, help="Run duration in seconds (default: continuous)")
+    args = parser.parse_args()
+
+    ctrl = ContinuousNavigator()
+    ctrl.run(args.duration)
