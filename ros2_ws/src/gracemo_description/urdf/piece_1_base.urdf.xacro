@@ -6,7 +6,7 @@
 <robot name="gracemo_vira_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Include Shared Materials -->
-  <xacro:include filename="$(find gracemo_description)/urdf/materials.xacro" />
+  <xacro:include filename="materials.xacro" />
 
   <!-- ======================================================================== -->
   <!-- Mathematical Parameters & Dimensions                                     -->
