@@ -1,0 +1,27 @@
+# GraceEMO Interaction — Python dependencies
+# Install: pip install -r requirements.txt
+
+# ── LLM Backends (at least one recommended) ────────────────────────
+google-genai>=0.8.0              # Gemini 2.0 (primary, modern SDK)
+google-generativeai>=0.8.0       # Gemini (legacy SDK fallback)
+groq>=0.9.0                      # Groq Cloud LPU (fast fallback)
+requests>=2.31.0                 # Ollama HTTP calls (local fallback)
+
+# ── Environment / Config ────────────────────────────────────────────
+python-dotenv>=1.0.0             # Load .env file
+
+# ── TTS ─────────────────────────────────────────────────────────────
+pyttsx3>=2.90                    # Offline TTS (primary)
+gTTS>=2.5.0                      # Online TTS (fallback)
+pygame>=2.5.0                    # Audio playback for gTTS
+
+# ── STT ─────────────────────────────────────────────────────────────
+SpeechRecognition>=3.10.0        # Microphone → Google STT
+PyAudio>=0.2.13                  # Microphone access (STT backend)
+
+# ── REST API (optional --serve mode) ───────────────────────────────
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+
+# ── Terminal UI ─────────────────────────────────────────────────────
+# No extra deps needed — uses ANSI escape codes (works on macOS/Linux/WSL)

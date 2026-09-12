@@ -1,0 +1,19 @@
+# Environment and virtualenv
+.env
+.venv
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
