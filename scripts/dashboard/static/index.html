@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRaCEmo ViRa — Observability & Event Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-logo">⚡</div>
+      <div class="brand-text">
+        <h1>GRaCEmo ViRa</h1>
+        <span>Kernel & Robotics Observability System</span>
+      </div>
+    </div>
+    <div class="nav-status">
+      <div class="status-indicator">
+        <span class="pulse-dot" id="wsDot"></span>
+        <span id="wsStatus">Connecting...</span>
+      </div>
+      <div class="header-pill">ROS 2: Humble</div>
+      <div class="header-pill">Gazebo: Harmonic 8</div>
+      <div class="header-pill highlight">Kernel: Active</div>
+    </div>
+  </header>
+
+  <main class="dashboard-grid">
+
+    <!-- Column 1: Telemetry & State -->
+    <section class="card telemetry-card">
+      <div class="card-header">
+        <h2>Robot Telemetry & Pose</h2>
+        <span class="badge badge-primary" id="robotState">READY</span>
+      </div>
+      <div class="card-body">
+        <div class="metric-grid">
+          <div class="metric-item">
+            <span class="metric-label">X Position</span>
+            <span class="metric-value" id="valX">0.000 <small>m</small></span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Y Position</span>
+            <span class="metric-value" id="valY">0.000 <small>m</small></span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Heading (Yaw)</span>
+            <span class="metric-value" id="valYaw">0.0 <small>°</small></span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Linear Vel (vx)</span>
+            <span class="metric-value" id="valVx">0.00 <small>m/s</small></span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Angular Vel (wz)</span>
+            <span class="metric-value" id="valWz">0.00 <small>rad/s</small></span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Min Obstacle Dist</span>
+            <span class="metric-value text-cyan" id="valObstacle">-- <small>m</small></span>
+          </div>
+        </div>
+
+        <div class="cushion-bar-container">
+          <div class="cushion-header">
+            <span>LiDAR Safety Margin</span>
+            <span id="cushionText">Clearance Safe</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="cushionFill" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="mission-info-box">
+          <div class="info-row">
+            <span class="info-label">Active Goal:</span>
+            <span class="info-val text-bold" id="targetRoom">Central Hallway</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Current Step:</span>
+            <span class="info-val" id="missionStep">Stationary at Origin</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Column 2: Interactive Mission & Intent Dispatcher -->
+    <section class="card command-card">
+      <div class="card-header">
+        <h2>Perception & Mission Dispatcher</h2>
+        <span class="badge badge-accent">End-to-End Loop</span>
+      </div>
+      <div class="card-body">
+        <p class="section-desc">Trigger a full pipeline transition: <code>Input &rarr; Kernel Event &rarr; Brain Reasoning &rarr; ROS 2 Action</code></p>
+        
+        <div class="quick-buttons">
+          <button class="btn btn-room" onclick="dispatchRoom('Bedroom')">🛌 Bedroom</button>
+          <button class="btn btn-room" onclick="dispatchRoom('Study')">📚 Study</button>
+          <button class="btn btn-room" onclick="dispatchRoom('Kitchen')">🍳 Kitchen</button>
+          <button class="btn btn-room" onclick="dispatchRoom('Living Room')">🛋️ Living Room</button>
+        </div>
+
+        <div class="command-input-group">
+          <input type="text" id="cmdInput" placeholder="Enter custom voice/text instruction (e.g. 'Navigate to study desk')..." />
+          <button class="btn btn-primary" onclick="dispatchCustom()">Execute Intent</button>
+        </div>
+
+        <div class="pipeline-flow-diagram">
+          <div class="flow-step active">
+            <div class="flow-icon">🎙️</div>
+            <div class="flow-name">Voice / Input</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step active">
+            <div class="flow-icon">⚡</div>
+            <div class="flow-name">Kernel Bus</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step active">
+            <div class="flow-icon">🧠</div>
+            <div class="flow-name">Reasoning</div>
+          </div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-step active">
+            <div class="flow-icon">🤖</div>
+            <div class="flow-name">ROS 2 Base</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Column 3: Event & Decision Timeline (Full Width / Prominent) -->
+    <section class="card timeline-card full-span">
+      <div class="card-header">
+        <h2>Event & Decision Timeline (Auditable Ledger)</h2>
+        <span class="badge badge-mono" id="timelineCount">0 Events</span>
+      </div>
+      <div class="card-body">
+        <div class="timeline-container" id="timelineList">
+          <!-- Populated dynamically via WebSocket -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Column 4: Modular Adapter Observability (Latency, Confidence, Health) -->
+    <section class="card adapters-card full-span">
+      <div class="card-header">
+        <h2>Adapter Health, Latency & Metrics</h2>
+        <span class="badge badge-success">4/4 Online</span>
+      </div>
+      <div class="card-body">
+        <div class="adapter-grid">
+          
+          <!-- Vision Card -->
+          <div class="adapter-item">
+            <div class="adapter-top">
+              <span class="adapter-title">👁️ Vision Adapter</span>
+              <span class="badge badge-success">ONLINE</span>
+            </div>
+            <div class="adapter-detail">Model: <strong>YOLOv11n</strong></div>
+            <div class="adapter-metrics">
+              <div class="metric-pill">Latency: <span id="visLatency">16.2</span> ms</div>
+              <div class="metric-pill">FPS: <span id="visFps">28.5</span></div>
+              <div class="metric-pill">Conf: <span id="visConf">91%</span></div>
+            </div>
+          </div>
+
+          <!-- Voice Card -->
+          <div class="adapter-item">
+            <div class="adapter-top">
+              <span class="adapter-title">🗣️ Voice Adapter</span>
+              <span class="badge badge-success">READY</span>
+            </div>
+            <div class="adapter-detail">STT: <strong>Faster-Whisper</strong> | TTS: <strong>Piper</strong></div>
+            <div class="adapter-metrics">
+              <div class="metric-pill">STT Latency: <span id="voiceLatency">135</span> ms</div>
+              <div class="metric-pill">Status: <span id="voiceStatus">Listening</span></div>
+            </div>
+          </div>
+
+          <!-- Brain Card -->
+          <div class="adapter-item">
+            <div class="adapter-top">
+              <span class="adapter-title">🧠 Brain / Planner</span>
+              <span class="badge badge-success">ACTIVE</span>
+            </div>
+            <div class="adapter-detail">Engine: <strong>SpatialGraph + PurePursuit</strong></div>
+            <div class="adapter-metrics">
+              <div class="metric-pill">Plan Latency: <span id="brainLatency">4.8</span> ms</div>
+              <div class="metric-pill">Corridor Graph: Verified</div>
+            </div>
+          </div>
+
+          <!-- Bridge Card -->
+          <div class="adapter-item">
+            <div class="adapter-top">
+              <span class="adapter-title">🔌 Robot Bridge</span>
+              <span class="badge badge-success">CONNECTED</span>
+            </div>
+            <div class="adapter-detail">Middleware: <strong>ROS 2 &harr; Gazebo Harmonic</strong></div>
+            <div class="adapter-metrics">
+              <div class="metric-pill">Rate: <span id="bridgeRate">50</span> Hz</div>
+              <div class="metric-pill">Domain: ID 0</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>GRaCEmo ViRa &bull; Autonomous Humanoid Assistant &bull; Tripartite Rust-Python-ROS2 Architecture</span>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
