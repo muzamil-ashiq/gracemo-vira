@@ -7,12 +7,12 @@ import os
 import subprocess
 
 def make_rich_obstacle_world():
-    sdf_tmp = "/tmp/piece_3.sdf"
-    urdf_tmp = "/tmp/piece_3.urdf"
+    sdf_tmp = "/tmp/robot_base.sdf"
+    urdf_tmp = "/tmp/robot_base.urdf"
 
     subprocess.run([
         "xacro",
-        "/home/mab/Applications/lpu-project/gracemo-vira/ros2_ws/src/gracemo_description/urdf/piece_3_torso_head.urdf.xacro"
+        "/home/mab/Applications/lpu-project/gracemo-vira/ros2_ws/src/gracemo_description/urdf/piece_2_sensors.urdf.xacro"
     ], stdout=open(urdf_tmp, "w"), check=True)
 
     subprocess.run([

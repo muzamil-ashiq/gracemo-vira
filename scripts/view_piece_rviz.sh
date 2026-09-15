@@ -35,7 +35,7 @@ sleep 2
 echo "3. Publishing Robot State & TF..."
 distrobox enter gracemo-harmonic -- bash -c "
     source /opt/ros/humble/setup.bash
-    ros2 run robot_state_publisher robot_state_publisher /tmp/piece_3.urdf
+    ros2 run robot_state_publisher robot_state_publisher /tmp/robot_base.urdf
 " &
 RSP_PID=$!
 sleep 1
