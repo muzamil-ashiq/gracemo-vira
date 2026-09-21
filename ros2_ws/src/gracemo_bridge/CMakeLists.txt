@@ -14,4 +14,11 @@ install(
   RENAME kernel_bridge
 )
 
+install(
+  PROGRAMS
+    gracemo_bridge/sensor_bridge.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME sensor_bridge
+)
+
 ament_package()

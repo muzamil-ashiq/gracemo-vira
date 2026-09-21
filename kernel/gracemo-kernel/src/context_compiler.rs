@@ -21,10 +21,27 @@ impl CompiledContext {
         let mut lines = Vec::new();
 
         // 1. Current State (@NOW)
-        let room = self.now.get("room").and_then(|v| v.as_str()).unwrap_or("Central Hallway");
-        let x = self.now.get("x").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let y = self.now.get("y").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let yaw = self.now.get("yaw").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let room = self.now.get("current_room")
+            .or_else(|| self.now.get("room"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("Central Hallway");
+
+        let pos = self.now.get("robot_position");
+        let x = pos.and_then(|p| p.get("x"))
+            .or_else(|| self.now.get("x"))
+            .and_then(|v| v.as_f64())
+            .unwrap_or(0.0);
+
+        let y = pos.and_then(|p| p.get("y"))
+            .or_else(|| self.now.get("y"))
+            .and_then(|v| v.as_f64())
+            .unwrap_or(0.0);
+
+        let yaw = pos.and_then(|p| p.get("theta"))
+            .or_else(|| self.now.get("yaw"))
+            .and_then(|v| v.as_f64())
+            .unwrap_or(0.0);
+
         lines.push(format!("@NOW:Room[{}]|Pose[x:{:.2},y:{:.2},yaw:{:.0}°]", room, x, y, yaw.to_degrees()));
 
         // 2. Verified Knowledge Graph Edges (#GRAPH)
@@ -32,10 +49,20 @@ impl CompiledContext {
             let mut obj_items = Vec::new();
             for e in edges {
                 if e.get("relation").and_then(|v| v.as_str()) == Some("LOCATED_IN") {
-                    let src = e.get("source_id").and_then(|v| v.as_str()).unwrap_or("").replace("object:", "");
-                    let tgt = e.get("target_id").and_then(|v| v.as_str()).unwrap_or("").replace("room:", "");
+                    let src = e.get("source")
+                        .or_else(|| e.get("source_id"))
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .replace("object:", "");
+                    let tgt = e.get("target")
+                        .or_else(|| e.get("target_id"))
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .replace("room:", "");
                     let conf = e.get("confidence").and_then(|v| v.as_f64()).unwrap_or(1.0);
-                    obj_items.push(format!("{}[in:{},conf:{:.2}]", src, tgt, conf));
+                    if !src.is_empty() && !tgt.is_empty() {
+                        obj_items.push(format!("{}[in:{},conf:{:.2}]", src, tgt, conf));
+                    }
                 }
             }
             if !obj_items.is_empty() {
@@ -61,8 +88,64 @@ impl CompiledContext {
 
     /// Compiles active pipeline state into .k stream syntax
     pub fn to_kpipe(&self) -> String {
-        let room = self.now.get("room").and_then(|v| v.as_str()).unwrap_or("Hallway");
+        let room = self.now.get("current_room")
+            .or_else(|| self.now.get("room"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("Central Hallway");
         format!("state::grounded[room:{}] | reflex::active | ledger::synced", room)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_to_toon_with_live_inspector_state() {
+        let now = json!({
+            "status": "online",
+            "current_room": "Kitchen & Dining",
+            "robot_position": {
+                "x": -4.665,
+                "y": -2.195,
+                "theta": -1.117,
+                "speed": 0.0
+            },
+            "battery": null,
+            "last_vision_detection": null,
+            "last_voice_command": null
+        });
+
+        let context = CompiledContext {
+            now,
+            recent_history: vec![],
+            graph: json!({"nodes": [], "edges": []}),
+        };
+
+        let toon = context.to_toon();
+        assert!(toon.starts_with("@NOW:Room[Kitchen & Dining]|Pose[x:-4.67,y:-2.19,yaw:-64°]"), "Actual: {}", toon);
+
+        let kpipe = context.to_kpipe();
+        assert_eq!(kpipe, "state::grounded[room:Kitchen & Dining] | reflex::active | ledger::synced");
+    }
+
+    #[test]
+    fn test_to_toon_backwards_compatibility() {
+        let now = json!({
+            "room": "Master Bedroom",
+            "x": -5.02,
+            "y": 1.41,
+            "yaw": 1.5708
+        });
+
+        let context = CompiledContext {
+            now,
+            recent_history: vec![],
+            graph: json!({"nodes": [], "edges": []}),
+        };
+
+        let toon = context.to_toon();
+        assert!(toon.starts_with("@NOW:Room[Master Bedroom]|Pose[x:-5.02,y:1.41,yaw:90°]"), "Actual: {}", toon);
     }
 }
 

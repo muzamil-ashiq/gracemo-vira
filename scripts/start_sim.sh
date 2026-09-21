@@ -20,7 +20,7 @@ pkill -9 -f "gz sim" 2>/dev/null || true
 pkill -9 -f "gz-sim" 2>/dev/null || true
 pkill -9 -f "ruby.*gz" 2>/dev/null || true
 pkill -9 -f "ros2 launch" 2>/dev/null || true
-~/.local/bin/distrobox enter gracemo-harmonic -- bash -c \
+/usr/bin/distrobox enter gracemo-harmonic -- bash -c \
   "pkill -9 -f 'gz sim' 2>/dev/null; pkill -9 -f 'gz-sim' 2>/dev/null; pkill -9 -f 'ros2 launch' 2>/dev/null; killall -9 ruby 2>/dev/null; true" \
   >/dev/null 2>&1 || true
 sleep 1
@@ -35,22 +35,22 @@ fi
 
 # 2. Build workspace and update embedded robot
 echo "Building ROS 2 workspace..."
-~/.local/bin/distrobox enter gracemo-harmonic -- bash -c "
+/usr/bin/distrobox enter gracemo-harmonic -- bash -c "
     source /opt/ros/humble/setup.bash
     cd $WS_DIR
-    colcon build --symlink-install 2>&1 | tail -3
+    colcon build --symlink-install 2>&1
     source $WS_DIR/install/setup.bash
     python3 $DIR/scripts/embed_robot_world.py
 "
 
 # 3. Launch Gazebo Harmonic + ROS bridge inside distrobox
 echo "Launching Gazebo Harmonic..."
-~/.local/bin/distrobox enter gracemo-harmonic -- bash -c "
+/usr/bin/distrobox enter gracemo-harmonic -- bash -c "
     source /opt/ros/humble/setup.bash
     source $WS_DIR/install/setup.bash
     export DISPLAY='${DISPLAY:-:0}'
     export WAYLAND_DISPLAY='${WAYLAND_DISPLAY:-}'
     export QT_X11_NO_MITSHM=1
-    export GZ_SIM_RESOURCE_PATH='$WS_DIR/install/gracemo_gazebo/share/gracemo_gazebo/models:/opt/ros/humble/share'
+    export GZ_SIM_RESOURCE_PATH="$WS_DIR/install/gracemo_gazebo/share/gracemo_gazebo/models:$HOME/.gz/fuel/fuel.gazebosim.org/openrobotics/models:/opt/ros/humble/share"
     ros2 launch gracemo_gazebo sim.launch.py
 "

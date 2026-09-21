@@ -19,10 +19,11 @@ def generate_launch_description():
 
     world_file  = os.path.join(pkg_gracemo_gazebo, "worlds", "apartment_floor.world")
     xacro_file  = os.path.join(pkg_gracemo_description, "urdf", "gracemo_vira.urdf.xacro")
-    models_path = os.path.join(pkg_gracemo_gazebo, "models")
-    fuel_cache  = os.path.expanduser("~/.ignition/fuel/fuel.gazebosim.org/openrobotics/models")
-    ros_share   = "/opt/ros/humble/share"
-    resource_paths = f"{models_path}:{fuel_cache}:{ros_share}"
+    models_path    = os.path.join(pkg_gracemo_gazebo, "models")
+    fuel_cache_gz  = os.path.expanduser("~/.gz/fuel/fuel.gazebosim.org/openrobotics/models")
+    fuel_cache_ign = os.path.expanduser("~/.ignition/fuel/fuel.gazebosim.org/openrobotics/models")
+    ros_share      = "/opt/ros/humble/share"
+    resource_paths = f"{models_path}:{fuel_cache_gz}:{fuel_cache_ign}:{ros_share}"
 
     os.environ["GZ_SIM_RESOURCE_PATH"] = resource_paths
 
@@ -48,7 +49,7 @@ def generate_launch_description():
                 os.path.join(pkg_ros_gz_sim, "launch", "gz_sim.launch.py")
             ),
             launch_arguments={
-                "gz_args": f"-r {world_file}",
+                "gz_args": f"-s -r {world_file}",
                 "gz_version": "8"
             }.items()
         ),
@@ -61,6 +62,17 @@ def generate_launch_description():
             output="screen",
             parameters=[{
                 "robot_description": robot_description,
+                "use_sim_time": use_sim_time
+            }]
+        ),
+
+        # 3. GRaCEmo Physical Sensor Bridge (Gazebo Harmonic <-> ROS 2 topics)
+        Node(
+            package="gracemo_bridge",
+            executable="sensor_bridge",
+            name="gracemo_sensor_bridge",
+            output="screen",
+            parameters=[{
                 "use_sim_time": use_sim_time
             }]
         ),

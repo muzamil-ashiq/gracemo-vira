@@ -1,0 +1,16 @@
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Local secrets & runtime audio
+.env
+*.wav
+*.mp3
+
+# Local model weights
+models/
+
+# Pytest / cache
+.pytest_cache/

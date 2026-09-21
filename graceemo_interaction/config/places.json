@@ -1,0 +1,13 @@
+{
+  "_comment": "GraceEMO campus places map. Format: [x, y, display_name]",
+  "door":      [2.5,   -2.5,  "Welcome Reception Desk"],
+  "reception": [2.5,   -2.5,  "Welcome Reception Desk"],
+  "lab":       [2.5,    2.0,  "Robotics Research Lab"],
+  "robotics":  [2.5,    2.0,  "Robotics Research Lab"],
+  "commons":   [-2.5,  -2.5,  "Campus Commons"],
+  "kitchen":   [-2.5,  -2.5,  "Campus Commons"],
+  "ai":        [-2.5,   2.0,  "AI Compute Center"],
+  "library":   [45.0,  20.0,  "Central Library (B37)"],
+  "mall":      [30.0, -40.0,  "Uni-Mall Shopping Center"],
+  "gate":      [0.0,  -95.0,  "Main Campus Gate 1"]
+}
