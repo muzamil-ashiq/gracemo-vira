@@ -65,7 +65,9 @@ pub fn create_shared_state() -> SharedInspectorState {
         "battery": null,
         "last_vision_detection": null,
         "last_voice_command": null,
-        "current_room": "Central Hallway"
+        "last_scan_completed": null,
+        "current_room": "Central Hallway",
+        "world_objects": []
     })))
 }
 
@@ -89,8 +91,25 @@ pub async fn update_from_event(state: &SharedInspectorState, event_type: &EventT
         EventType::PersonVisible { identity, confidence, distance } => {
             live["last_vision_detection"] = json!({ "identity": identity, "confidence": confidence, "distance": distance });
         }
+        EventType::ObjectDetected { class_name, confidence, x, y, z, .. } => {
+            live["last_vision_detection"] = json!({
+                "identity": class_name,
+                "confidence": confidence,
+                "x": x,
+                "y": y,
+                "z": z.unwrap_or(0.0)
+            });
+        }
         EventType::VoiceDetected { transcription, confidence } => {
             live["last_voice_command"] = json!({ "text": transcription, "confidence": confidence });
+        }
+        EventType::ScanCompleted { room, objects_found, success, duration_sec } => {
+            live["last_scan_completed"] = json!({
+                "room": room,
+                "objects_found": objects_found,
+                "success": success,
+                "duration_sec": duration_sec
+            });
         }
         _ => {}
     }

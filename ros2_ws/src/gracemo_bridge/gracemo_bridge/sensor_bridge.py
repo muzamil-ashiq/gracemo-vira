@@ -44,6 +44,7 @@ from gz.msgs10.imu_pb2 import IMU as GzIMU
 from gz.msgs10.model_pb2 import Model as GzModel
 from gz.msgs10.pointcloud_packed_pb2 import PointCloudPacked as GzPointCloudPacked
 from gz.msgs10.clock_pb2 import Clock as GzClock
+from gz.msgs10.pose_v_pb2 import Pose_V as GzPoseV
 
 
 class SensorBridgeNode(Node):
@@ -68,7 +69,16 @@ class SensorBridgeNode(Node):
         # ── 2. Setup TF Broadcasters ──
         self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
         self.static_tf_broadcaster = tf2_ros.StaticTransformBroadcaster(self)
-        self._publish_static_world_tf()
+
+        # Ground-truth tracking for dynamic world -> odom alignment
+        self._world_x = -4.322
+        self._world_y = 2.50
+        self._world_z = 0.025
+        self._world_yaw = 1.570796
+        self._has_world_pose = False
+        self._odom_x = 0.0
+        self._odom_y = 0.0
+        self._odom_yaw = 0.0
 
         # ── 3. Setup ROS 2 Subscribers ──
         self.sub_cmd_vel = self.create_subscription(
@@ -125,6 +135,11 @@ class SensorBridgeNode(Node):
             "/camera/depth_image/points",
             self._on_gz_depth_points,
         )
+        self.gz_node.subscribe(
+            GzPoseV,
+            "/world/gracemo_home/dynamic_pose/info",
+            self._on_gz_pose_v,
+        )
 
         self.get_logger().info("✓ GRaCEmo Sensor Bridge initialized: All physical Gazebo sensors mapped to ROS 2!")
 
@@ -134,20 +149,19 @@ class SensorBridgeNode(Node):
             return Time(seconds=gz_header.stamp.sec, nanoseconds=gz_header.stamp.nsec).to_msg()
         return self.get_clock().now().to_msg()
 
-    def _publish_static_world_tf(self):
-        """Broadcast static transform world -> odom."""
-        t = TransformStamped()
-        t.header.stamp = self.get_clock().now().to_msg()
-        t.header.frame_id = "world"
-        t.child_frame_id = "odom"
-        t.transform.translation.x = 0.0
-        t.transform.translation.y = 0.0
-        t.transform.translation.z = 0.0
-        t.transform.rotation.x = 0.0
-        t.transform.rotation.y = 0.0
-        t.transform.rotation.z = 0.0
-        t.transform.rotation.w = 1.0
-        self.static_tf_broadcaster.sendTransform(t)
+    def _on_gz_pose_v(self, msg: GzPoseV):
+        """Authoritatively tracks true world pose of gracemo_vira model from Gazebo."""
+        for p in msg.pose:
+            if p.name == "gracemo_vira":
+                self._world_x = float(p.position.x)
+                self._world_y = float(p.position.y)
+                self._world_z = float(p.position.z)
+                q = p.orientation
+                siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+                cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+                self._world_yaw = math.atan2(siny_cosp, cosy_cosp)
+                self._has_world_pose = True
+                break
 
     def _build_camera_info(self, width: int, height: int, hfov: float, frame_id: str) -> RosCameraInfo:
         """Construct static CameraInfo matching pinhole camera optics."""
@@ -255,6 +269,35 @@ class SensorBridgeNode(Node):
         t.transform.rotation.w = float(msg.pose.orientation.w)
 
         self.tf_broadcaster.sendTransform(t)
+
+        # 3. Broadcast dynamic TF: world -> odom aligning odometry frame with physical Gazebo world
+        self._odom_x = float(msg.pose.position.x)
+        self._odom_y = float(msg.pose.position.y)
+        qo = msg.pose.orientation
+        siny_cosp = 2.0 * (qo.w * qo.z + qo.x * qo.y)
+        cosy_cosp = 1.0 - 2.0 * (qo.y * qo.y + qo.z * qo.z)
+        self._odom_yaw = math.atan2(siny_cosp, cosy_cosp)
+
+        yaw_diff = self._world_yaw - self._odom_yaw
+        cos_y = math.cos(yaw_diff)
+        sin_y = math.sin(yaw_diff)
+        odom_origin_x = self._world_x - (cos_y * self._odom_x - sin_y * self._odom_y)
+        odom_origin_y = self._world_y - (sin_y * self._odom_x + cos_y * self._odom_y)
+        odom_origin_z = self._world_z - float(msg.pose.position.z)
+
+        tw = TransformStamped()
+        tw.header.stamp = stamp
+        tw.header.frame_id = "world"
+        tw.child_frame_id = "odom"
+        tw.transform.translation.x = float(odom_origin_x)
+        tw.transform.translation.y = float(odom_origin_y)
+        tw.transform.translation.z = float(odom_origin_z)
+        tw.transform.rotation.x = 0.0
+        tw.transform.rotation.y = 0.0
+        tw.transform.rotation.z = math.sin(yaw_diff / 2.0)
+        tw.transform.rotation.w = math.cos(yaw_diff / 2.0)
+
+        self.tf_broadcaster.sendTransform(tw)
 
     def _on_gz_imu(self, msg: GzIMU):
         now = time.time()

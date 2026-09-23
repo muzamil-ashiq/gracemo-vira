@@ -49,6 +49,8 @@ fn test_vcsc_empirical_token_benchmark() {
         now,
         recent_history: history,
         graph,
+        world_objects: vec![],
+        rooms: vec![],
     };
 
     // 1. Measure Pretty JSON

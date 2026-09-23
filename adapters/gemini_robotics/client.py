@@ -160,7 +160,20 @@ class GeminiRoboticsClient:
                     elif all(isinstance(t, getattr(types, "FunctionDeclaration", object)) for t in tools):
                         tool_list = [types.Tool(function_declarations=list(tools))]
                     else:
-                        tool_list = list(tools)
+                        clean_tools = []
+                        import functools
+                        for t in tools:
+                            if callable(t) and hasattr(t, "__annotations__") and "return" in t.__annotations__:
+                                def _make_wrapper(fn):
+                                    @functools.wraps(fn)
+                                    def _w(*args, **kwargs):
+                                        return fn(*args, **kwargs)
+                                    _w.__annotations__ = {k: v for k, v in fn.__annotations__.items() if k != "return"}
+                                    return _w
+                                clean_tools.append(_make_wrapper(t))
+                            else:
+                                clean_tools.append(t)
+                        tool_list = clean_tools
                 elif hasattr(tools, "function_declarations"):
                     tool_list = [tools]
                 else:
@@ -226,6 +239,7 @@ class GeminiRoboticsClient:
         has_image: bool = False,
     ) -> GeminiResponse:
         """Heuristic fallback for offline / mock unit testing."""
+        import math
         low = prompt.lower()
         tool_names: List[str] = []
         for t in (tools or []):
@@ -240,7 +254,161 @@ class GeminiRoboticsClient:
             else:
                 tool_names.append(str(t))
 
-        if ("see" in low or "look" in low or "inspect" in low or "visual" in low) and "inspect_visual_scene" in tool_names:
+        # If a turn or navigation action just completed, perform final look_at on the target object
+        if ("action completed: turn_toward_object" in low or "action completed: navigate_to_object" in low) and "look_at_object" in tool_names:
+            target_obj_name = "chair"
+            if "Original User Command:" in prompt:
+                orig_cmd = prompt.split("Original User Command:")[1].split("\n")[0].strip().strip('"')
+                for prefix in ["find the ", "find ", "look at the ", "look at "]:
+                    if prefix in orig_cmd.lower():
+                        target_obj_name = orig_cmd.lower().split(prefix, 1)[1].split(" ")[0].strip()
+                        break
+            return GeminiResponse(
+                text=f"Base repositioning complete. Now executing final active gaze at {target_obj_name}.",
+                function_calls=[ToolCall(name="look_at_object", args={"object_name": target_obj_name})]
+            )
+
+        # If look_at just completed, conclude verbally
+        if "action completed: look_at" in low:
+            return GeminiResponse(
+                text="The target has been acquired and I am now looking directly at it."
+            )
+
+        # Extract user command from prompt if wrapped in grounded reality
+        user_cmd = prompt
+        if "User Command: \"" in prompt:
+            user_cmd = prompt.split("User Command: \"")[1].split("\"")[0]
+        elif "User Command:" in prompt:
+            user_cmd = prompt.split("User Command:")[1].split("\n")[0].strip().strip('"')
+        cmd_low = user_cmd.lower().strip()
+
+        # ---------------------------------------------------------------------
+        # Object-Grounded LookAt Reasoning (Phase 4 Step 3)
+        # ---------------------------------------------------------------------
+        is_look_at = (
+            cmd_low.startswith("look at")
+            or " look at " in cmd_low
+            or cmd_low.startswith("gaze at")
+            or " gaze at " in cmd_low
+            or "turn toward" in cmd_low
+            or "turn to" in cmd_low
+            or "navigate to" in cmd_low
+            or "behind you" in cmd_low
+        )
+
+        if is_look_at and any(t in tool_names for t in ["look_at_object", "look_at", "turn_toward_object", "navigate_to_object"]):
+            cmd_after = cmd_low
+            # Check if this is explicitly a turn or navigation request or behind the robot
+            is_turn_request = "behind you" in cmd_low or "turn toward" in cmd_low or "turn to" in cmd_low
+            is_nav_request = ("navigate to" in cmd_low or "approach" in cmd_low) and not is_turn_request
+
+            for prefix in ["find the ", "find ", "turn toward the ", "turn toward ", "turn to the ", "turn to ", "navigate to the ", "navigate to ", "gaze at ", "look at "]:
+                if prefix in cmd_after:
+                    cmd_after = cmd_after.split(prefix, 1)[1].strip()
+                    break
+            if " behind you" in cmd_after:
+                cmd_after = cmd_after.split(" behind you")[0].strip()
+            if " and look at it" in cmd_after:
+                cmd_after = cmd_after.split(" and look at it")[0].strip()
+            cmd_after = cmd_after.rstrip(".!?")
+            for art in ["the ", "a ", "an ", "this ", "that "]:
+                if cmd_after.startswith(art):
+                    cmd_after = cmd_after[len(art):].strip()
+            target = cmd_after
+
+            world_objects = _parse_world_objects_from_prompt(prompt)
+
+            # Determine selected tool name based on intent
+            if is_turn_request and "turn_toward_object" in tool_names:
+                selected_tool = "turn_toward_object"
+            elif is_nav_request and "navigate_to_object" in tool_names:
+                selected_tool = "navigate_to_object"
+            elif "look_at_object" in tool_names:
+                selected_tool = "look_at_object"
+            else:
+                selected_tool = "look_at"
+
+            # CASE F: Exact ID match (e.g. 'chair_001')
+            exact_match = next((o for o in world_objects if o["id"].lower() == target.lower()), None)
+            if exact_match:
+                # CASE E: Invalid coordinates
+                if not all(math.isfinite(val) for val in exact_match["pos"]):
+                    return GeminiResponse(
+                        text=f"Cannot look at '{exact_match['id']}': coordinates are invalid/non-finite."
+                    )
+                # CASE D: Stale
+                if not exact_match["visible"]:
+                    return GeminiResponse(
+                        text=f"Object '{exact_match['id']}' is stale / no longer visible. Cannot perform active gaze."
+                    )
+                if selected_tool in ("turn_toward_object", "navigate_to_object", "look_at_object"):
+                    return GeminiResponse(
+                        text=f"Executing {selected_tool} for {exact_match['id']}.",
+                        function_calls=[ToolCall(name=selected_tool, args={"object_name": exact_match["id"]})]
+                    )
+                else:
+                    return GeminiResponse(
+                        text=f"Directing active gaze to {exact_match['id']}.",
+                        function_calls=[ToolCall(name="look_at", args={
+                            "x": exact_match["pos"][0],
+                            "y": exact_match["pos"][1],
+                            "z": exact_match["pos"][2],
+                        })]
+                    )
+
+            # Match by class name
+            matching = [
+                o for o in world_objects
+                if o["class"].lower() == target.lower() or target.lower() in o["class"].lower()
+            ]
+
+            # CASE C: Missing / No object found
+            if not matching:
+                return GeminiResponse(
+                    text=f"Unresolved object: Object '{target}' has not been sighted in the environment."
+                )
+
+            visible_matching = [o for o in matching if o["visible"]]
+
+            # CASE D: Stale matching objects
+            if not visible_matching:
+                stale_ids = [o["id"] for o in matching]
+                return GeminiResponse(
+                    text=f"Object '{target}' ({', '.join(stale_ids)}) was observed previously but is no longer currently visible."
+                )
+
+            # CASE B: Multiple matching objects (Ambiguous)
+            if len(visible_matching) > 1:
+                cand_ids = [o["id"] for o in visible_matching]
+                return GeminiResponse(
+                    text=f"Clarification required: Multiple '{target}' objects are visible ({', '.join(cand_ids)}). Which one do you want me to look at?"
+                )
+
+            # CASE A: Exactly one visible object
+            chosen = visible_matching[0]
+
+            # CASE E: Invalid coordinates
+            if not all(math.isfinite(val) for val in chosen["pos"]):
+                return GeminiResponse(
+                    text=f"Cannot look at '{chosen['id']}': authoritative coordinates are invalid/non-finite."
+                )
+
+            if selected_tool in ("turn_toward_object", "navigate_to_object", "look_at_object"):
+                return GeminiResponse(
+                    text=f"Executing {selected_tool} toward {chosen['id']} ({chosen['class']}).",
+                    function_calls=[ToolCall(name=selected_tool, args={"object_name": target})]
+                )
+            else:
+                return GeminiResponse(
+                    text=f"Gazing at {chosen['id']} ({chosen['class']}).",
+                    function_calls=[ToolCall(name="look_at", args={
+                        "x": chosen["pos"][0],
+                        "y": chosen["pos"][1],
+                        "z": chosen["pos"][2],
+                    })]
+                )
+
+        if ("see" in low or "inspect" in low or "visual" in low or "surroundings" in low) and "inspect_visual_scene" in tool_names:
             return GeminiResponse(
                 text="Inspecting the visual scene using robot camera.",
                 function_calls=[ToolCall(name="inspect_visual_scene", args={})]
@@ -264,6 +432,19 @@ class GeminiRoboticsClient:
                 text="Heading to the Home Study.",
                 function_calls=[ToolCall(name="navigate_to_room", args={"room": "Home Study"})]
             )
+        elif "explore" in low:
+            if ("apartment" in low or "all" in low or "house" in low) and "explore_apartment" in tool_names:
+                return GeminiResponse(
+                    text="Initiating autonomous multi-room exploration of the apartment.",
+                    function_calls=[ToolCall(name="explore_apartment", args={})]
+                )
+            for r_name in ["bedroom", "study", "kitchen", "living", "hallway"]:
+                if r_name in low and "explore_room" in tool_names:
+                    return GeminiResponse(
+                        text=f"Exploring {r_name} autonomously.",
+                        function_calls=[ToolCall(name="explore_room", args={"room_id": f"room:{r_name}"})]
+                    )
+
         elif "stop" in low and "stop" in tool_names:
             return GeminiResponse(
                 text="Stopping robot motors.",
@@ -278,3 +459,84 @@ class GeminiRoboticsClient:
                     )
 
         return GeminiResponse(text=f"Mock response for instruction: {prompt}")
+
+
+def _parse_world_objects_from_prompt(prompt: str) -> List[Dict[str, Any]]:
+    """Extracts world objects from WORLD OBJECTS: block or #OBJECTS: TOON in prompt."""
+    objects: List[Dict[str, Any]] = []
+
+    # 1. Parse structured WORLD OBJECTS section
+    if "WORLD OBJECTS:" in prompt:
+        block = prompt.split("WORLD OBJECTS:")[1].split("===")[0].split("User Command:")[0]
+        current_obj: Optional[Dict[str, Any]] = None
+        for raw_line in block.splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("("):
+                continue
+            if line.startswith("- "):
+                if current_obj and "id" in current_obj:
+                    objects.append(current_obj)
+                obj_id = line[2:].strip()
+                current_obj = {
+                    "id": obj_id,
+                    "class": obj_id.split("_")[0] if "_" in obj_id else obj_id,
+                    "visible": True,
+                    "pos": (0.0, 0.0, 0.0),
+                }
+            elif current_obj is not None:
+                if line.startswith("class:"):
+                    current_obj["class"] = line.split("class:", 1)[1].strip()
+                elif line.startswith("visible:"):
+                    v_str = line.split("visible:", 1)[1].strip().lower()
+                    current_obj["visible"] = (v_str == "true" or v_str == "1")
+                elif line.startswith("position:"):
+                    p_str = line.split("position:", 1)[1].strip().strip("()[]")
+                    try:
+                        parts = [float(val.strip()) for val in p_str.split(",")]
+                        if len(parts) >= 3:
+                            current_obj["pos"] = (parts[0], parts[1], parts[2])
+                    except ValueError:
+                        if "nan" in p_str.lower():
+                            current_obj["pos"] = (float("nan"), 0.0, 0.0)
+                        elif "inf" in p_str.lower():
+                            current_obj["pos"] = (float("inf"), 0.0, 0.0)
+
+        if current_obj and "id" in current_obj:
+            objects.append(current_obj)
+
+    # 2. Parse #OBJECTS: from TOON format if not already captured
+    if "#OBJECTS:" in prompt:
+        import re
+        toon_part = prompt.split("#OBJECTS:")[1].split("#")[0].split("\n")[0]
+        matches = re.findall(r"([a-zA-Z0-9_-]+)\[(.*?)\]", toon_part)
+        for obj_id, fields_str in matches:
+            if any(o["id"].lower() == obj_id.lower() for o in objects):
+                continue
+            fdict = {}
+            for field in fields_str.split(","):
+                if ":" in field:
+                    k, v = field.split(":", 1)
+                    fdict[k.strip()] = v.strip()
+            c_name = fdict.get("class", obj_id.split("_")[0])
+            vis = fdict.get("vis", "1") in ["1", "true"]
+            pos = (0.0, 0.0, 0.0)
+            if "pos" in fdict:
+                p_str = fdict["pos"].strip("()")
+                try:
+                    parts = [float(x.strip()) for x in p_str.split(",")]
+                    if len(parts) >= 3:
+                        pos = (parts[0], parts[1], parts[2])
+                except ValueError:
+                    if "nan" in p_str.lower():
+                        pos = (float("nan"), 0.0, 0.0)
+                    elif "inf" in p_str.lower():
+                        pos = (float("inf"), 0.0, 0.0)
+
+            objects.append({
+                "id": obj_id,
+                "class": c_name,
+                "visible": vis,
+                "pos": pos,
+            })
+
+    return objects

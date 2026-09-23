@@ -23,7 +23,9 @@ robot_model_xml = robot_sdf[start:end]
 # 2a. Inject initial pose (default: central hallway (0,0) for navigation missions; or bedroom for manipulation)
 import sys
 spawn_pose = "0.0 0.0 0.025 0 0 0"
-if len(sys.argv) > 1 and "bedroom" in sys.argv[1].lower():
+if len(sys.argv) > 1 and "multi_room" in sys.argv[1].lower():
+    spawn_pose = "-5.0 2.2 0.025 0 0 -1.570796"
+elif len(sys.argv) > 1 and "bedroom" in sys.argv[1].lower():
     spawn_pose = "-4.322 2.50 0.025 0 0 1.570796"
 pose_tag = f"    <pose>{spawn_pose}</pose>\n"
 tag_end = robot_model_xml.find(">") + 1

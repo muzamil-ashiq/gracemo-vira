@@ -40,6 +40,17 @@ pub struct KExecuteRequest {
     pub expression: String,
 }
 
+#[derive(Deserialize)]
+pub struct WorldObjectsQuery {
+    pub class: Option<String>,
+    pub visible_only: Option<bool>,
+    pub nearest_x: Option<f64>,
+    pub nearest_y: Option<f64>,
+    pub nearest_z: Option<f64>,
+    pub id: Option<String>,
+    pub room: Option<String>,
+}
+
 pub fn create_router(state: AppState) -> Router {
     Router::new()
         .route("/health", get(health_handler))
@@ -47,6 +58,11 @@ pub fn create_router(state: AppState) -> Router {
         .route("/state", get(snapshot_handler))
         .route("/context", get(context_handler))
         .route("/graph", get(graph_handler))
+        .route("/world/objects", get(world_objects_handler))
+        .route("/world/rooms", get(world_rooms_handler))
+        .route("/world/rooms/:room_id", get(world_room_handler))
+        .route("/world/rooms/:room_id/objects", get(world_room_objects_handler))
+        .route("/world/exploration/status", get(world_exploration_status_handler))
         .route("/k/execute", post(k_execute_handler))
         .route("/emit", post(emit_handler))
         .route("/events/live", get(sse_handler))
@@ -73,6 +89,12 @@ pub async fn process_incoming_event(state: AppState, event: Event) {
     };
     let _ = state.graph.process_event(&event, &current_room);
 
+    // Sync authoritative world objects to InspectorState
+    if let Ok(objs) = state.graph.query_world_objects(None, false) {
+        let mut live = state.live_state.write().await;
+        live["world_objects"] = json!(objs);
+    }
+
     // 4. Broadcast across EventBus
     let _ = state.tx.send(event);
 }
@@ -92,8 +114,10 @@ pub struct ContextQuery {
 }
 
 async fn snapshot_handler(State(state): State<AppState>) -> impl IntoResponse {
-    let snapshot = state.live_state.read().await;
-    Json((*snapshot).clone())
+    let objs = state.graph.query_world_objects(None, false).unwrap_or_default();
+    let mut snapshot = state.live_state.read().await.clone();
+    snapshot["world_objects"] = json!(objs);
+    Json(snapshot)
 }
 
 async fn context_handler(
@@ -128,6 +152,105 @@ async fn graph_handler(
             Ok(graph) => Json(graph),
             Err(e) => Json(json!({ "error": e.to_string() })),
         }
+    }
+}
+
+async fn world_objects_handler(
+    State(state): State<AppState>,
+    Query(params): Query<WorldObjectsQuery>,
+) -> impl IntoResponse {
+    let visible_only = params.visible_only.unwrap_or(false);
+
+    if let Some(id) = params.id {
+        match state.graph.query_world_object_by_id(&id) {
+            Ok(Some(obj)) => Json(json!({ "found": true, "object": obj })).into_response(),
+            Ok(None) => Json(json!({ "found": false, "message": format!("Object '{}' not found in world", id) })).into_response(),
+            Err(e) => Json(json!({ "found": false, "error": e.to_string() })).into_response(),
+        }
+    } else if let Some(room) = params.room {
+        match state.graph.query_objects_in_room(&room) {
+            Ok(objs) => {
+                let filtered: Vec<_> = if visible_only {
+                    objs.into_iter().filter(|o| o.currently_visible).collect()
+                } else {
+                    objs
+                };
+                Json(json!({ "objects": filtered, "count": filtered.len(), "room": room })).into_response()
+            }
+            Err(e) => Json(json!({ "error": e.to_string() })).into_response(),
+        }
+    } else if let (Some(nx), Some(ny)) = (params.nearest_x, params.nearest_y) {
+        let nz = params.nearest_z.unwrap_or(0.0);
+        let class_name = params.class.as_deref().unwrap_or("");
+        match state.graph.query_nearest_world_object(class_name, nx, ny, nz, visible_only) {
+            Ok(Some(obj)) => Json(json!({ "found": true, "object": obj })).into_response(),
+            Ok(None) => Json(json!({ "found": false, "message": format!("No matching objects found for nearest query (class: '{}')", class_name) })).into_response(),
+            Err(e) => Json(json!({ "found": false, "error": e.to_string() })).into_response(),
+        }
+    } else {
+        match state.graph.query_world_objects(params.class.as_deref(), visible_only) {
+            Ok(objs) => Json(json!({ "objects": objs, "count": objs.len() })).into_response(),
+            Err(e) => Json(json!({ "error": e.to_string() })).into_response(),
+        }
+    }
+}
+
+async fn world_rooms_handler(
+    State(state): State<AppState>,
+) -> impl IntoResponse {
+    match state.graph.query_all_rooms() {
+        Ok(rooms) => Json(json!({ "rooms": rooms, "count": rooms.len() })).into_response(),
+        Err(e) => (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )
+            .into_response(),
+    }
+}
+
+async fn world_room_handler(
+    State(state): State<AppState>,
+    axum::extract::Path(room_id): axum::extract::Path<String>,
+) -> impl IntoResponse {
+    match state.graph.get_room(&room_id) {
+        Ok(Some(room)) => Json(room).into_response(),
+        Ok(None) => (
+            axum::http::StatusCode::NOT_FOUND,
+            Json(json!({ "error": format!("Room '{}' not found", room_id) })),
+        )
+            .into_response(),
+        Err(e) => (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )
+            .into_response(),
+    }
+}
+
+async fn world_room_objects_handler(
+    State(state): State<AppState>,
+    axum::extract::Path(room_id): axum::extract::Path<String>,
+) -> impl IntoResponse {
+    match state.graph.query_objects_in_room(&room_id) {
+        Ok(objs) => Json(json!({ "room": room_id, "objects": objs, "count": objs.len() })).into_response(),
+        Err(e) => (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )
+            .into_response(),
+    }
+}
+
+async fn world_exploration_status_handler(
+    State(state): State<AppState>,
+) -> impl IntoResponse {
+    match state.graph.get_exploration_status() {
+        Ok(status) => Json(status).into_response(),
+        Err(e) => (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )
+            .into_response(),
     }
 }
 

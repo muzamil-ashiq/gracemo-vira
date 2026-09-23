@@ -54,6 +54,8 @@ blueprints/
 .blueprint/
 /*.jpg
 /*.png
+scripts/*_debug_frame.jpg
+scratch/
 
 # IDE & OS
 .vscode/

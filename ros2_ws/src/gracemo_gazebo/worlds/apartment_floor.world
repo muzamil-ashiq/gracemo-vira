@@ -438,7 +438,7 @@
          🤖 GRaCEmo ViRa ROBOT MODEL
          ===================================================================== -->
     <model name='gracemo_vira'>
-    <pose>0.0 0.0 0.025 0 0 0</pose>
+    <pose>-5.0 2.2 0.025 0 0 -1.570796</pose>
 
     <link name='base_footprint'>
       <inertial>
