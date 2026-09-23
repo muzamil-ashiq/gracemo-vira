@@ -56,6 +56,9 @@ blueprints/
 /*.png
 scripts/*_debug_frame.jpg
 scratch/
+*IMPLEMENTATION_REPORT*.md
+*IMPLEMENTATION_PLAN*.md
+
 
 # IDE & OS
 .vscode/
