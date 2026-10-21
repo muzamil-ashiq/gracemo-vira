@@ -1,0 +1,629 @@
+{
+  "project": {
+    "name": "GRaCEmo ViRa V1",
+    "designation": "Autonomous Interactive Mobile Service Robot",
+    "organization": "Lovely Professional University (LPU)",
+    "audit_date": "2026-10-19",
+    "software_version": "1.0.0-rc1",
+    "frozen_commit_sha": "cd6af65677e6195b2cd499e1251787f332690f5e"
+  },
+  "audit_scope": {
+    "target": "Full Computational Requirements and Hardware Sizing Audit",
+    "repository_root": "/Users/samdavi/projects/VIRA",
+    "evaluated_tiers": [
+      "Low-Level Actuation & Microcontroller Substrate",
+      "ROS 2 Jazzy Robotics & Navigation Stack",
+      "Core Kernel EventBus & Context Compilers",
+      "Computer Vision & Facial Perception Pipeline",
+      "Speech, Dialogue & Interaction Pipeline",
+      "Embodied AI & Cloud/Local LLM Orchestration",
+      "Digital Twin & Physics Simulation Engine"
+    ]
+  },
+  "hardware_candidates": [
+    {
+      "name": "NVIDIA Jetson Orin Nano Super 8GB",
+      "type": "Edge AI System-on-Module",
+      "memory_gb": 8.0,
+      "memory_type": "Unified LPDDR5",
+      "memory_bandwidth_gbps": 68.0,
+      "gpu_architecture": "Ampere (1024 CUDA cores, 32 Tensor cores)",
+      "ai_tops": 68,
+      "cpu_cores": 6,
+      "cpu_arch": "Arm Cortex-A78AE v8.2 64-bit",
+      "power_watts": "7W - 25W",
+      "status": "Inadequate for concurrent local AI + Vision + Speech stack"
+    },
+    {
+      "name": "NVIDIA Jetson Orin NX 8GB",
+      "type": "Edge AI System-on-Module",
+      "memory_gb": 8.0,
+      "memory_type": "Unified LPDDR5",
+      "memory_bandwidth_gbps": 102.4,
+      "gpu_architecture": "Ampere (1024 CUDA cores, 32 Tensor cores)",
+      "ai_tops": 70,
+      "cpu_cores": 6,
+      "cpu_arch": "Arm Cortex-A78AE v8.2 64-bit",
+      "power_watts": "10W - 20W",
+      "status": "Inadequate memory headroom for concurrent multimodal stack"
+    },
+    {
+      "name": "NVIDIA Jetson Orin NX 16GB",
+      "type": "Edge AI System-on-Module",
+      "memory_gb": 16.0,
+      "memory_type": "Unified LPDDR5",
+      "memory_bandwidth_gbps": 102.4,
+      "gpu_architecture": "Ampere (1024 CUDA cores, 32 Tensor cores)",
+      "ai_tops": 100,
+      "cpu_cores": 8,
+      "cpu_arch": "Arm Cortex-A78AE v8.2 64-bit",
+      "power_watts": "10W - 25W",
+      "status": "Recommended Baseline for Onboard Perception, Local Speech & Cognitive Edge"
+    },
+    {
+      "name": "NVIDIA Jetson AGX Orin 64GB",
+      "type": "High-Performance Edge AI Compute",
+      "memory_gb": 64.0,
+      "memory_type": "Unified LPDDR5",
+      "memory_bandwidth_gbps": 204.8,
+      "gpu_architecture": "Ampere (2048 CUDA cores, 64 Tensor cores)",
+      "ai_tops": 275,
+      "cpu_cores": 12,
+      "cpu_arch": "Arm Cortex-A78AE v8.2 64-bit",
+      "power_watts": "15W - 60W",
+      "status": "Recommended Fallback / High-Density Option for Onboard Heavy Riva + Large VLM / 14B LLM"
+    },
+    {
+      "name": "Raspberry Pi 5 8GB",
+      "type": "Single Board Computer",
+      "memory_gb": 8.0,
+      "memory_type": "LPDDR4X",
+      "memory_bandwidth_gbps": 17.0,
+      "gpu_architecture": "VideoCore VII (No CUDA/TensorRT)",
+      "ai_tops": 0,
+      "cpu_cores": 4,
+      "cpu_arch": "Arm Cortex-A76 @ 2.4GHz",
+      "power_watts": "5W - 12W",
+      "status": "Viable for Split-Compute Architecture (Dedicated Nav2, SLAM Toolbox, Micro-ROS bridge)"
+    },
+    {
+      "name": "x86-64 GPU Workstation (RTX 4080/4090)",
+      "type": "Offboard Simulation & Digital Twin Rig",
+      "memory_gb": 64.0,
+      "memory_type": "DDR5 System RAM + 16/24GB GDDR6X VRAM",
+      "memory_bandwidth_gbps": 1008.0,
+      "gpu_architecture": "Ada Lovelace",
+      "ai_tops": 800,
+      "cpu_cores": 16,
+      "cpu_arch": "x86_64",
+      "power_watts": "350W - 650W",
+      "status": "Required for Full Gazebo Harmonic Physics Simulation & Synthetic Sensor Pipelines"
+    }
+  ],
+  "features": [
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "Wake-Word Detection",
+      "status": "Implemented",
+      "implementation_ref": "adapters/voice/gracemo_voice/wake_word.py:OpenWakeWordEngine",
+      "notes": "Uses openwakeword ONNX runtime (hey_jarvis_v0.1.onnx) gated by Silero VAD."
+    },
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "Voice Activity Detection (VAD)",
+      "status": "Implemented",
+      "implementation_ref": "adapters/voice/gracemo_voice/stt.py:FasterWhisperEngine",
+      "notes": "Silero VAD threshold 0.35, min_silence_duration_ms=300ms."
+    },
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "Speech-to-Text (STT) Local",
+      "status": "Implemented",
+      "implementation_ref": "adapters/voice/gracemo_voice/stt.py:FasterWhisperEngine",
+      "notes": "Faster-Whisper tiny.en running on CPU int8 or CUDA float16."
+    },
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "Speech-to-Text (STT) Cloud",
+      "status": "Implemented",
+      "implementation_ref": "graceemo_interaction/model.py:GroqClient",
+      "notes": "Groq Whisper-large-v3-turbo cloud fallback."
+    },
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "Text-to-Speech (TTS) Local",
+      "status": "Implemented",
+      "implementation_ref": "adapters/voice/gracemo_voice/tts.py:KokoroTTSEngine",
+      "notes": "Kokoro TTS (af_sarah) local GPU synthesis with Edge-TTS fallback."
+    },
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "Text-to-Speech (TTS) Cloud",
+      "status": "Implemented",
+      "implementation_ref": "adapters/voice/gracemo_voice/tts.py:EdgeTTSEngine",
+      "notes": "Edge-TTS cloud neural (en-US-JennyNeural) via Python CLI."
+    },
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "NVIDIA Riva Speech Stack",
+      "status": "Not Found / Proposed Only",
+      "implementation_ref": "config/voice.yaml",
+      "notes": "Zero Riva code or server containers exist in the repository. Riva is an external candidate only."
+    },
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "Microphone-Array Beamforming / DoA",
+      "status": "Not Found",
+      "implementation_ref": "config/voice.yaml:audio_io",
+      "notes": "Audio capture is single-channel 16/48kHz PyAudio stream. No direction-of-arrival processing found."
+    },
+    {
+      "category": "Speech & Conversational Interaction",
+      "feature": "Deterministic Fast-Path Intent",
+      "status": "Implemented",
+      "implementation_ref": "graceemo_interaction/core/fast_path.py:FastPathMatcher",
+      "notes": "Regex/keyword intent matcher executing in < 1 ms."
+    },
+    {
+      "category": "Face & Identity Processing",
+      "feature": "Face Detection",
+      "status": "Implemented",
+      "implementation_ref": "adapters/vision/gracemo_vision/face_id.py:FaceRecognizer",
+      "notes": "OpenCV FaceDetectorYN (YuNet CNN ONNX model)."
+    },
+    {
+      "category": "Face & Identity Processing",
+      "feature": "Face Embedding & Real Recognition",
+      "status": "Partially Implemented (Stub)",
+      "implementation_ref": "adapters/vision/gracemo_vision/face_id.py:61-71",
+      "notes": "Hardcoded assignment to default_user if detection confidence > 0.55. No cosine feature matcher or deep embeddings."
+    },
+    {
+      "category": "Face & Identity Processing",
+      "feature": "Person Re-Identification (ReID)",
+      "status": "Not Found",
+      "implementation_ref": "adapters/vision",
+      "notes": "Zero ReID feature extraction or gallery association found."
+    },
+    {
+      "category": "General Computer Vision",
+      "feature": "2D Object Detection",
+      "status": "Implemented",
+      "implementation_ref": "adapters/vision/gracemo_vision/detector.py:VisionAdapter",
+      "notes": "Ultralytics YOLO (yolo11n.pt) on CUDA/CPU."
+    },
+    {
+      "category": "General Computer Vision",
+      "feature": "Multi-Object Tracking",
+      "status": "Implemented",
+      "implementation_ref": "adapters/vision/gracemo_vision/detector.py:track",
+      "notes": "ByteTrack tracking enabled in Ultralytics pipeline."
+    },
+    {
+      "category": "General Computer Vision",
+      "feature": "Monocular 3D Spatial Distance Estimation",
+      "status": "Implemented",
+      "implementation_ref": "adapters/vision/gracemo_vision/spatial.py:SpatialEstimator",
+      "notes": "Pinhole focal-length projection based on assumed 0.15m face width."
+    },
+    {
+      "category": "General Computer Vision",
+      "feature": "Visual Odometry / VSLAM",
+      "status": "Not Found",
+      "implementation_ref": "ros2_ws/src/gracemo_nav2",
+      "notes": "Navigation relies strictly on 2D LiDAR SLAM (SLAM Toolbox) and wheel odometry. No Isaac ROS Visual SLAM or RTAB-Map present."
+    },
+    {
+      "category": "LLMs, VLMs and Planning",
+      "feature": "Local Offline LLM",
+      "status": "Implemented (macOS Only)",
+      "implementation_ref": "graceemo_interaction/model.py",
+      "notes": "Qwen 2.5 3B Instruct 4-bit loaded via Apple Silicon MLX GPU. Requires TensorRT-LLM/Ollama port for Linux Jetson."
+    },
+    {
+      "category": "LLMs, VLMs and Planning",
+      "feature": "Cloud Embodied LLM / VLM",
+      "status": "Implemented",
+      "implementation_ref": "adapters/gemini_robotics/orchestrator.py",
+      "notes": "Google Gemini Robotics ER 2 preview / Gemini 4 Argon cloud API orchestrator with tool calls."
+    },
+    {
+      "category": "ROS 2, Nav2 and SLAM",
+      "feature": "Autonomous 2D Navigation (Nav2)",
+      "status": "Implemented",
+      "implementation_ref": "ros2_ws/src/gracemo_nav2/launch/nav2.launch.py",
+      "notes": "Nav2 stack with DWB controller, costmaps, and BT navigator."
+    },
+    {
+      "category": "ROS 2, Nav2 and SLAM",
+      "feature": "2D SLAM Mapping",
+      "status": "Implemented",
+      "implementation_ref": "ros2_ws/src/gracemo_nav2/launch/nav2.launch.py",
+      "notes": "SLAM Toolbox online_async_launch.py."
+    },
+    {
+      "category": "ROS 2, Nav2 and SLAM",
+      "feature": "AMCL Particle Filter Localization",
+      "status": "Implemented",
+      "implementation_ref": "ros2_ws/src/gracemo_nav2/config/nav2_physical_params.yaml",
+      "notes": "500 to 2000 particles, 60 max beams, scan topic /scan."
+    },
+    {
+      "category": "Robotics Hardware & Low-Level Control",
+      "feature": "Spinal Hardware Motor Adapter",
+      "status": "Implemented (Host Abstraction)",
+      "implementation_ref": "adapters/robot-bridge/gracemo_bridge/hardware_adapter.py",
+      "notes": "50Hz differential drive velocity converter with 400ms deadman watchdog and battery monitor."
+    },
+    {
+      "category": "Robotics Hardware & Low-Level Control",
+      "feature": "STM32 MCU Firmware",
+      "status": "Planned / Not in Repository",
+      "implementation_ref": "config/robot.yaml:hardware_interface",
+      "notes": "Zero C/C++ or micro-ROS firmware source code in repo. Communicates via serial port mock or USB CDC."
+    },
+    {
+      "category": "Digital Twin & Simulation",
+      "feature": "Gazebo Harmonic Physics & World",
+      "status": "Implemented",
+      "implementation_ref": "ros2_ws/src/gracemo_gazebo/worlds/apartment_floor.world",
+      "notes": "Multi-room indoor apartment world with differential drive, bumper, LiDAR, camera plugins."
+    }
+  ],
+  "models": [
+    {
+      "name": "Qwen 2.5 3B Instruct 4-bit",
+      "format": "safetensors (MLX quantized)",
+      "file_size_bytes": 1736293090,
+      "parameters": "3.09B",
+      "precision": "4-bit (int4 weight-only)",
+      "runtime_backend": "MLX (Apple Silicon) -> Port to TensorRT-LLM on Jetson",
+      "resident_memory_est_mb": 2200,
+      "resident_status": "Resident during voice interaction"
+    },
+    {
+      "name": "YOLOv11 Nano (yolo11n.pt)",
+      "format": "PyTorch / ONNX",
+      "file_size_bytes": 5500000,
+      "parameters": "2.6M",
+      "precision": "FP16 / INT8",
+      "runtime_backend": "Ultralytics PyTorch / TensorRT Engine",
+      "resident_memory_est_mb": 350,
+      "resident_status": "Resident during active perception"
+    },
+    {
+      "name": "YuNet Face Detector (face_detection_yunet_2023mar.onnx)",
+      "format": "ONNX",
+      "file_size_bytes": 350000,
+      "parameters": "85K",
+      "precision": "FP32",
+      "runtime_backend": "OpenCV DNN (CPU/CUDA)",
+      "resident_memory_est_mb": 80,
+      "resident_status": "Resident during perception"
+    },
+    {
+      "name": "OpenWakeWord (hey_jarvis_v0.1.onnx)",
+      "format": "ONNX",
+      "file_size_bytes": 1500000,
+      "parameters": "0.3M",
+      "precision": "FP32",
+      "runtime_backend": "ONNX Runtime",
+      "resident_memory_est_mb": 60,
+      "resident_status": "Continuous in idle standby"
+    },
+    {
+      "name": "Silero VAD",
+      "format": "ONNX / PyTorch JIT",
+      "file_size_bytes": 2000000,
+      "parameters": "0.5M",
+      "precision": "FP32",
+      "runtime_backend": "ONNX Runtime",
+      "resident_memory_est_mb": 50,
+      "resident_status": "Continuous in idle standby"
+    },
+    {
+      "name": "Faster-Whisper (tiny.en)",
+      "format": "CTranslate2 (int8/float16)",
+      "file_size_bytes": 75000000,
+      "parameters": "39M",
+      "precision": "INT8 / FP16",
+      "runtime_backend": "CTranslate2",
+      "resident_memory_est_mb": 220,
+      "resident_status": "Resident during voice interaction"
+    },
+    {
+      "name": "Kokoro TTS (af_sarah)",
+      "format": "PyTorch (.pth / safetensors)",
+      "file_size_bytes": 350000000,
+      "parameters": "82M",
+      "precision": "FP16",
+      "runtime_backend": "PyTorch / Kokoro pipeline",
+      "resident_memory_est_mb": 550,
+      "resident_status": "Resident during voice interaction"
+    },
+    {
+      "name": "Google Gemini Robotics ER 2 / Argon",
+      "format": "Remote Cloud API",
+      "file_size_bytes": 0,
+      "parameters": "Undisclosed Cloud VLM",
+      "precision": "Cloud Managed",
+      "runtime_backend": "Google GenAI SDK (HTTPS)",
+      "resident_memory_est_mb": 25,
+      "resident_status": "Stateless client connection"
+    }
+  ],
+  "workloads": [
+    {
+      "subsystem": "gracemo-kernel",
+      "language": "Rust (Axum + Tokio)",
+      "target_rate_hz": 1000.0,
+      "cpu_load_est_pct": 5.0,
+      "memory_mb": 35.0,
+      "criticality": "Safety-Critical Core Substrate",
+      "host": "Onboard Host (Jetson or Pi 5)"
+    },
+    {
+      "subsystem": "gracemo_vision (YOLO11n + ByteTrack)",
+      "language": "Python 3.11",
+      "target_rate_hz": 30.0,
+      "cpu_load_est_pct": 25.0,
+      "gpu_load_est_pct": 35.0,
+      "memory_mb": 450.0,
+      "criticality": "Medium (Obstacle / Object / Human Detection)",
+      "host": "Jetson Orin NX"
+    },
+    {
+      "subsystem": "gracemo_voice (VAD + Faster-Whisper + Kokoro)",
+      "language": "Python 3.11",
+      "target_rate_hz": "On-demand audio turn",
+      "cpu_load_est_pct": 30.0,
+      "gpu_load_est_pct": 40.0,
+      "memory_mb": 850.0,
+      "criticality": "High (User Experience & Stop Intent)",
+      "host": "Jetson Orin NX"
+    },
+    {
+      "subsystem": "Nav2 (Costmaps + DWB Controller + Planners)",
+      "language": "C++ (ROS 2 Jazzy)",
+      "target_rate_hz": 20.0,
+      "cpu_load_est_pct": 60.0,
+      "gpu_load_est_pct": 0.0,
+      "memory_mb": 1200.0,
+      "criticality": "High (Locomotion & Obstacle Avoidance)",
+      "host": "Raspberry Pi 5 (or Jetson)"
+    },
+    {
+      "subsystem": "SLAM Toolbox (Online Async Mapping)",
+      "language": "C++ (ROS 2 Jazzy)",
+      "target_rate_hz": 15.0,
+      "cpu_load_est_pct": 45.0,
+      "gpu_load_est_pct": 0.0,
+      "memory_mb": 800.0,
+      "criticality": "Medium (Active Mapping Mode Only)",
+      "host": "Raspberry Pi 5 (or Jetson)"
+    },
+    {
+      "subsystem": "Gazebo Harmonic Physics Sim",
+      "language": "C++ (gz-sim 8)",
+      "target_rate_hz": 1000.0,
+      "cpu_load_est_pct": 250.0,
+      "gpu_load_est_pct": 85.0,
+      "memory_mb": 3500.0,
+      "criticality": "Offboard Development",
+      "host": "Separate x86-64 GPU Workstation"
+    }
+  ],
+  "concurrency_scenarios": [
+    {
+      "scenario": "Scenario 1 — Idle Standby",
+      "active_subsystems": ["Kernel", "SafetyGate", "OpenWakeWord", "Silero VAD", "Telemetry"],
+      "cpu_cores_required": 1.2,
+      "gpu_memory_mb": 150,
+      "system_ram_mb": 800,
+      "bottlenecks": "None. Low power idle state."
+    },
+    {
+      "scenario": "Scenario 2 — Normal Interaction",
+      "active_subsystems": ["Kernel", "Pygame Face", "OpenWakeWord", "VAD", "Faster-Whisper", "Local Qwen / Cloud LLM", "Kokoro TTS", "YOLO11n Face Tracker"],
+      "cpu_cores_required": 3.8,
+      "gpu_memory_mb": 3600,
+      "system_ram_mb": 4200,
+      "bottlenecks": "Simultaneous STT transcription and TTS audio synthesis spikes."
+    },
+    {
+      "scenario": "Scenario 3 — Person Following / ReID",
+      "active_subsystems": ["YOLO11n Detector", "ByteTrack", "Depth Estimator", "Nav2 DWB Controller", "Base Controller 50Hz"],
+      "cpu_cores_required": 4.5,
+      "gpu_memory_mb": 900,
+      "system_ram_mb": 3800,
+      "bottlenecks": "ReID model missing from codebase; ByteTrack association only. Sustained 30 FPS camera processing required."
+    },
+    {
+      "scenario": "Scenario 4 — Heavy AI Interaction",
+      "active_subsystems": ["YOLO11n", "Nav2 Active Transit", "Local Qwen 2.5 3B (MLX/TRT-LLM)", "Faster-Whisper", "Kokoro TTS", "Kernel SSE"],
+      "cpu_cores_required": 6.8,
+      "gpu_memory_mb": 4500,
+      "system_ram_mb": 7200,
+      "bottlenecks": "Unified memory bandwidth contention on Jetson; audio jitter during heavy GPU inference."
+    },
+    {
+      "scenario": "Scenario 5 — Mapping / VSLAM",
+      "active_subsystems": ["SLAM Toolbox", "Nav2 Frontier Explorer", "LiDAR 15Hz", "IMU 50Hz", "Base Controller"],
+      "cpu_cores_required": 4.2,
+      "gpu_memory_mb": 200,
+      "system_ram_mb": 3200,
+      "bottlenecks": "Graph optimization memory growth during prolonged mapping runs."
+    },
+    {
+      "scenario": "Scenario 6 — Manipulation",
+      "active_subsystems": ["ArmKinematics 5/7-DOF", "HandController", "GraspVerifier", "Visual Inspection", "MoveIt 2 TRAC-IK"],
+      "cpu_cores_required": 3.5,
+      "gpu_memory_mb": 450,
+      "system_ram_mb": 2800,
+      "bottlenecks": "IK solve timeouts and gripper contact sensor latency."
+    },
+    {
+      "scenario": "Scenario 7 — Digital-Twin Development",
+      "active_subsystems": ["Gazebo Harmonic", "Apartment World", "OGRE2 Rendering", "gz-transport13", "ROS 2 Sensor Bridge", "Nav2", "RViz2"],
+      "cpu_cores_required": 8.0,
+      "gpu_memory_mb": 5500,
+      "system_ram_mb": 9000,
+      "bottlenecks": "Cannot run concurrently on embedded Jetson. Must run on external GPU workstation."
+    }
+  ],
+  "software_dependencies": [
+    {
+      "package": "ROS 2",
+      "configured_version": "Jazzy Jalisco (LTS)",
+      "target_os": "Ubuntu 24.04 LTS (Noble Numbat)",
+      "compatibility_notes": "JetPack 6.x officially provides Ubuntu 22.04 LTS / ROS 2 Humble. Running Jazzy on Jetson requires Ubuntu 24.04 userspace container or custom rootfs."
+    },
+    {
+      "package": "CUDA / TensorRT",
+      "configured_version": "CUDA 12.2+ / TensorRT 8.6+",
+      "target_os": "Linux ARM64",
+      "compatibility_notes": "Required for Ultralytics YOLO and Faster-Whisper GPU acceleration."
+    },
+    {
+      "package": "MLX / MLX-LM",
+      "configured_version": ">=0.22.0",
+      "target_os": "macOS Darwin ARM64 ONLY",
+      "compatibility_notes": "HARD BLOCKER: MLX is Apple Silicon exclusive. Running Qwen 2.5 on Jetson requires porting to TensorRT-LLM, vLLM, or Ollama."
+    },
+    {
+      "package": "FastAPI / Uvicorn",
+      "configured_version": "0.110.0 / 0.29.0",
+      "target_os": "Platform Independent",
+      "compatibility_notes": "Fully supported on ARM64 Linux."
+    }
+  ],
+  "hardware_allocation": {
+    "edge_tier_1_jetson": {
+      "candidate": "NVIDIA Jetson Orin NX 16GB",
+      "responsibilities": [
+        "YOLOv11n Object Detection (30 FPS)",
+        "YuNet Face Detection & Future ReID",
+        "Silero VAD & OpenWakeWord",
+        "Faster-Whisper Local STT",
+        "Kokoro TTS Synthesis",
+        "Local Qwen 2.5 3B (TensorRT-LLM Port)",
+        "Pygame Facial Expression Display"
+      ]
+    },
+    "edge_tier_2_rpi5": {
+      "candidate": "Raspberry Pi 5 8GB",
+      "responsibilities": [
+        "ROS 2 Jazzy Middleware & CycloneDDS",
+        "Nav2 Costmaps, Planners, and DWB Controller",
+        "SLAM Toolbox / AMCL Localization",
+        "gracemo-kernel (Rust Axum EventBus)",
+        "RobotBridge & Hardware Watchdog Interface",
+        "Micro-ROS Agent Interface"
+      ]
+    },
+    "mcu_tier_3_stm32": {
+      "candidate": "STM32F746-Class Cortex-M7 MCU",
+      "responsibilities": [
+        "50Hz Closed-Loop PID Motor Velocity Control",
+        "Quadrature Encoder High-Frequency Sampling",
+        "Physical E-Stop Hardware Interlock",
+        "Hardware Watchdog Dynamic Braking (< 100ms)",
+        "Battery Voltage ADC Telemetry"
+      ]
+    },
+    "workstation_tier_4": {
+      "candidate": "x86-64 GPU Workstation (RTX 4080/4090)",
+      "responsibilities": [
+        "Gazebo Harmonic Headless / GUI World Physics",
+        "High-Fidelity Sensor Simulation (LiDAR, Depth, Contacts)",
+        "Synthetic Data Generation & Model Fine-Tuning"
+      ]
+    }
+  },
+  "risks": [
+    {
+      "id": "RISK-01",
+      "severity": "CRITICAL",
+      "description": "MLX Framework Incompatibility on Jetson: The local Qwen 2.5 3B model currently uses Apple-proprietary MLX framework which cannot execute on NVIDIA Jetson or Raspberry Pi.",
+      "mitigation": "Export safetensors to TensorRT-LLM or deploy via Ollama/llama.cpp before hardware deployment."
+    },
+    {
+      "id": "RISK-02",
+      "severity": "HIGH",
+      "description": "NVIDIA Riva Memory & Platform Overhead: Riva containers require 3.5GB to 5.0GB unified memory and specific JetPack versions, creating severe contention on 16GB Orin NX if run concurrently with local LLM.",
+      "mitigation": "Keep lightweight modular voice pipeline (Silero + Faster-Whisper + Kokoro) as baseline, or mandate AGX Orin 64GB if Riva is strictly required."
+    },
+    {
+      "id": "RISK-03",
+      "severity": "HIGH",
+      "description": "Missing Person ReID Implementation: Person ReID is currently a stub assigning identity to default_user without visual feature embeddings.",
+      "mitigation": "Integrate OSNet or FastReID ONNX model on Jetson before claiming follow-me / ReID capability."
+    },
+    {
+      "id": "RISK-04",
+      "severity": "MEDIUM",
+      "description": "Distributed Ethernet TF Sync Jitter: Splitting Nav2 across Pi 5 and Vision across Jetson introduces network serialization delay on camera/pointcloud streams.",
+      "mitigation": "Use Gigabit Ethernet with PTP (IEEE 1588) clock synchronization or consolidate Nav2 directly onto Jetson Orin NX."
+    }
+  ],
+  "unknowns": [
+    {
+      "item": "Riva Jetson JetPack 6 Availability",
+      "impact": "High",
+      "description": "Exact JetPack 6 ARM64 debian / container support matrix for embedded Riva ASR/TTS models."
+    },
+    {
+      "item": "Thermal Throttling Under Sustained Concurrent Load",
+      "impact": "High",
+      "description": "Sustained temperature of Orin NX 16GB in sealed robot chassis under 25W TDP."
+    },
+    {
+      "item": "Physical STM32 Firmware Codebase",
+      "impact": "Critical",
+      "description": "Micro-ROS STM32 firmware implementation is absent from the repository."
+    }
+  ],
+  "benchmark_plan": [
+    {
+      "step": 1,
+      "name": "TensorRT-LLM Qwen 2.5 3B Latency & Memory Benchmark",
+      "target_hardware": "Jetson Orin NX 16GB",
+      "metrics": ["Time-to-first-token (ms)", "Tokens/sec", "Resident Unified Memory (MB)"]
+    },
+    {
+      "step": 2,
+      "name": "Concurrent YOLOv11n + ByteTrack FPS & Latency Soak",
+      "target_hardware": "Jetson Orin NX 16GB",
+      "metrics": ["FPS", "Inference P95 latency (ms)", "GPU Utilization (%)"]
+    },
+    {
+      "step": 3,
+      "name": "Nav2 + SLAM Toolbox CPU & Memory Benchmark",
+      "target_hardware": "Raspberry Pi 5 8GB & Jetson Orin NX 16GB",
+      "metrics": ["Core utilization (%)", "Control loop jitter (ms)", "Costmap update latency (ms)"]
+    },
+    {
+      "step": 4,
+      "name": "Microsecond Voice-to-Stop Verification",
+      "target_hardware": "Physical Chassis REV-C",
+      "metrics": ["VAD cutoff latency", "FastPath dispatch latency", "Mechanical stopping time (ms)"]
+    }
+  ],
+  "recommendation": {
+    "minimum_defensible_configuration": {
+      "onboard_compute": "NVIDIA Jetson Orin NX 16GB + Raspberry Pi 5 8GB (Two-Computer Split Architecture)",
+      "low_level_mcu": "STM32F746-Class MCU for 50Hz Safety Watchdog & Motor PID",
+      "offboard_compute": "Dedicated x86-64 Workstation (RTX 4080/4090) for Full Gazebo Harmonic Digital Twin",
+      "justification": "Provides hard hardware isolation between safety-critical deterministic navigation (Nav2 on Pi 5) and high-load dynamic AI inference (YOLO + Speech + LLM on Jetson 16GB). Prevents memory exhaustion and GPU thrashing from causing motion control loss."
+    },
+    "single_computer_alternative": {
+      "onboard_compute": "NVIDIA Jetson AGX Orin 64GB",
+      "justification": "Consolidates all AI, Vision, Speech, Nav2, SLAM, and Kernel onto a single monolithic board with 204.8 GB/s bandwidth and 275 TOPS, eliminating inter-board Ethernet transport and TF synchronization risks."
+    },
+    "upgrade_trigger_conditions": [
+      "Mandating full onboard NVIDIA Riva ASR/TTS services concurrently with a local 7B/14B LLM.",
+      "Transitioning from 2D planar LiDAR navigation to multi-camera 3D Isaac ROS Visual SLAM and dense volumetric occupancy mapping.",
+      "Attempting to run full headless Gazebo physics simulation onboard the mobile robot."
+    ]
+  }
+}

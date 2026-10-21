@@ -1,0 +1,23 @@
+* GRaCEmo ViRa Circuit B - educational averaged buck converter equivalent
+* NOT a manufacturer IC model or production power-stage design.
+.param VIN=24 VREF=5 DUTY=0.2083
+Vinput vin 0 PWL(0 {VIN} 2m {VIN} 2.01m 20 8m 20 8.01m 24 20m 24)
+* Averaged ideal PWM switch represented by controlled voltage source
+Bsw sw 0 V={V(vin)*DUTY}
+L1 sw vout 220u
+R_L vout vout_c 0.08
+Cout vout_c 0 470u
+Rload vout_c 0 5
+Rleak vout_c 0 100k
+* load-step switch: parallel load engages at 10 ms
+Vstep step 0 PULSE(0 5 10m 1u 1u 20m 40m)
+Sload vout_c load2 step 0 SWLOAD
+Rload2 load2 0 5
+.model SWLOAD SW(Ron=5 Roff=1e9 Vt=2.5 Vh=0.1)
+.tran 10u 25m
+.control
+set noaskquit
+tran 10u 25m
+print v(vin) v(vout_c) i(Vinput)
+.endc
+.end

@@ -97,12 +97,23 @@ chat_client = Groq(api_key=chat_key) if chat_key else None
 voice_client = Groq(api_key=voice_key) if voice_key else None
 live_client = Groq(api_key=live_key) if live_key else None
 
-# Deterministic Dialogue & Campus Places System (from git repository)
+# Deterministic Dialogue & Production Interaction Gateway
 try:
     from core.dialogue_engine import DialogueEngine
     dialogue_engine = DialogueEngine()
 except Exception as e:
     dialogue_engine = None
+
+try:
+    from core.gateway import InteractionGateway
+    from core.interaction_adapter import InteractionAdapter
+    gateway = InteractionGateway()
+    interaction_adapter = InteractionAdapter(gateway.event_bus, gateway.fsm, gateway.tts)
+    print("✅ Production InteractionGateway & EventBus connected!")
+except Exception as e:
+    print(f"ℹ InteractionGateway notice: {e}")
+    gateway = None
+    interaction_adapter = None
 
 PLACES_PATH = os.path.join(BASE_DIR, "config", "places.json")
 CAMPUS_PLACES = {}
@@ -465,7 +476,21 @@ def speach2text(file_loc="input.wav"):
 def chat_model(user_input):
     if user_input:
         print(">>>>>>>>>>>>>>>>")
-        global CONV_HISTORY, chat_client, LOCAL_MLX_MODEL, LOCAL_MLX_TOKENIZER
+        global CONV_HISTORY, chat_client, LOCAL_MLX_MODEL, LOCAL_MLX_TOKENIZER, NEXT_EXP, gateway
+
+        # Route through Production Interaction Gateway (EventBus, SafetyGate, FSM, and Tracing)
+        if gateway is not None:
+            gw_res = gateway.process_text(user_input)
+            response = gw_res.response
+            if gw_res.expression:
+                NEXT_EXP = gw_res.expression.value
+            print(f"🤖 [Gateway Response ({gw_res.latency_ms:.1f}ms)]: {response}")
+            CONV_HISTORY.append({"role": "user", "content": user_input})
+            CONV_HISTORY.append({"role": "assistant", "content": response})
+            print("<<<<<<<<<<<<<<<<")
+            start_tts = threading.Thread(target=asynt_tss, args=(response,), daemon=False)
+            start_tts.start()
+            return
 
         CONV_HISTORY.append({"role": "user", "content": user_input})
         response = None
@@ -570,43 +595,42 @@ async def text2speech(text):
     if "{stop-record}" in text:
         end_conv = True
     text = function_extract(text)
+    if not text.strip() and end_conv:
+        text = "Goodbye! Have a great day."
     print("⚍ GraceEMO:", text)
     global CAPTION_TEXT, NEXT_EXP
 
     CAPTION_TEXT = text
 
-    # Select the language for TTS
-    communicate = edge_tts.Communicate(text, voice='en-IN-NeerjaNeural')
-    
-    # Use edge-tts and convert to WAV
     try:
-        mp3_path = os.path.join(BASE_DIR, "output.mp3")
-        output_wav_path = os.path.join(BASE_DIR, "output.wav")
-        await communicate.save(mp3_path)
-        
-        # Fast direct ffmpeg conversion to 24kHz 16-bit mono WAV
-        ffmpeg_bin = "/home/sam/.local/bin/ffmpeg" if os.path.exists("/home/sam/.local/bin/ffmpeg") else "ffmpeg"
-        subprocess.run(
-            [ffmpeg_bin, "-y", "-i", mp3_path, "-acodec", "pcm_s16le", "-ar", "24000", "-ac", "1", output_wav_path],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=True
-        )
+        if text.strip():
+            # Select the language for TTS
+            communicate = edge_tts.Communicate(text, voice='en-IN-NeerjaNeural')
+            mp3_path = os.path.join(BASE_DIR, "output.mp3")
+            output_wav_path = os.path.join(BASE_DIR, "output.wav")
+            await communicate.save(mp3_path)
+            
+            # Fast direct ffmpeg conversion to 24kHz 16-bit mono WAV
+            ffmpeg_bin = "/home/sam/.local/bin/ffmpeg" if os.path.exists("/home/sam/.local/bin/ffmpeg") else "ffmpeg"
+            subprocess.run(
+                [ffmpeg_bin, "-y", "-i", mp3_path, "-acodec", "pcm_s16le", "-ar", "24000", "-ac", "1", output_wav_path],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True
+            )
 
-        # Audio Playback:
-        # On macOS: afplay
-        # On Linux: pw-play / aplay
-        if sys.platform == "darwin":
-            subprocess.run(["afplay", output_wav_path])
-        elif os.path.exists("/usr/bin/pw-play"):
-            subprocess.run(["/usr/bin/pw-play", output_wav_path])
-        elif os.path.exists("/usr/bin/aplay"):
-            subprocess.run(["/usr/bin/aplay", "-q", output_wav_path])
-        else:
-            pygame.mixer.music.load(output_wav_path)
-            pygame.mixer.music.play()
-            while pygame.mixer.music.get_busy():
-                time.sleep(0.1)
+            # Audio Playback:
+            if sys.platform == "darwin":
+                subprocess.run(["afplay", output_wav_path])
+            elif os.path.exists("/usr/bin/pw-play"):
+                subprocess.run(["/usr/bin/pw-play", output_wav_path])
+            elif os.path.exists("/usr/bin/aplay"):
+                subprocess.run(["/usr/bin/aplay", "-q", output_wav_path])
+            else:
+                pygame.mixer.music.load(output_wav_path)
+                pygame.mixer.music.play()
+                while pygame.mixer.music.get_busy():
+                    time.sleep(0.1)
 
         NEXT_EXP = "idle"
         if end_conv:
@@ -622,6 +646,15 @@ async def text2speech(text):
             threading.Thread(target=record_audio, daemon=False).start()
     except Exception as e:
         print(f"Error occurred while processing audio: {e}")
+        NEXT_EXP = "idle"
+        if end_conv:
+            CAPTION_TEXT = "[s] Speak  |  [f] Fullscreen  |  [q] Quit"
+            LISTENING_ENABLED = False
+        else:
+            CAPTION_TEXT = "🎙️ Listening... (Speak your question)"
+            LISTENING_ENABLED = True
+            STOP_RECORDING = False
+            threading.Thread(target=record_audio, daemon=False).start()
 
 def draw_caption(surface, text, font, color, y_offset=10):
     """
@@ -749,6 +782,14 @@ def GUI():
     if not next_vid:
         print(f"⚠ Error: No videos found in {VID_DIR}")
         return
+
+    # Connect production interaction adapter to EventBus
+    if interaction_adapter and gateway:
+        def _sync_exp(exp):
+            global NEXT_EXP
+            NEXT_EXP = exp.value
+        interaction_adapter.set_expression_callback(_sync_exp)
+        gateway.event_bus.start_sse_listener()
 
     vid = Video(next_vid)
 

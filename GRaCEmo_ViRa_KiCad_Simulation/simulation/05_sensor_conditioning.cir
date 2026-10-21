@@ -1,0 +1,17 @@
+* GRaCEmo ViRa Circuit E - sensor input filter and conditioning
+.param SENSOR=1.2
+Vsensor sensor 0 SIN({SENSOR} 0.4 10 0 0 0)
+Rsource sensor filt 1k
+Cfilt filt 0 10u
+* Ideal non-inverting gain-of-2 equivalent (E source); input clamp rails omitted
+Eamp adc 0 filt 0 2
+Rseries adc adc_pin 1k
+Cadc adc_pin 0 100n
+Radc adc_pin 0 100k
+.tran 100u 500m
+.control
+set noaskquit
+tran 100u 500m
+print v(sensor) v(filt) v(adc_pin)
+.endc
+.end

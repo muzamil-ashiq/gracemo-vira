@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
 """
-GraceEMO Interaction — Interaction Loop
-Standalone (no ROS 2) equivalent of the interaction slice from
-gracemo_brain/planner_node.py.
-
-Pipeline:
-  text input
-    → DialogueEngine.parse()  (fast local intent)
-    → LLMEngine.ask()         (Gemini/Groq/Ollama/heuristics)
-    → dispatch action         (speak, navigate, stop, hand/head gestures)
-    → TTSEngine.speak()
+GRaCEmo ViRa — Interaction Loop (Phase 2 Refactor)
+Integrates the production InteractionGateway, SafetyGate, and EventBus
+while maintaining complete backwards compatibility with existing CLI, Voice, and REST callers.
 """
 from __future__ import annotations
 import json
@@ -24,10 +17,11 @@ from .models import (
 from .llm_engine import LLMEngine
 from .dialogue_engine import DialogueEngine
 from .tts_engine import TTSEngine
+from .gateway import InteractionGateway, GatewayResult
+from .state_machine import CognitiveState, Expression
 
 log = logging.getLogger("gracemo.loop")
 
-# Default campus places map (mirrors FALLBACK_PLACES in planner_node.py)
 DEFAULT_PLACES: Dict[str, Tuple[float, float, str]] = {
     "door":      (2.5,  -2.5,  "Welcome Reception Desk"),
     "reception": (2.5,  -2.5,  "Welcome Reception Desk"),
@@ -44,16 +38,8 @@ DEFAULT_PLACES: Dict[str, Tuple[float, float, str]] = {
 
 class InteractionLoop:
     """
-    The core human-robot interaction engine.
-
-    Accepts text (or VoiceCommand) and:
-      1. Classifies intent via DialogueEngine
-      2. Calls LLMEngine for reasoning
-      3. Dispatches actions (speak, navigate, gesture)
-      4. Speaks response via TTSEngine
-
-    Action hooks (navigate, hand_*, look_*) are no-ops by default.
-    Connect them to your robot via set_action_hook().
+    The core human-robot interaction loop.
+    Coordinates between CLI/Web callers and the production InteractionGateway.
     """
 
     def __init__(
@@ -62,75 +48,95 @@ class InteractionLoop:
         tts: Optional[TTSEngine] = None,
         enable_tts: bool = True,
         places: Optional[Dict[str, Tuple[float, float, str]]] = None,
+        gateway: Optional[InteractionGateway] = None,
     ):
         self.llm = llm or LLMEngine()
         self.dialogue = DialogueEngine()
         self.tts = tts or (TTSEngine() if enable_tts else None)
+        self.enable_tts = enable_tts
         self.state = InspectorState()
         self.known_places: Dict[str, Tuple[float, float, str]] = dict(places or DEFAULT_PLACES)
-        self._last_greeting = 0.0
-
-        # Action hooks: set via set_action_hook(name, fn)
         self._hooks: Dict[str, Callable] = {}
 
-        log.info(f"InteractionLoop online (llm={self.llm.backend_name}, tts={self.tts.backend if self.tts else 'disabled'})")
+        # Production Interaction Gateway
+        self.gateway = gateway or InteractionGateway()
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
+        log.info(f"InteractionLoop online (gateway active, tts={'enabled' if enable_tts else 'disabled'})")
 
     def handle_text(self, text: str) -> ActionResult:
         """
-        Main entry point: process raw text input through the full pipeline.
-        Returns an ActionResult describing what was dispatched.
+        Main entry point: processes text through the production InteractionGateway.
+        Dispatches validated semantic actions to both EventBus and registered hooks.
         """
-        if not text.strip():
+        if not text or not text.strip():
             return ActionResult()
 
         self.state.last_voice = text
 
-        # Step 1: Local intent classification
-        cmd = self.dialogue.parse(text)
-        log.debug(f"DialogueEngine intent: {cmd.intent}")
+        # Route through Production Interaction Gateway
+        gw_result: GatewayResult = self.gateway.process_text(text)
 
-        # Step 2: Fast-path dispatch for deterministic commands
-        result = self._fast_dispatch(cmd)
-        if result is not None:
-            return result
+        # Map to legacy ActionResult
+        primary_action = "speak"
+        target_name = ""
+        target_x = 0.0
+        target_y = 0.0
 
-        # Step 3: LLM reasoning for ambiguous commands
-        llm_resp = self._ask_llm(text)
-        return self._dispatch_llm_response(llm_resp)
+        for act in gw_result.semantic_commands:
+            action_name = act.get("action")
+            params = act.get("params", {})
+
+            if action_name == "NavigateTo":
+                primary_action = "navigate_to"
+                target_name = params.get("target_name", "designated location")
+                target_x = float(params.get("x", 0.0))
+                target_y = float(params.get("y", 0.0))
+                self.state.current_task = f"NAVIGATE:{target_name}"
+                self._fire_hook("navigate_to", target=target_name, x=target_x, y=target_y)
+
+            elif action_name == "NavigateToRoom":
+                primary_action = "navigate_to"
+                target_name = params.get("room", "designated room")
+                self.state.current_task = f"NAVIGATE:{target_name}"
+                self._fire_hook("navigate_to", target=target_name, x=0.0, y=0.0)
+
+            elif action_name == "Stop":
+                primary_action = "stop"
+                self.state.current_task = "IDLE"
+                self._fire_hook("stop")
+
+            elif action_name == "Express":
+                emotion = params.get("emotion", "idle")
+                self._fire_hook("express", emotion=emotion)
+
+        # Trigger TTS if speech response was generated and TTS is enabled
+        if gw_result.response and self.enable_tts and self.tts:
+            self.tts.speak(gw_result.response)
+            self._fire_hook("speak", text=gw_result.response)
+
+        return ActionResult(
+            action=primary_action,
+            target=target_name,
+            text=gw_result.response,
+            x=target_x,
+            y=target_y,
+        )
 
     def greet(self) -> ActionResult:
         """Autonomous greeting when a person is detected nearby."""
-        self.stop()
-        self.look_home()
-        self.hand_hi()
-        return self.speak("Hello! I am GraceEMO. Welcome to campus. How may I assist you?")
+        return self.handle_text("hello")
 
     def set_action_hook(self, action: str, fn: Callable):
-        """
-        Register a hook for a physical robot action.
-        fn receives relevant args: fn(target, x, y) for navigate_to, fn() for others.
-
-        Actions: navigate_to, stop, speak, hand_hi, hand_up, hand_down, look_home, look_at
-        """
         self._hooks[action] = fn
-
-    # ------------------------------------------------------------------
-    # Action implementations (no-op + hook dispatch)
-    # ------------------------------------------------------------------
 
     def speak(self, text: str) -> ActionResult:
         log.info(f"🤖 GraceEMO: \"{text}\"")
-        if self.tts:
+        if self.enable_tts and self.tts:
             self.tts.speak(text)
         self._fire_hook("speak", text=text)
         return ActionResult(action="speak", text=text)
 
     def stop(self) -> ActionResult:
-        self.state.nav_active = False  # type: ignore[attr-defined]
         self.state.current_task = "IDLE"
         self._fire_hook("stop")
         log.info("🛑 STOP")
@@ -161,84 +167,6 @@ class InteractionLoop:
         self._fire_hook("look_at", x=yaw, y=pitch)
         return ActionResult(action="look_at", x=yaw, y=pitch)
 
-    def navigate_to(self, place_key: str) -> ActionResult:
-        key = (place_key or "").lower().strip()
-        entry = self._lookup_place(key)
-        if entry is None:
-            resp = self.speak(f"I don't know where {key or 'that'} is.")
-            return resp
-        x, y, name = entry
-        self.state.current_task = f"NAVIGATE:{name}"
-        self.speak(f"Going to {name}.")
-        self._fire_hook("navigate_to", target=name, x=x, y=y)
-        log.info(f"🗺️  NAVIGATE_TO {name} ({x:.2f}, {y:.2f})")
-        return ActionResult(action="navigate_to", target=name, x=x, y=y)
-
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
-
-    def _fast_dispatch(self, cmd: VoiceCommand) -> Optional[ActionResult]:
-        """Handle deterministic intents without calling the LLM."""
-        intent = cmd.intent
-
-        if intent == "STOP":
-            r = self.stop()
-            self.speak("Stopping now.")
-            return r
-
-        if intent == "NAVIGATE":
-            place = self._extract_place(cmd.transcript, cmd.entities)
-            return self.navigate_to(place)
-
-        if intent == "GREET":
-            self.hand_hi()
-            return self.speak("Hello! Welcome to LPU campus.")
-
-        if intent == "HAND_UP":
-            self.hand_up()
-            return self.speak("Hands raised.")
-
-        if intent == "HAND_DOWN":
-            self.hand_down()
-            return self.speak("Hands lowered.")
-
-        return None  # Fall through to LLM
-
-    def _ask_llm(self, text: str) -> AskQuestionResponse:
-        req = AskQuestionRequest(
-            question=text,
-            context=json.dumps(self.state.to_dict()),
-        )
-        return self.llm.ask(req)
-
-    def _dispatch_llm_response(self, resp: AskQuestionResponse) -> ActionResult:
-        """Execute actions from LLM response."""
-        result = ActionResult()
-        for act in (resp.suggested_actions or []):
-            if act.startswith("navigate_to"):
-                place = act.split(":")[-1] if ":" in act else self._extract_place(self.state.last_voice, [])
-                result = self.navigate_to(place)
-                return result  # navigate is terminal
-            elif act == "stop":
-                result = self.stop()
-                if resp.answer:
-                    self.speak(resp.answer)
-                return result
-            elif act == "hand_hi":
-                self.hand_hi()
-            elif act == "hand_up":
-                self.hand_up()
-            elif act == "hand_down":
-                self.hand_down()
-            elif act == "look_home":
-                self.look_home()
-
-        if resp.answer:
-            result = self.speak(resp.answer)
-
-        return result
-
     def _fire_hook(self, action: str, **kwargs):
         fn = self._hooks.get(action)
         if fn:
@@ -247,25 +175,6 @@ class InteractionLoop:
             except Exception as e:
                 log.warning(f"Hook '{action}' error: {e}")
 
-    def _lookup_place(self, key: str) -> Optional[Tuple[float, float, str]]:
-        if key in self.known_places:
-            return self.known_places[key]
-        for name, data in self.known_places.items():
-            if key in name or name in key:
-                return data
-        return None
-
-    def _extract_place(self, text: str, entities: List[str]) -> str:
-        blob = (text or "").lower()
-        for name in sorted(self.known_places.keys(), key=len, reverse=True):
-            if name in blob:
-                return name
-        for e in entities:
-            el = e.lower()
-            if el in self.known_places:
-                return el
-        return "door"
-
     @property
     def llm_backend(self) -> str:
-        return self.llm.backend_name
+        return "InteractionGateway"

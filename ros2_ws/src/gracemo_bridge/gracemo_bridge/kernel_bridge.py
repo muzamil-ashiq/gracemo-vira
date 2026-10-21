@@ -317,9 +317,10 @@ class KernelBridgeNode(Node):
             except Exception:
                 pass
 
-    def _emit_event(self, event_type: str, data: dict, source: str = "RobotBridge"):
+    def _emit_event(self, event_type: str, data: dict, source: str = "RobotBridge", trace_id: str = None):
         envelope = {
             "id": str(uuid.uuid4()),
+            "trace_id": trace_id or getattr(self, "_current_trace_id", None) or str(uuid.uuid4()),
             "timestamp": int(time.time()),
             "source": source,
             "observed_by": "kernel_bridge",
@@ -351,6 +352,9 @@ class KernelBridgeNode(Node):
                         if decoded.startswith("data:"):
                             data_str = decoded[5:].strip()
                             event = json.loads(data_str)
+                            tid = event.get("trace_id")
+                            if tid:
+                                self._current_trace_id = tid
                             event_type = event.get("event_type", {})
                             if isinstance(event_type, dict) and event_type.get("type") == "ActionRequested":
                                 self._handle_kernel_action(event_type.get("data", {}))
@@ -721,6 +725,12 @@ class KernelBridgeNode(Node):
     def _execute_waypoints(self, waypoints: list, destination: str, final_yaw: float = None):
         self.navigating = True
         self.get_logger().info(f"🚀 [NAV] Commencing transit to '{destination}' via {len(waypoints)} waypoints")
+        self._emit_event("NavigationStarted", {
+            "destination": destination,
+            "target_x": round(waypoints[-1][0], 3),
+            "target_y": round(waypoints[-1][1], 3),
+            "estimated_duration_sec": 10.0,
+        })
 
         rate_hz = 20.0
         dt = 1.0 / rate_hz
@@ -805,6 +815,13 @@ class KernelBridgeNode(Node):
                 "success": True,
                 "x": round(self.current_x, 3),
                 "y": round(self.current_y, 3)
+            })
+        elif not completed_all:
+            self._emit_event("RobotStopped", {
+                "reason": "Navigation interrupted or cancelled",
+                "x": round(self.current_x, 3),
+                "y": round(self.current_y, 3),
+                "emergency": False,
             })
 
     def _handle_kernel_action(self, payload: dict):

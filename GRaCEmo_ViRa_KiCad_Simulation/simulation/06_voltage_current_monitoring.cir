@@ -1,0 +1,17 @@
+* GRaCEmo ViRa Circuit F - voltage divider + shunt current monitoring
+.param VSUP=24 ILOAD=2
+Vsup supply 0 {VSUP}
+Rshunt supply load_in 0.05
+Rload load_in 0 {VSUP/ILOAD-0.05}
+* Divider: 100k / 10k => Vmon = Vload/11
+Rtop load_in vmon 100k
+Rbottom vmon 0 10k
+* Ideal current-sense gain of 20 on shunt drop (sense amp equivalent)
+Eisense imon 0 supply load_in 20
+Rimon imon 0 100k
+.control
+set noaskquit
+op
+print v(supply) v(load_in) v(vmon) v(imon) i(Vsup)
+.endc
+.end

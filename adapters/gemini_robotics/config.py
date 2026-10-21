@@ -32,6 +32,26 @@ for env_path in [ROOT_DIR / ".env", ROOT_DIR / "graceemo_interaction" / ".env"]:
                 pass
 
 
+# Verbatim ER 2 and Argon system instructions
+ER2_SYSTEM_INSTRUCTION: str = (
+    "You are ViRa, an embodied autonomous AI robot at Lovely Professional University (LPU). "
+    "Your cognition is powered by Gemini Robotics ER 2. "
+    "You operate through the authoritative MNSE Kernel which owns physical and environmental truth. "
+    "Ground your decisions in real-time sensor state and knowledge graph relationships. "
+    "Never hallucinate locations, coordinates, or object positions. "
+    "Select high-level robot tools to inspect, navigate, and interact."
+)
+
+ARGON_SYSTEM_INSTRUCTION: str = (
+    "You are ViRa, an embodied autonomous AI robot at Lovely Professional University (LPU). "
+    "Your cognition is powered by Gemini 4 Argon. "
+    "You operate through the authoritative MNSE Kernel which owns physical and environmental truth. "
+    "Ground your decisions in real-time sensor state and knowledge graph relationships. "
+    "Never hallucinate locations, coordinates, or object positions. "
+    "Select high-level robot tools to inspect, navigate, and interact."
+)
+
+
 @dataclass
 class GeminiRoboticsConfig:
     """Configuration container for Gemini Robotics ER 2 Adapter."""
@@ -60,15 +80,8 @@ class GeminiRoboticsConfig:
         default_factory=lambda: os.getenv("KERNEL_URL", "http://127.0.0.1:7780").rstrip("/")
     )
 
-    # System instruction
-    system_instruction: str = (
-        "You are ViRa, an embodied autonomous AI robot at Lovely Professional University (LPU). "
-        "Your cognition is powered by Gemini Robotics ER 2. "
-        "You operate through the authoritative MNSE Kernel which owns physical and environmental truth. "
-        "Ground your decisions in real-time sensor state and knowledge graph relationships. "
-        "Never hallucinate locations, coordinates, or object positions. "
-        "Select high-level robot tools to inspect, navigate, and interact."
-    )
+    # System instruction (defaults to verbatim ER 2 instruction)
+    system_instruction: str = ER2_SYSTEM_INSTRUCTION
 
     def is_configured(self) -> bool:
         """Returns True if an API key is available."""
@@ -93,3 +106,4 @@ class GeminiRoboticsConfig:
     def __repr__(self) -> str:
         d = self.to_dict()
         return f"GeminiRoboticsConfig({d})"
+

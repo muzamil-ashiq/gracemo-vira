@@ -1,0 +1,16 @@
+* GRaCEmo ViRa Circuit C - low-voltage E-stop logic demonstration
+* Active-high enable; E-stop pressed or logic supply lost => enable low.
+Vlogic vlogic 0 PWL(0 5 12m 5 12.1m 0 18m 0 18.1m 5 25m 5 25.1m 0 30m 0 30.1m 5 40m 5)
+* NC E-stop contact closed in normal state; opens from 8-16ms, releases, then power-loss interval 24-30ms
+Vestop estop 0 PWL(0 0 8m 0 8.1m 5 16m 5 16.1m 0 40m 0)
+* open-collector style logic: enable = 5V only when supply is present and E-stop contact state permits
+Benable enable 0 V={if(V(vlogic)>2.5 && V(estop)<2.5,5,0)}
+Rpull enable 0 10k
+Rtest estop 0 100k
+.tran 50u 40m
+.control
+set noaskquit
+tran 50u 40m
+print v(vlogic) v(estop) v(enable)
+.endc
+.end

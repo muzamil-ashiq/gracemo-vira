@@ -1,0 +1,22 @@
+image: physical_lab_map.pgm
+mode: trinary
+resolution: 0.050000
+origin: [-6.000000, -4.250000, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25
+metadata:
+  environment_dimensions_m: [12.0, 8.5]
+  lidar_transform:
+    parent_frame: "base_link"
+    child_frame: "laser_link"
+    translation: [0.18, 0.0, 0.35]
+    rotation_rpy: [0.0, 0.0, 0.0]
+  quality:
+    consistency_pct: 98.4
+    loop_closure_covariance_max: 0.015
+    dynamic_artifacts_filtered: true
+  zones:
+    observable_areas: ["central_arena", "doorway_corridor", "workbench_perimeter", "dock_station"]
+    blind_spots: ["under_chassis_perimeter", "acoustic_curtain_corner"]
+    monitored_dynamic_zones: ["operator_observation_path", "visitor_walkway"]
