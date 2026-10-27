@@ -8,8 +8,8 @@ import unittest
 import sys
 from pathlib import Path
 
-# Add graceemo_interaction to path
-interaction_dir = Path(__file__).resolve().parent.parent.parent / "graceemo_interaction"
+ROOT = Path(__file__).resolve().parent.parent.parent
+interaction_dir = ROOT / "vira_interaction" if (ROOT / "vira_interaction").exists() else ROOT / "graceemo_interaction"
 sys.path.insert(0, str(interaction_dir))
 
 from core.state_machine import CognitiveState, Expression, InteractionFSM

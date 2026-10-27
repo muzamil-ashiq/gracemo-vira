@@ -23,6 +23,7 @@ setup(
     entry_points={
         "console_scripts": [
             "kernel_bridge = gracemo_bridge.kernel_bridge:main",
+            "interaction_bridge = gracemo_bridge.interaction_bridge:main",
         ],
     },
 )

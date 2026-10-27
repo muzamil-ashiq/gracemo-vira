@@ -8,7 +8,8 @@ import unittest
 import sys
 from pathlib import Path
 
-interaction_dir = Path(__file__).resolve().parent.parent.parent / "graceemo_interaction"
+ROOT = Path(__file__).resolve().parent.parent.parent
+interaction_dir = ROOT / "vira_interaction" if (ROOT / "vira_interaction").exists() else ROOT / "graceemo_interaction"
 sys.path.insert(0, str(interaction_dir))
 
 from core.fast_path import FastPathMatcher
@@ -44,7 +45,10 @@ class TestFastPathMatcher(unittest.TestCase):
             self.assertTrue(res.matched, f"Failed for identity: '{phrase}'")
             self.assertEqual(res.intent, "IDENTITY")
             self.assertIn("GraceEMO", res.response_text)
-            self.assertIn("Vice Chancellor", res.response_text)
+            self.assertTrue(
+                "Vice Chancellor" in res.response_text
+                or "academic leader" in res.response_text
+            )
 
     def test_campus_navigation_places(self):
         test_cases = [

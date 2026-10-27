@@ -93,3 +93,6 @@ graceemo_interaction/.venv/
 # Exclude shared external virtual-environment symlinks
 /.venv
 /graceemo_interaction/.venv
+/vira_interaction/.venv
+vira_interaction/.venv/
+
