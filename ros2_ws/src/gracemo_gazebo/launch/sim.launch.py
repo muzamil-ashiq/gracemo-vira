@@ -22,8 +22,8 @@ def generate_launch_description():
     models_path    = os.path.join(pkg_gracemo_gazebo, "models")
     fuel_cache_gz  = os.path.expanduser("~/.gz/fuel/fuel.gazebosim.org/openrobotics/models")
     fuel_cache_ign = os.path.expanduser("~/.ignition/fuel/fuel.gazebosim.org/openrobotics/models")
-    ros_share      = "/opt/ros/humble/share"
-    resource_paths = f"{models_path}:{fuel_cache_gz}:{fuel_cache_ign}:{ros_share}"
+    ros_share      = "/opt/ros/jazzy/share"
+    resource_paths = f"{models_path}:{fuel_cache_gz}:{fuel_cache_ign}:{os.path.dirname(pkg_gracemo_description)}:{pkg_gracemo_description}:{ros_share}"
 
     os.environ["GZ_SIM_RESOURCE_PATH"] = resource_paths
 

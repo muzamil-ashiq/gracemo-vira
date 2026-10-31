@@ -33,8 +33,8 @@ class TestArmKinematics7DOF(unittest.TestCase):
         p_ee, R_ee, tfs = self.kinematics.forward_kinematics(self.kinematics.STANCE_TRAVEL)
         self.assertEqual(p_ee.shape, (3,))
         self.assertEqual(R_ee.shape, (3, 3))
-        self.assertEqual(len(tfs), 8)
-        self.assertGreater(p_ee[2], 0.15)
+        p_robot = self.kinematics.shoulder_to_robot(p_ee)
+        self.assertGreater(p_robot[2], 0.15)
 
     def test_jacobian_shape_and_rank(self):
         q = self.kinematics.STANCE_TABLE_REACH

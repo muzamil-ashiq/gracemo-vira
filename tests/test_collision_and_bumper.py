@@ -76,18 +76,23 @@ class TestCollisionAndBumper(unittest.TestCase):
 
         # Verify ground clearance in SDF
         col_match = re.search(
-            r"<collision name=['\"]base_footprint_fixed_joint_lump__base_link_collision_collision['\"]>.*?<pose>(.*?)</pose>.*?<cylinder>.*?<length>(.*?)</length>.*?<radius>(.*?)</radius>",
+            r"<collision name=['\"](base_footprint_fixed_joint_lump__base_link_collision_collision|base_footprint_fixed_joint_lump__chassis_collision_collision)['\"]>.*?<pose>(.*?)</pose>.*?(?:<cylinder>.*?<length>(.*?)</length>.*?<radius>(.*?)</radius>|<box>.*?<size>(.*?)</size>)",
             self.world_content,
             re.DOTALL
         )
-        self.assertIsNotNone(col_match, "Lumped base_link collision must exist in SDF")
-        pose_str = col_match.group(1).split()
+        self.assertIsNotNone(col_match, "Lumped chassis/base collision must exist in SDF")
+        pose_str = col_match.group(2).split()
         z_center = float(pose_str[2])
-        length = float(col_match.group(2))
-        radius = float(col_match.group(3))
+        if col_match.group(3) is not None:
+            length = float(col_match.group(3))
+            radius = float(col_match.group(4))
+            self.assertAlmostEqual(radius, 0.19, places=2)
+            bottom_z = z_center - length / 2.0
+        else:
+            size_str = col_match.group(5).split()
+            height = float(size_str[2])
+            bottom_z = z_center - height / 2.0
 
-        self.assertAlmostEqual(radius, 0.19, places=2)
-        bottom_z = z_center - length / 2.0
         # base_footprint is at ground (z=0), wheel radius = 0.065m, base origin z = 0.065
         # z_center relative to base_footprint should be >= 0.10m, so bottom_z >= 0.05m above ground
         self.assertGreaterEqual(bottom_z, 0.05, f"Chassis collision bottom Z={bottom_z}m must not drag on ground")

@@ -13,6 +13,27 @@ from .memory_adapter import MemoryAdapter
 from .gateway import InteractionGateway, GatewayResult
 from .interaction_adapter import InteractionAdapter
 from .interaction_loop import InteractionLoop
+from .behavior_manager import (
+    BehaviorState,
+    HumanInteractionBehaviorManager,
+    PersonDetection,
+    StructuredMotionRequest,
+)
+from .camera_driver import (
+    CameraDriverInterface,
+    CameraFrame,
+    DetectedPerson,
+    MockCameraDriver,
+    OpenCVCameraDriver,
+)
+from .audio_driver import (
+    AudioDriverInterface,
+    AudioChunk,
+    MockAudioDriver,
+    PyAudioDriver,
+    VoiceCommandParser,
+    ParsedVoiceCommand,
+)
 
 __all__ = [
     "CognitiveState",
@@ -34,4 +55,19 @@ __all__ = [
     "GatewayResult",
     "InteractionAdapter",
     "InteractionLoop",
+    "BehaviorState",
+    "HumanInteractionBehaviorManager",
+    "PersonDetection",
+    "StructuredMotionRequest",
+    "CameraDriverInterface",
+    "CameraFrame",
+    "DetectedPerson",
+    "MockCameraDriver",
+    "OpenCVCameraDriver",
+    "AudioDriverInterface",
+    "AudioChunk",
+    "MockAudioDriver",
+    "PyAudioDriver",
+    "VoiceCommandParser",
+    "ParsedVoiceCommand",
 ]

@@ -180,6 +180,7 @@ class NavigationAdapter:
 
     def cancel_navigation(self, reason: str = "User Cancel", trace_id: Optional[str] = None) -> bool:
         """Idempotent cancellation of active navigation following Section 24 FSM."""
+        thread = None
         with self._nav_lock:
             tid = trace_id or self._active_trace_id or "trace_cancel"
             self._cancel_requested.set()
@@ -198,12 +199,14 @@ class NavigationAdapter:
                 self.current_speed = 0.0
                 if self.hardware_adapter:
                     self.hardware_adapter.send_velocity_command(0.0, 0.0)
-                return True
-
-            return True
+            thread = self._active_thread
+        if thread and thread.is_alive() and thread != threading.current_thread():
+            thread.join(timeout=1.0)
+        return True
 
     def stop_immediately(self, reason: str = "Emergency Stop", trace_id: Optional[str] = None) -> bool:
         """Immediate stopping and latching of robot."""
+        thread = None
         with self._nav_lock:
             tid = trace_id or self._active_trace_id or "trace_stop"
             self._cancel_requested.set()
@@ -218,7 +221,10 @@ class NavigationAdapter:
                 trace_id=tid,
                 emergency=True,
             )
-            return True
+            thread = self._active_thread
+        if thread and thread.is_alive() and thread != threading.current_thread():
+            thread.join(timeout=1.0)
+        return True
 
     def _launch_failure_thread(
         self, target_name: str, target_x: float, target_y: float, trace_id: str, session_id: Optional[str]

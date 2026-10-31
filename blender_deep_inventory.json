@@ -1,0 +1,4928 @@
+{
+  "blender_version": "5.2.2 LTS",
+  "filepath": "/home/sabarishchandrasekaran/gracemo_gazebo/gracemo_blender_to_gazebo/robot.blend",
+  "actions": [
+    "ANIM_ANTENNAAction",
+    "ANIM_ELBOW_LEFTAction",
+    "ANIM_ELBOW_RIGHTAction",
+    "ANIM_EYE_LEFTAction",
+    "ANIM_EYE_RIGHTAction",
+    "ANIM_FINGER_LEFT_1Action",
+    "ANIM_FINGER_LEFT_2Action",
+    "ANIM_FINGER_LEFT_3Action",
+    "ANIM_FINGER_LEFT_4Action",
+    "ANIM_FINGER_RIGHT_1Action",
+    "ANIM_FINGER_RIGHT_2Action",
+    "ANIM_FINGER_RIGHT_3Action",
+    "ANIM_FINGER_RIGHT_4Action",
+    "ANIM_HEADAction",
+    "ANIM_HEADLEADAction",
+    "ANIM_MOUTHAction",
+    "ANIM_SHOULDER_LEFTAction",
+    "ANIM_SHOULDER_RIGHTAction",
+    "ANIM_THUMB_LEFTAction",
+    "ANIM_THUMB_RIGHTAction",
+    "ANIM_TORSOAction",
+    "ANIM_WRIST_LEFTAction",
+    "ANIM_WRIST_RIGHTAction",
+    "GRACE_BLUE_GLOWAction",
+    "GRACEEMO_01_ROOTAction",
+    "WHEEL_FRONT_LEFTAction",
+    "WHEEL_FRONT_RIGHTAction",
+    "WHEEL_HUB_FRONT_LEFTAction",
+    "WHEEL_HUB_FRONT_RIGHTAction",
+    "WHEEL_HUB_REAR_LEFTAction",
+    "WHEEL_HUB_REAR_RIGHTAction",
+    "WHEEL_REAR_LEFTAction",
+    "WHEEL_REAR_RIGHTAction",
+    "WHEEL_RING_FRONT_LEFTAction",
+    "WHEEL_RING_FRONT_RIGHTAction",
+    "WHEEL_RING_REAR_LEFTAction",
+    "WHEEL_RING_REAR_RIGHTAction"
+  ],
+  "armatures": [],
+  "objects_count": 96,
+  "materials_count": 8,
+  "materials": {
+    "GRACE_ACCENT": {
+      "name": "GRACE_ACCENT",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "base_color": [
+        1.0,
+        0.36000001430511475,
+        0.019999999552965164,
+        1.0
+      ],
+      "roughness": 0.3499999940395355,
+      "metallic": 0.0,
+      "emission_color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "GRACE_BLACK": {
+      "name": "GRACE_BLACK",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "base_color": [
+        0.014999999664723873,
+        0.014999999664723873,
+        0.017999999225139618,
+        1.0
+      ],
+      "roughness": 0.3499999940395355,
+      "metallic": 0.30000001192092896,
+      "emission_color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "GRACE_BLUE_GLOW": {
+      "name": "GRACE_BLUE_GLOW",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "base_color": [
+        0.10000000149011612,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "roughness": 0.30000001192092896,
+      "metallic": 0.0,
+      "emission_color": [
+        0.15000000596046448,
+        0.550000011920929,
+        1.0,
+        1.0
+      ]
+    },
+    "GRACE_GROUND": {
+      "name": "GRACE_GROUND",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "base_color": [
+        0.05999999865889549,
+        0.05999999865889549,
+        0.07000000029802322,
+        1.0
+      ],
+      "roughness": 0.5,
+      "metallic": 0.0,
+      "emission_color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "GRACE_SCREEN": {
+      "name": "GRACE_SCREEN",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "base_color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "roughness": 0.05000000074505806,
+      "metallic": 0.0,
+      "emission_color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "GRACE_TIRE": {
+      "name": "GRACE_TIRE",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "base_color": [
+        0.019999999552965164,
+        0.019999999552965164,
+        0.019999999552965164,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "GRACE_WHITE": {
+      "name": "GRACE_WHITE",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "base_color": [
+        0.9300000071525574,
+        0.9300000071525574,
+        0.9100000262260437,
+        1.0
+      ],
+      "roughness": 0.2800000011920929,
+      "metallic": 0.0,
+      "emission_color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "Material": {
+      "name": "Material",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "base_color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "roughness": 0.5,
+      "metallic": 0.0,
+      "emission_color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "hierarchy": {},
+  "objects": [
+    {
+      "name": "ANIM_ANTENNA",
+      "type": "EMPTY",
+      "parent": "ANIM_HEAD",
+      "children": [
+        "HEAD_ANTENNA"
+      ],
+      "location_local": [
+        0.0,
+        0.0,
+        1.2100000381469727
+      ],
+      "rotation_euler": [
+        0.0,
+        0.022029658779501915,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        1.2100000381469727
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_ELBOW_LEFT",
+      "type": "EMPTY",
+      "parent": "ANIM_SHOULDER_LEFT",
+      "children": [
+        "ANIM_WRIST_LEFT",
+        "FOREARM_LEFT",
+        "WRIST_LEFT"
+      ],
+      "location_local": [
+        0.25,
+        0.0,
+        0.6549999713897705
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.25,
+        0.0,
+        0.6549999713897705
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_ELBOW_RIGHT",
+      "type": "EMPTY",
+      "parent": "ANIM_SHOULDER_RIGHT",
+      "children": [
+        "ANIM_WRIST_RIGHT",
+        "FOREARM_RIGHT",
+        "WRIST_RIGHT"
+      ],
+      "location_local": [
+        -0.25,
+        0.0,
+        0.6549999713897705
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.25,
+        0.0,
+        0.6549999713897705
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_EYE_LEFT",
+      "type": "EMPTY",
+      "parent": "ANIM_HEAD",
+      "children": [
+        "EYE_LEFT"
+      ],
+      "location_local": [
+        0.054999999701976776,
+        -0.1120000034570694,
+        1.0199999809265137
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.054999999701976776,
+        -0.1120000034570694,
+        1.0199999809265137
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_EYE_RIGHT",
+      "type": "EMPTY",
+      "parent": "ANIM_HEAD",
+      "children": [
+        "EYE_RIGHT"
+      ],
+      "location_local": [
+        -0.054999999701976776,
+        -0.1120000034570694,
+        1.0199999809265137
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.054999999701976776,
+        -0.1120000034570694,
+        1.0199999809265137
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_FINGER_LEFT_1",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_LEFT",
+      "children": [
+        "FINGER_LEFT_1"
+      ],
+      "location_local": [
+        0.27799999713897705,
+        -0.029999999329447746,
+        0.42500001192092896
+      ],
+      "rotation_euler": [
+        -0.1745329201221466,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.27799999713897705,
+        -0.029999999329447746,
+        0.42500001192092896
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_FINGER_LEFT_2",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_LEFT",
+      "children": [
+        "FINGER_LEFT_2"
+      ],
+      "location_local": [
+        0.27799999713897705,
+        -0.009999999776482582,
+        0.42500001192092896
+      ],
+      "rotation_euler": [
+        -0.1745329201221466,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.27799999713897705,
+        -0.009999999776482582,
+        0.42500001192092896
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_FINGER_LEFT_3",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_LEFT",
+      "children": [
+        "FINGER_LEFT_3"
+      ],
+      "location_local": [
+        0.27799999713897705,
+        0.009999999776482582,
+        0.42500001192092896
+      ],
+      "rotation_euler": [
+        -0.1745329201221466,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.27799999713897705,
+        0.009999999776482582,
+        0.42500001192092896
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_FINGER_LEFT_4",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_LEFT",
+      "children": [
+        "FINGER_LEFT_4"
+      ],
+      "location_local": [
+        0.27799999713897705,
+        0.029999999329447746,
+        0.42500001192092896
+      ],
+      "rotation_euler": [
+        -0.1745329201221466,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.27799999713897705,
+        0.029999999329447746,
+        0.42500001192092896
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_FINGER_RIGHT_1",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_RIGHT",
+      "children": [
+        "FINGER_RIGHT_1"
+      ],
+      "location_local": [
+        -0.27799999713897705,
+        -0.029999999329447746,
+        0.42500001192092896
+      ],
+      "rotation_euler": [
+        -0.1745329201221466,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.27799999713897705,
+        -0.029999999329447746,
+        0.42500001192092896
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_FINGER_RIGHT_2",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_RIGHT",
+      "children": [
+        "FINGER_RIGHT_2"
+      ],
+      "location_local": [
+        -0.27799999713897705,
+        -0.009999999776482582,
+        0.42500001192092896
+      ],
+      "rotation_euler": [
+        -0.1745329201221466,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.27799999713897705,
+        -0.009999999776482582,
+        0.42500001192092896
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_FINGER_RIGHT_3",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_RIGHT",
+      "children": [
+        "FINGER_RIGHT_3"
+      ],
+      "location_local": [
+        -0.27799999713897705,
+        0.009999999776482582,
+        0.42500001192092896
+      ],
+      "rotation_euler": [
+        -0.1745329201221466,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.27799999713897705,
+        0.009999999776482582,
+        0.42500001192092896
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_FINGER_RIGHT_4",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_RIGHT",
+      "children": [
+        "FINGER_RIGHT_4"
+      ],
+      "location_local": [
+        -0.27799999713897705,
+        0.029999999329447746,
+        0.42500001192092896
+      ],
+      "rotation_euler": [
+        -0.1745329201221466,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.27799999713897705,
+        0.029999999329447746,
+        0.42500001192092896
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_HEAD",
+      "type": "EMPTY",
+      "parent": "ANIM_HEADLEAD",
+      "children": [
+        "ANIM_ANTENNA",
+        "ANIM_EYE_LEFT",
+        "ANIM_EYE_RIGHT",
+        "ANIM_MOUTH",
+        "HEAD_BEZEL",
+        "HEAD_CAMERA_BAR",
+        "HEAD_EAR_LEFT",
+        "HEAD_EAR_RIGHT",
+        "HEAD_EAR_RING_LEFT",
+        "HEAD_EAR_RING_RIGHT",
+        "HEAD_LENSES",
+        "HEAD_LIDAR",
+        "HEAD_LIDAR_RING",
+        "HEAD_SCREEN",
+        "HEAD_SHELL"
+      ],
+      "location_local": [
+        0.0,
+        0.0,
+        0.9049999713897705
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.9049999713897705
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_HEADLEAD",
+      "type": "EMPTY",
+      "parent": "ANIM_TORSO",
+      "children": [
+        "ANIM_HEAD"
+      ],
+      "location_local": [
+        0.0,
+        0.0,
+        0.9049999713897705
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.9049999713897705
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_MOUTH",
+      "type": "EMPTY",
+      "parent": "ANIM_HEAD",
+      "children": [
+        "MOUTH"
+      ],
+      "location_local": [
+        0.0,
+        -0.1120000034570694,
+        1.0149999856948853
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.1120000034570694,
+        1.0149999856948853
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_SHOULDER_LEFT",
+      "type": "EMPTY",
+      "parent": "ANIM_TORSO",
+      "children": [
+        "ANIM_ELBOW_LEFT",
+        "ELBOW_LEFT",
+        "ELBOW_RING_LEFT",
+        "UPPER_ARM_LEFT"
+      ],
+      "location_local": [
+        0.2150000035762787,
+        0.0,
+        0.8050000071525574
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.2150000035762787,
+        0.0,
+        0.8050000071525574
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_SHOULDER_RIGHT",
+      "type": "EMPTY",
+      "parent": "ANIM_TORSO",
+      "children": [
+        "ANIM_ELBOW_RIGHT",
+        "ELBOW_RIGHT",
+        "ELBOW_RING_RIGHT",
+        "UPPER_ARM_RIGHT"
+      ],
+      "location_local": [
+        -0.2150000035762787,
+        0.0,
+        0.8050000071525574
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.2150000035762787,
+        0.0,
+        0.8050000071525574
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_THUMB_LEFT",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_LEFT",
+      "children": [
+        "THUMB_LEFT"
+      ],
+      "location_local": [
+        0.3149999976158142,
+        -0.009999999776482582,
+        0.44999998807907104
+      ],
+      "rotation_euler": [
+        -0.10471975803375244,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.3149999976158142,
+        -0.009999999776482582,
+        0.44999998807907104
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_THUMB_RIGHT",
+      "type": "EMPTY",
+      "parent": "ANIM_WRIST_RIGHT",
+      "children": [
+        "THUMB_RIGHT"
+      ],
+      "location_local": [
+        -0.3149999976158142,
+        -0.009999999776482582,
+        0.44999998807907104
+      ],
+      "rotation_euler": [
+        -0.10471975803375244,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.3149999976158142,
+        -0.009999999776482582,
+        0.44999998807907104
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_TORSO",
+      "type": "EMPTY",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [
+        "ANIM_HEADLEAD",
+        "ANIM_SHOULDER_LEFT",
+        "ANIM_SHOULDER_RIGHT",
+        "CHEST",
+        "CHEST_ACCENT",
+        "CHEST_LENSES",
+        "CHEST_SENSOR",
+        "NECK_ACTUATOR",
+        "NECK_RING",
+        "ORANGE_BUTTON",
+        "PEDESTAL",
+        "PLATFORM",
+        "PLATFORM_TRIM",
+        "SHOULDER_JOINT_LEFT",
+        "SHOULDER_JOINT_RIGHT",
+        "WAIST",
+        "WAIST_SLOTS"
+      ],
+      "location_local": [
+        0.0,
+        0.0,
+        0.3199999928474426
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.3199999928474426
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_WRIST_LEFT",
+      "type": "EMPTY",
+      "parent": "ANIM_ELBOW_LEFT",
+      "children": [
+        "ANIM_FINGER_LEFT_1",
+        "ANIM_FINGER_LEFT_2",
+        "ANIM_FINGER_LEFT_3",
+        "ANIM_FINGER_LEFT_4",
+        "ANIM_THUMB_LEFT",
+        "PALM_LEFT"
+      ],
+      "location_local": [
+        0.2759999930858612,
+        0.0,
+        0.5049999952316284
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.2759999930858612,
+        0.0,
+        0.5049999952316284
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "ANIM_WRIST_RIGHT",
+      "type": "EMPTY",
+      "parent": "ANIM_ELBOW_RIGHT",
+      "children": [
+        "ANIM_FINGER_RIGHT_1",
+        "ANIM_FINGER_RIGHT_2",
+        "ANIM_FINGER_RIGHT_3",
+        "ANIM_FINGER_RIGHT_4",
+        "ANIM_THUMB_RIGHT",
+        "PALM_RIGHT"
+      ],
+      "location_local": [
+        -0.2759999930858612,
+        0.0,
+        0.5049999952316284
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.2759999930858612,
+        0.0,
+        0.5049999952316284
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "BASE_ACCENT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.3100000023841858,
+        0.008000016212463379,
+        0.03999999165534973
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 16,
+      "polygon_count": 12,
+      "world_bbox_min": [
+        -0.1550000011920929,
+        -0.30300000309944153,
+        0.18000000715255737
+      ],
+      "world_bbox_max": [
+        0.1550000011920929,
+        -0.29499998688697815,
+        0.2199999988079071
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.29899999499320984,
+        0.20000000298023224
+      ]
+    },
+    {
+      "name": "BASE_LIGHTBAR",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.20000000298023224,
+        0.0059999823570251465,
+        0.01199999451637268
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.10000000149011612,
+        -0.304999977350235,
+        0.1340000033378601
+      ],
+      "world_bbox_max": [
+        0.10000000149011612,
+        -0.29899999499320984,
+        0.1459999978542328
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.3019999861717224,
+        0.14000000059604645
+      ]
+    },
+    {
+      "name": "BASE_LOWER",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.41999998688697815,
+        0.6000000238418579,
+        0.12000000476837158
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.20999999344348907,
+        -0.30000001192092896,
+        0.07999999821186066
+      ],
+      "world_bbox_max": [
+        0.20999999344348907,
+        0.30000001192092896,
+        0.20000000298023224
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.14000000059604645
+      ]
+    },
+    {
+      "name": "BASE_UPPER",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.4300000071525574,
+        0.5799999833106995,
+        0.12000000476837158
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.2150000035762787,
+        -0.28999999165534973,
+        0.19999998807907104
+      ],
+      "world_bbox_max": [
+        0.2150000035762787,
+        0.28999999165534973,
+        0.3199999928474426
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.25999999046325684
+      ]
+    },
+    {
+      "name": "CHEST",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.3400000035762787,
+        0.25999999046325684,
+        0.24000000953674316
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.17000000178813934,
+        -0.12999999523162842,
+        0.6000000238418579
+      ],
+      "world_bbox_max": [
+        0.17000000178813934,
+        0.12999999523162842,
+        0.8400000333786011
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.7200000286102295
+      ]
+    },
+    {
+      "name": "CHEST_ACCENT",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.25,
+        0.004999995231628418,
+        0.059999942779541016
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 16,
+      "polygon_count": 12,
+      "world_bbox_min": [
+        -0.125,
+        -0.13349999487400055,
+        0.690000057220459
+      ],
+      "world_bbox_max": [
+        0.125,
+        -0.12849999964237213,
+        0.75
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.13099999725818634,
+        0.7200000286102295
+      ]
+    },
+    {
+      "name": "CHEST_LENSES",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.10599999874830246,
+        0.006000012159347534,
+        0.026000022888183594
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 144,
+      "polygon_count": 78,
+      "world_bbox_min": [
+        -0.05299999937415123,
+        -0.1420000046491623,
+        0.7669999599456787
+      ],
+      "world_bbox_max": [
+        0.05299999937415123,
+        -0.13599999248981476,
+        0.7929999828338623
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.13899999856948853,
+        0.7799999713897705
+      ]
+    },
+    {
+      "name": "CHEST_SENSOR",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.14000000059604645,
+        0.01199999451637268,
+        0.039999961853027344
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.07000000029802322,
+        -0.1379999965429306,
+        0.7599999904632568
+      ],
+      "world_bbox_max": [
+        0.07000000029802322,
+        -0.12600000202655792,
+        0.7999999523162842
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.13199999928474426,
+        0.7799999713897705
+      ]
+    },
+    {
+      "name": "ELBOW_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_SHOULDER_LEFT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.07999998331069946,
+        0.08500000089406967,
+        0.08000004291534424
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        0.21000000834465027,
+        -0.042500000447034836,
+        0.6149999499320984
+      ],
+      "world_bbox_max": [
+        0.28999999165534973,
+        0.042500000447034836,
+        0.6949999928474426
+      ],
+      "world_bbox_center": [
+        0.25,
+        0.0,
+        0.6549999713897705
+      ]
+    },
+    {
+      "name": "ELBOW_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_SHOULDER_RIGHT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.07999998331069946,
+        0.08500000089406967,
+        0.08000004291534424
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.28999999165534973,
+        -0.042500000447034836,
+        0.6149999499320984
+      ],
+      "world_bbox_max": [
+        -0.21000000834465027,
+        0.042500000447034836,
+        0.6949999928474426
+      ],
+      "world_bbox_center": [
+        -0.25,
+        0.0,
+        0.6549999713897705
+      ]
+    },
+    {
+      "name": "ELBOW_RING_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_SHOULDER_LEFT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.08399999141693115,
+        0.008000001311302185,
+        0.08399999141693115
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        0.20800000429153442,
+        -0.04749999940395355,
+        0.6129999756813049
+      ],
+      "world_bbox_max": [
+        0.2919999957084656,
+        -0.03949999809265137,
+        0.6969999670982361
+      ],
+      "world_bbox_center": [
+        0.25,
+        -0.04349999874830246,
+        0.6549999713897705
+      ]
+    },
+    {
+      "name": "ELBOW_RING_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_SHOULDER_RIGHT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.08399999141693115,
+        0.008000001311302185,
+        0.08399999141693115
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.2919999957084656,
+        -0.04749999940395355,
+        0.6129999756813049
+      ],
+      "world_bbox_max": [
+        -0.20800000429153442,
+        -0.03949999809265137,
+        0.6969999670982361
+      ],
+      "world_bbox_center": [
+        -0.25,
+        -0.04349999874830246,
+        0.6549999713897705
+      ]
+    },
+    {
+      "name": "EYE_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_EYE_LEFT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.06000000238418579,
+        0.008000001311302185,
+        0.059999942779541016
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 384,
+      "polygon_count": 384,
+      "world_bbox_min": [
+        0.02500000037252903,
+        -0.11600000411272049,
+        0.9900000095367432
+      ],
+      "world_bbox_max": [
+        0.08500000089406967,
+        -0.1080000028014183,
+        1.0499999523162842
+      ],
+      "world_bbox_center": [
+        0.05500000063329935,
+        -0.1120000034570694,
+        1.0199999809265137
+      ]
+    },
+    {
+      "name": "EYE_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_EYE_RIGHT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.06000000238418579,
+        0.008000001311302185,
+        0.059999942779541016
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 384,
+      "polygon_count": 384,
+      "world_bbox_min": [
+        -0.08500000089406967,
+        -0.11600000411272049,
+        0.9900000095367432
+      ],
+      "world_bbox_max": [
+        -0.02500000037252903,
+        -0.1080000028014183,
+        1.0499999523162842
+      ],
+      "world_bbox_center": [
+        -0.05500000063329935,
+        -0.1120000034570694,
+        1.0199999809265137
+      ]
+    },
+    {
+      "name": "FINGER_LEFT_1",
+      "type": "MESH",
+      "parent": "ANIM_FINGER_LEFT_1",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.015999997034668922,
+        0.07499998062849045
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.07425624132156372,
+        0.0012472579255700111
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        0.27000001072883606,
+        -0.050902072340250015,
+        0.34975022077560425
+      ],
+      "world_bbox_max": [
+        0.28599998354911804,
+        -0.02212153747677803,
+        0.4263891577720642
+      ],
+      "world_bbox_center": [
+        0.27799999713897705,
+        -0.03651180490851402,
+        0.38806968927383423
+      ]
+    },
+    {
+      "name": "FINGER_LEFT_2",
+      "type": "MESH",
+      "parent": "ANIM_FINGER_LEFT_2",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.015999997034668922,
+        0.07499998062849045
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.07395239174365997,
+        0.004720221273601055
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        0.27000001072883606,
+        -0.030902067199349403,
+        0.34975022077560425
+      ],
+      "world_bbox_max": [
+        0.28599998354911804,
+        -0.002121532103046775,
+        0.4263891577720642
+      ],
+      "world_bbox_center": [
+        0.27799999713897705,
+        -0.01651179965119809,
+        0.38806968927383423
+      ]
+    },
+    {
+      "name": "FINGER_LEFT_3",
+      "type": "MESH",
+      "parent": "ANIM_FINGER_LEFT_3",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.015999997034668922,
+        0.07499998062849045
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.07364855706691742,
+        0.0081931846216321
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        0.27000001072883606,
+        -0.010902078822255135,
+        0.34975022077560425
+      ],
+      "world_bbox_max": [
+        0.28599998354911804,
+        0.01787845604121685,
+        0.4263891577720642
+      ],
+      "world_bbox_center": [
+        0.27799999713897705,
+        0.003488188609480858,
+        0.38806968927383423
+      ]
+    },
+    {
+      "name": "FINGER_LEFT_4",
+      "type": "MESH",
+      "parent": "ANIM_FINGER_LEFT_4",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.015999997034668922,
+        0.07499998062849045
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.07334470748901367,
+        0.011666147969663143
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        0.27000001072883606,
+        0.009097926318645477,
+        0.34975022077560425
+      ],
+      "world_bbox_max": [
+        0.28599998354911804,
+        0.03787846118211746,
+        0.4263891577720642
+      ],
+      "world_bbox_center": [
+        0.27799999713897705,
+        0.02348819375038147,
+        0.38806968927383423
+      ]
+    },
+    {
+      "name": "FINGER_RIGHT_1",
+      "type": "MESH",
+      "parent": "ANIM_FINGER_RIGHT_1",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.015999997034668922,
+        0.07499998062849045
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.07425624132156372,
+        0.0012472579255700111
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.28599998354911804,
+        -0.050902072340250015,
+        0.34975022077560425
+      ],
+      "world_bbox_max": [
+        -0.27000001072883606,
+        -0.02212153747677803,
+        0.4263891577720642
+      ],
+      "world_bbox_center": [
+        -0.27799999713897705,
+        -0.03651180490851402,
+        0.38806968927383423
+      ]
+    },
+    {
+      "name": "FINGER_RIGHT_2",
+      "type": "MESH",
+      "parent": "ANIM_FINGER_RIGHT_2",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.015999997034668922,
+        0.07499998062849045
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.07395239174365997,
+        0.004720221273601055
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.28599998354911804,
+        -0.030902067199349403,
+        0.34975022077560425
+      ],
+      "world_bbox_max": [
+        -0.27000001072883606,
+        -0.002121532103046775,
+        0.4263891577720642
+      ],
+      "world_bbox_center": [
+        -0.27799999713897705,
+        -0.01651179965119809,
+        0.38806968927383423
+      ]
+    },
+    {
+      "name": "FINGER_RIGHT_3",
+      "type": "MESH",
+      "parent": "ANIM_FINGER_RIGHT_3",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.015999997034668922,
+        0.07499998062849045
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.07364855706691742,
+        0.0081931846216321
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.28599998354911804,
+        -0.010902078822255135,
+        0.34975022077560425
+      ],
+      "world_bbox_max": [
+        -0.27000001072883606,
+        0.01787845604121685,
+        0.4263891577720642
+      ],
+      "world_bbox_center": [
+        -0.27799999713897705,
+        0.003488188609480858,
+        0.38806968927383423
+      ]
+    },
+    {
+      "name": "FINGER_RIGHT_4",
+      "type": "MESH",
+      "parent": "ANIM_FINGER_RIGHT_4",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.015999997034668922,
+        0.07499998062849045
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.07334470748901367,
+        0.011666147969663143
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.28599998354911804,
+        0.009097926318645477,
+        0.34975022077560425
+      ],
+      "world_bbox_max": [
+        -0.27000001072883606,
+        0.03787846118211746,
+        0.4263891577720642
+      ],
+      "world_bbox_center": [
+        -0.27799999713897705,
+        0.02348819375038147,
+        0.38806968927383423
+      ]
+    },
+    {
+      "name": "FOREARM_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_ELBOW_LEFT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.07380612194538116,
+        0.07500000298023224,
+        0.1145322322845459
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        0.22609694302082062,
+        -0.03750000149011612,
+        0.5227338671684265
+      ],
+      "world_bbox_max": [
+        0.2999030649662018,
+        0.03750000149011612,
+        0.6372660994529724
+      ],
+      "world_bbox_center": [
+        0.2630000039935112,
+        0.0,
+        0.5799999833106995
+      ]
+    },
+    {
+      "name": "FOREARM_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_ELBOW_RIGHT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.07380612194538116,
+        0.07500000298023224,
+        0.1145322322845459
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.2999030649662018,
+        -0.03750000149011612,
+        0.5227338671684265
+      ],
+      "world_bbox_max": [
+        -0.22609694302082062,
+        0.03750000149011612,
+        0.6372660994529724
+      ],
+      "world_bbox_center": [
+        -0.2630000039935112,
+        0.0,
+        0.5799999833106995
+      ]
+    },
+    {
+      "name": "FRONT_LENSES",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.2280000001192093,
+        0.0059999823570251465,
+        0.02799999713897705
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 144,
+      "polygon_count": 78,
+      "world_bbox_min": [
+        -0.11400000005960464,
+        -0.3100000023841858,
+        0.2160000056028366
+      ],
+      "world_bbox_max": [
+        0.11400000005960464,
+        -0.30400002002716064,
+        0.24400000274181366
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.3070000112056732,
+        0.23000000417232513
+      ]
+    },
+    {
+      "name": "FRONT_SENSOR_BAR",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.3400000035762787,
+        0.019999980926513672,
+        0.07000000774860382
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.17000000178813934,
+        -0.304999977350235,
+        0.19500000774860382
+      ],
+      "world_bbox_max": [
+        0.17000000178813934,
+        -0.2849999964237213,
+        0.26500001549720764
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.29499998688697815,
+        0.23000001162290573
+      ]
+    },
+    {
+      "name": "GRACEEMO_01_ROOT",
+      "type": "EMPTY",
+      "parent": null,
+      "children": [
+        "ANIM_TORSO",
+        "BASE_ACCENT",
+        "BASE_LIGHTBAR",
+        "BASE_LOWER",
+        "BASE_UPPER",
+        "FRONT_LENSES",
+        "FRONT_SENSOR_BAR",
+        "WHEEL_FRONT_LEFT",
+        "WHEEL_FRONT_RIGHT",
+        "WHEEL_HUB_FRONT_LEFT",
+        "WHEEL_HUB_FRONT_RIGHT",
+        "WHEEL_HUB_REAR_LEFT",
+        "WHEEL_HUB_REAR_RIGHT",
+        "WHEEL_REAR_LEFT",
+        "WHEEL_REAR_RIGHT",
+        "WHEEL_RING_FRONT_LEFT",
+        "WHEEL_RING_FRONT_RIGHT",
+        "WHEEL_RING_REAR_LEFT",
+        "WHEEL_RING_REAR_RIGHT"
+      ],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "GROUND",
+      "type": "MESH",
+      "parent": null,
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        6.0,
+        6.0,
+        0.009999999776482582
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_GROUND"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -3.0,
+        -3.0,
+        -0.009999999776482582
+      ],
+      "world_bbox_max": [
+        3.0,
+        3.0,
+        0.0
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        -0.004999999888241291
+      ]
+    },
+    {
+      "name": "HEAD_ANTENNA",
+      "type": "MESH",
+      "parent": "ANIM_ANTENNA",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.004000000189989805,
+        0.004000000189989805,
+        0.029999971389770508
+      ],
+      "matrix_world_translation": [
+        -0.026653731241822243,
+        0.0,
+        0.0002936124801635742
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 16,
+      "polygon_count": 10,
+      "world_bbox_min": [
+        -0.001999514875933528,
+        -0.0020000000949949026,
+        1.2099559307098389
+      ],
+      "world_bbox_max": [
+        0.0026603497099131346,
+        0.0020000000949949026,
+        1.2400368452072144
+      ],
+      "world_bbox_center": [
+        0.0003304174169898033,
+        0.0,
+        1.2249963879585266
+      ]
+    },
+    {
+      "name": "HEAD_BEZEL",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.27000001072883606,
+        0.01199999451637268,
+        0.15000003576278687
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.13500000536441803,
+        -0.10700000077486038,
+        0.9300000071525574
+      ],
+      "world_bbox_max": [
+        0.13500000536441803,
+        -0.0950000062584877,
+        1.0800000429153442
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.10100000351667404,
+        1.0050000250339508
+      ]
+    },
+    {
+      "name": "HEAD_CAMERA_BAR",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.23999999463558197,
+        0.07000000029802322,
+        0.039999961853027344
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.11999999731779099,
+        -0.04500000178813934,
+        1.100000023841858
+      ],
+      "world_bbox_max": [
+        0.11999999731779099,
+        0.02500000037252903,
+        1.1399999856948853
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.010000000707805157,
+        1.1200000047683716
+      ]
+    },
+    {
+      "name": "HEAD_EAR_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.030000001192092896,
+        0.10000000149011612,
+        0.09999996423721313
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        0.14300000667572021,
+        -0.05000000074505806,
+        0.9549999833106995
+      ],
+      "world_bbox_max": [
+        0.1730000078678131,
+        0.05000000074505806,
+        1.0549999475479126
+      ],
+      "world_bbox_center": [
+        0.15800000727176666,
+        0.0,
+        1.004999965429306
+      ]
+    },
+    {
+      "name": "HEAD_EAR_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.030000001192092896,
+        0.10000000149011612,
+        0.09999996423721313
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.1730000078678131,
+        -0.05000000074505806,
+        0.9549999833106995
+      ],
+      "world_bbox_max": [
+        -0.14300000667572021,
+        0.05000000074505806,
+        1.0549999475479126
+      ],
+      "world_bbox_center": [
+        -0.15800000727176666,
+        0.0,
+        1.004999965429306
+      ]
+    },
+    {
+      "name": "HEAD_EAR_RING_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0040000081062316895,
+        0.07199999690055847,
+        0.07200002670288086
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        0.17249999940395355,
+        -0.035999998450279236,
+        0.968999981880188
+      ],
+      "world_bbox_max": [
+        0.17650000751018524,
+        0.035999998450279236,
+        1.0410000085830688
+      ],
+      "world_bbox_center": [
+        0.1745000034570694,
+        0.0,
+        1.0049999952316284
+      ]
+    },
+    {
+      "name": "HEAD_EAR_RING_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0040000081062316895,
+        0.07199999690055847,
+        0.07200002670288086
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.17650000751018524,
+        -0.035999998450279236,
+        0.968999981880188
+      ],
+      "world_bbox_max": [
+        -0.17249999940395355,
+        0.035999998450279236,
+        1.0410000085830688
+      ],
+      "world_bbox_center": [
+        -0.1745000034570694,
+        0.0,
+        1.0049999952316284
+      ]
+    },
+    {
+      "name": "HEAD_LENSES",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.18400000035762787,
+        0.006000004708766937,
+        0.023999929428100586
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 144,
+      "polygon_count": 78,
+      "world_bbox_min": [
+        -0.09200000017881393,
+        -0.049000002443790436,
+        1.1080000400543213
+      ],
+      "world_bbox_max": [
+        0.09200000017881393,
+        -0.0429999977350235,
+        1.1319999694824219
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.04600000008940697,
+        1.1200000047683716
+      ]
+    },
+    {
+      "name": "HEAD_LIDAR",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.09000000357627869,
+        0.09000000357627869,
+        0.06999993324279785
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.04500000178813934,
+        -0.04500000178813934,
+        1.1399999856948853
+      ],
+      "world_bbox_max": [
+        0.04500000178813934,
+        0.04500000178813934,
+        1.209999918937683
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        1.1749999523162842
+      ]
+    },
+    {
+      "name": "HEAD_LIDAR_RING",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.09200000017881393,
+        0.09200000017881393,
+        0.007999897003173828
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.04600000008940697,
+        -0.04600000008940697,
+        1.1759999990463257
+      ],
+      "world_bbox_max": [
+        0.04600000008940697,
+        0.04600000008940697,
+        1.1839998960494995
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        1.1799999475479126
+      ]
+    },
+    {
+      "name": "HEAD_SCREEN",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.24500000476837158,
+        0.013999998569488525,
+        0.125
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_SCREEN"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.12250000238418579,
+        -0.10999999940395355,
+        0.9424999952316284
+      ],
+      "world_bbox_max": [
+        0.12250000238418579,
+        -0.09600000083446503,
+        1.0674999952316284
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.10300000011920929,
+        1.0049999952316284
+      ]
+    },
+    {
+      "name": "HEAD_SHELL",
+      "type": "MESH",
+      "parent": "ANIM_HEAD",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.30000001192092896,
+        0.20000000298023224,
+        0.19000005722045898
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.15000000596046448,
+        -0.10000000149011612,
+        0.9099999666213989
+      ],
+      "world_bbox_max": [
+        0.15000000596046448,
+        0.10000000149011612,
+        1.100000023841858
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        1.0049999952316284
+      ]
+    },
+    {
+      "name": "HEIGHT_LABEL",
+      "type": "FONT",
+      "parent": null,
+      "children": [],
+      "location_local": [
+        -0.6499999761581421,
+        0.0,
+        1.2599999904632568
+      ],
+      "rotation_euler": [
+        1.5707963705062866,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.15042001008987427,
+        0.041999999433755875,
+        0.0
+      ],
+      "matrix_world_translation": [
+        -0.6499999761581421,
+        0.0,
+        1.2599999904632568
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 0,
+      "polygon_count": 0
+    },
+    {
+      "name": "MASTER_HEIGHT",
+      "type": "MESH",
+      "parent": null,
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.006000041961669922,
+        0.006000000052154064,
+        1.2400000095367432
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.5530000329017639,
+        -0.003000000026077032,
+        0.0
+      ],
+      "world_bbox_max": [
+        -0.546999990940094,
+        0.003000000026077032,
+        1.2400000095367432
+      ],
+      "world_bbox_center": [
+        -0.550000011920929,
+        0.0,
+        0.6200000047683716
+      ]
+    },
+    {
+      "name": "MOUTH",
+      "type": "MESH",
+      "parent": "ANIM_MOUTH",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.059751465916633606,
+        0.008000001311302185,
+        0.019073545932769775
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 200,
+      "polygon_count": 192,
+      "world_bbox_min": [
+        -0.029875732958316803,
+        -0.11600000411272049,
+        0.9760000109672546
+      ],
+      "world_bbox_max": [
+        0.029875732958316803,
+        -0.1080000028014183,
+        0.9950735569000244
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.1120000034570694,
+        0.9855367839336395
+      ]
+    },
+    {
+      "name": "NECK_ACTUATOR",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.07999999821186066,
+        0.07999999821186066,
+        0.0700000524520874
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.03999999910593033,
+        -0.03999999910593033,
+        0.8399999737739563
+      ],
+      "world_bbox_max": [
+        0.03999999910593033,
+        0.03999999910593033,
+        0.9100000262260437
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.875
+      ]
+    },
+    {
+      "name": "NECK_RING",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.08399999886751175,
+        0.08399999886751175,
+        0.006000041961669922
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.041999999433755875,
+        -0.041999999433755875,
+        0.871999979019165
+      ],
+      "world_bbox_max": [
+        0.041999999433755875,
+        0.041999999433755875,
+        0.878000020980835
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.875
+      ]
+    },
+    {
+      "name": "ORANGE_BUTTON",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0560000017285347,
+        0.0559999942779541,
+        0.0559999942779541
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 266,
+      "polygon_count": 288,
+      "world_bbox_min": [
+        -0.02800000086426735,
+        -0.16300000250339508,
+        0.6370000243186951
+      ],
+      "world_bbox_max": [
+        0.02800000086426735,
+        -0.10700000822544098,
+        0.6930000185966492
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.13500000536441803,
+        0.6650000214576721
+      ]
+    },
+    {
+      "name": "PALM_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_WRIST_LEFT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.050000011920928955,
+        0.09000000357627869,
+        0.06999999284744263
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        0.2529999911785126,
+        -0.04500000178813934,
+        0.4300000071525574
+      ],
+      "world_bbox_max": [
+        0.30300000309944153,
+        0.04500000178813934,
+        0.5
+      ],
+      "world_bbox_center": [
+        0.27799999713897705,
+        0.0,
+        0.4650000035762787
+      ]
+    },
+    {
+      "name": "PALM_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_WRIST_RIGHT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.050000011920928955,
+        0.09000000357627869,
+        0.06999999284744263
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.30300000309944153,
+        -0.04500000178813934,
+        0.4300000071525574
+      ],
+      "world_bbox_max": [
+        -0.2529999911785126,
+        0.04500000178813934,
+        0.5
+      ],
+      "world_bbox_center": [
+        -0.27799999713897705,
+        0.0,
+        0.4650000035762787
+      ]
+    },
+    {
+      "name": "PEDESTAL",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.3199999928474426,
+        0.30000001192092896,
+        0.07999998331069946
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.1599999964237213,
+        -0.15000000596046448,
+        0.3799999952316284
+      ],
+      "world_bbox_max": [
+        0.1599999964237213,
+        0.15000000596046448,
+        0.4599999785423279
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.41999998688697815
+      ]
+    },
+    {
+      "name": "PLATFORM",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.4000000059604645,
+        0.4000000059604645,
+        0.06000000238418579
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.20000000298023224,
+        -0.20000000298023224,
+        0.3199999928474426
+      ],
+      "world_bbox_max": [
+        0.20000000298023224,
+        0.20000000298023224,
+        0.3799999952316284
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.3499999940395355
+      ]
+    },
+    {
+      "name": "PLATFORM_TRIM",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.3400000035762787,
+        0.3400000035762787,
+        0.012000024318695068
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.17000000178813934,
+        -0.17000000178813934,
+        0.3789999783039093
+      ],
+      "world_bbox_max": [
+        0.17000000178813934,
+        0.17000000178813934,
+        0.39100000262260437
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.38499999046325684
+      ]
+    },
+    {
+      "name": "SHOULDER_JOINT_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.09999996423721313,
+        0.09999999403953552,
+        0.10000002384185791
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 266,
+      "polygon_count": 288,
+      "world_bbox_min": [
+        0.16500002145767212,
+        -0.049999989569187164,
+        0.7549999952316284
+      ],
+      "world_bbox_max": [
+        0.26499998569488525,
+        0.05000000074505806,
+        0.8550000190734863
+      ],
+      "world_bbox_center": [
+        0.2150000035762787,
+        5.587935447692871e-09,
+        0.8050000071525574
+      ]
+    },
+    {
+      "name": "SHOULDER_JOINT_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.09999997913837433,
+        0.09999999403953552,
+        0.10000002384185791
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 266,
+      "polygon_count": 288,
+      "world_bbox_min": [
+        -0.26499998569488525,
+        -0.049999989569187164,
+        0.7549999952316284
+      ],
+      "world_bbox_max": [
+        -0.16500000655651093,
+        0.05000000074505806,
+        0.8550000190734863
+      ],
+      "world_bbox_center": [
+        -0.2149999961256981,
+        5.587935447692871e-09,
+        0.8050000071525574
+      ]
+    },
+    {
+      "name": "THUMB_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_THUMB_LEFT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.017999999225139618,
+        0.06000000238418579
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.047092586755752563,
+        0.0014198442222550511
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        0.3070000112056732,
+        -0.025222402065992355,
+        0.38938790559768677
+      ],
+      "world_bbox_max": [
+        0.3229999840259552,
+        -0.0010493025183677673,
+        0.4509407579898834
+      ],
+      "world_bbox_center": [
+        0.3149999976158142,
+        -0.013135852292180061,
+        0.4201643317937851
+      ]
+    },
+    {
+      "name": "THUMB_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_THUMB_RIGHT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.015999972820281982,
+        0.017999999225139618,
+        0.06000000238418579
+      ],
+      "matrix_world_translation": [
+        0.0,
+        -0.047092586755752563,
+        0.0014198442222550511
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.3229999840259552,
+        -0.025222402065992355,
+        0.38938790559768677
+      ],
+      "world_bbox_max": [
+        -0.3070000112056732,
+        -0.0010493025183677673,
+        0.4509407579898834
+      ],
+      "world_bbox_center": [
+        -0.3149999976158142,
+        -0.013135852292180061,
+        0.4201643317937851
+      ]
+    },
+    {
+      "name": "UPPER_ARM_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_SHOULDER_LEFT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.08511373400688171,
+        0.07999999821186066,
+        0.12617743015289307
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        0.1899431347846985,
+        -0.03999999910593033,
+        0.6669113039970398
+      ],
+      "world_bbox_max": [
+        0.2750568687915802,
+        0.03999999910593033,
+        0.7930887341499329
+      ],
+      "world_bbox_center": [
+        0.23250000178813934,
+        0.0,
+        0.7300000190734863
+      ]
+    },
+    {
+      "name": "UPPER_ARM_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_SHOULDER_RIGHT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.08511373400688171,
+        0.07999999821186066,
+        0.12617743015289307
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.2750568687915802,
+        -0.03999999910593033,
+        0.6669113039970398
+      ],
+      "world_bbox_max": [
+        -0.1899431347846985,
+        0.03999999910593033,
+        0.7930887341499329
+      ],
+      "world_bbox_center": [
+        -0.23250000178813934,
+        0.0,
+        0.7300000190734863
+      ]
+    },
+    {
+      "name": "WAIST",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.2800000011920929,
+        0.23999999463558197,
+        0.13999998569488525
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_WHITE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 8,
+      "polygon_count": 6,
+      "world_bbox_min": [
+        -0.14000000059604645,
+        -0.11999999731779099,
+        0.4599999785423279
+      ],
+      "world_bbox_max": [
+        0.14000000059604645,
+        0.11999999731779099,
+        0.5999999642372131
+      ],
+      "world_bbox_center": [
+        0.0,
+        0.0,
+        0.5299999713897705
+      ]
+    },
+    {
+      "name": "WAIST_SLOTS",
+      "type": "MESH",
+      "parent": "ANIM_TORSO",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.16200000047683716,
+        0.00599999725818634,
+        0.039999961853027344
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 16,
+      "polygon_count": 12,
+      "world_bbox_min": [
+        -0.08100000023841858,
+        -0.12399999797344208,
+        0.5099999904632568
+      ],
+      "world_bbox_max": [
+        0.08100000023841858,
+        -0.11800000071525574,
+        0.5499999523162842
+      ],
+      "world_bbox_center": [
+        0.0,
+        -0.12099999934434891,
+        0.5299999713897705
+      ]
+    },
+    {
+      "name": "WHEEL_FRONT_LEFT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.23199999332427979,
+        0.23730933666229248,
+        0.12999999523162842
+      ],
+      "matrix_world_translation": [
+        0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_TIRE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 176,
+      "polygon_count": 118,
+      "world_bbox_min": [
+        0.2199999988079071,
+        -0.33865466713905334,
+        -0.0009999973699450493
+      ],
+      "world_bbox_max": [
+        0.3499999940395355,
+        -0.10134533047676086,
+        0.23100000619888306
+      ],
+      "world_bbox_center": [
+        0.2849999964237213,
+        -0.2199999988079071,
+        0.115000004414469
+      ]
+    },
+    {
+      "name": "WHEEL_FRONT_RIGHT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        -0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.23199999332427979,
+        0.23730933666229248,
+        0.12999999523162842
+      ],
+      "matrix_world_translation": [
+        -0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_TIRE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 176,
+      "polygon_count": 118,
+      "world_bbox_min": [
+        -0.3499999940395355,
+        -0.33865466713905334,
+        -0.0009999973699450493
+      ],
+      "world_bbox_max": [
+        -0.2199999988079071,
+        -0.10134533047676086,
+        0.23100000619888306
+      ],
+      "world_bbox_center": [
+        -0.2849999964237213,
+        -0.2199999988079071,
+        0.115000004414469
+      ]
+    },
+    {
+      "name": "WHEEL_HUB_FRONT_LEFT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.12399999797344208,
+        0.12399999797344208,
+        0.010000001639127731
+      ],
+      "matrix_world_translation": [
+        0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        0.34599998593330383,
+        -0.28200000524520874,
+        0.05299999937415123
+      ],
+      "world_bbox_max": [
+        0.35600000619888306,
+        -0.15799999237060547,
+        0.1770000010728836
+      ],
+      "world_bbox_center": [
+        0.35099999606609344,
+        -0.2199999988079071,
+        0.11500000022351742
+      ]
+    },
+    {
+      "name": "WHEEL_HUB_FRONT_RIGHT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        -0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.12399999797344208,
+        0.12399999797344208,
+        0.010000001639127731
+      ],
+      "matrix_world_translation": [
+        -0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.35600000619888306,
+        -0.28200000524520874,
+        0.05300000682473183
+      ],
+      "world_bbox_max": [
+        -0.34599998593330383,
+        -0.15799999237060547,
+        0.1770000010728836
+      ],
+      "world_bbox_center": [
+        -0.35099999606609344,
+        -0.2199999988079071,
+        0.11500000394880772
+      ]
+    },
+    {
+      "name": "WHEEL_HUB_REAR_LEFT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.12399999797344208,
+        0.12399999797344208,
+        0.010000001639127731
+      ],
+      "matrix_world_translation": [
+        0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        0.34599998593330383,
+        0.15799999237060547,
+        0.05299999937415123
+      ],
+      "world_bbox_max": [
+        0.35600000619888306,
+        0.28200000524520874,
+        0.1770000010728836
+      ],
+      "world_bbox_center": [
+        0.35099999606609344,
+        0.2199999988079071,
+        0.11500000022351742
+      ]
+    },
+    {
+      "name": "WHEEL_HUB_REAR_RIGHT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        -0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.12399999797344208,
+        0.12399999797344208,
+        0.010000001639127731
+      ],
+      "matrix_world_translation": [
+        -0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_BLUE_GLOW"
+      ],
+      "custom_properties": {},
+      "vertex_count": 64,
+      "polygon_count": 34,
+      "world_bbox_min": [
+        -0.35600000619888306,
+        0.15799999237060547,
+        0.05300000682473183
+      ],
+      "world_bbox_max": [
+        -0.34599998593330383,
+        0.28200000524520874,
+        0.1770000010728836
+      ],
+      "world_bbox_center": [
+        -0.35099999606609344,
+        0.2199999988079071,
+        0.11500000394880772
+      ]
+    },
+    {
+      "name": "WHEEL_REAR_LEFT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.23199999332427979,
+        0.23730933666229248,
+        0.12999999523162842
+      ],
+      "matrix_world_translation": [
+        0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_TIRE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 176,
+      "polygon_count": 118,
+      "world_bbox_min": [
+        0.2199999988079071,
+        0.10134533047676086,
+        -0.0009999973699450493
+      ],
+      "world_bbox_max": [
+        0.3499999940395355,
+        0.33865466713905334,
+        0.23100000619888306
+      ],
+      "world_bbox_center": [
+        0.2849999964237213,
+        0.2199999988079071,
+        0.115000004414469
+      ]
+    },
+    {
+      "name": "WHEEL_REAR_RIGHT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        -0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.23199999332427979,
+        0.23730933666229248,
+        0.12999999523162842
+      ],
+      "matrix_world_translation": [
+        -0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_TIRE"
+      ],
+      "custom_properties": {},
+      "vertex_count": 176,
+      "polygon_count": 118,
+      "world_bbox_min": [
+        -0.3499999940395355,
+        0.10134533047676086,
+        -0.0009999973699450493
+      ],
+      "world_bbox_max": [
+        -0.2199999988079071,
+        0.33865466713905334,
+        0.23100000619888306
+      ],
+      "world_bbox_center": [
+        -0.2849999964237213,
+        0.2199999988079071,
+        0.115000004414469
+      ]
+    },
+    {
+      "name": "WHEEL_RING_FRONT_LEFT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.17800000309944153,
+        0.17800000309944153,
+        0.02199999988079071
+      ],
+      "matrix_world_translation": [
+        0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 320,
+      "polygon_count": 320,
+      "world_bbox_min": [
+        0.3400000035762787,
+        -0.30900001525878906,
+        0.025999996811151505
+      ],
+      "world_bbox_max": [
+        0.3619999885559082,
+        -0.13099999725818634,
+        0.20399999618530273
+      ],
+      "world_bbox_center": [
+        0.35099999606609344,
+        -0.2200000062584877,
+        0.11499999649822712
+      ]
+    },
+    {
+      "name": "WHEEL_RING_FRONT_RIGHT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        -0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.17800000309944153,
+        0.17800000309944153,
+        0.02199999988079071
+      ],
+      "matrix_world_translation": [
+        -0.2849999964237213,
+        -0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 320,
+      "polygon_count": 320,
+      "world_bbox_min": [
+        -0.3619999885559082,
+        -0.30900001525878906,
+        0.026000002399086952
+      ],
+      "world_bbox_max": [
+        -0.3400000035762787,
+        -0.13099999725818634,
+        0.20400001108646393
+      ],
+      "world_bbox_center": [
+        -0.35099999606609344,
+        -0.2200000062584877,
+        0.11500000674277544
+      ]
+    },
+    {
+      "name": "WHEEL_RING_REAR_LEFT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.17800000309944153,
+        0.17800000309944153,
+        0.02199999988079071
+      ],
+      "matrix_world_translation": [
+        0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 320,
+      "polygon_count": 320,
+      "world_bbox_min": [
+        0.3400000035762787,
+        0.13099999725818634,
+        0.025999996811151505
+      ],
+      "world_bbox_max": [
+        0.3619999885559082,
+        0.30900001525878906,
+        0.20399999618530273
+      ],
+      "world_bbox_center": [
+        0.35099999606609344,
+        0.2200000062584877,
+        0.11499999649822712
+      ]
+    },
+    {
+      "name": "WHEEL_RING_REAR_RIGHT",
+      "type": "MESH",
+      "parent": "GRACEEMO_01_ROOT",
+      "children": [],
+      "location_local": [
+        -0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "rotation_euler": [
+        0.0,
+        1.5707963705062866,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.17800000309944153,
+        0.17800000309944153,
+        0.02199999988079071
+      ],
+      "matrix_world_translation": [
+        -0.2849999964237213,
+        0.2199999988079071,
+        0.11500000208616257
+      ],
+      "materials": [
+        "GRACE_ACCENT"
+      ],
+      "custom_properties": {},
+      "vertex_count": 320,
+      "polygon_count": 320,
+      "world_bbox_min": [
+        -0.3619999885559082,
+        0.13099999725818634,
+        0.026000002399086952
+      ],
+      "world_bbox_max": [
+        -0.3400000035762787,
+        0.30900001525878906,
+        0.20400001108646393
+      ],
+      "world_bbox_center": [
+        -0.35099999606609344,
+        0.2200000062584877,
+        0.11500000674277544
+      ]
+    },
+    {
+      "name": "WRIST_LEFT",
+      "type": "MESH",
+      "parent": "ANIM_ELBOW_LEFT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.06400001049041748,
+        0.06400000303983688,
+        0.06400001049041748
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 266,
+      "polygon_count": 288,
+      "world_bbox_min": [
+        0.24399998784065247,
+        -0.03200000151991844,
+        0.4729999899864197
+      ],
+      "world_bbox_max": [
+        0.30799999833106995,
+        0.03200000151991844,
+        0.5370000004768372
+      ],
+      "world_bbox_center": [
+        0.2759999930858612,
+        0.0,
+        0.5049999952316284
+      ]
+    },
+    {
+      "name": "WRIST_RIGHT",
+      "type": "MESH",
+      "parent": "ANIM_ELBOW_RIGHT",
+      "children": [],
+      "location_local": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_euler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.06400001049041748,
+        0.06400000303983688,
+        0.06400001049041748
+      ],
+      "matrix_world_translation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "GRACE_BLACK"
+      ],
+      "custom_properties": {},
+      "vertex_count": 266,
+      "polygon_count": 288,
+      "world_bbox_min": [
+        -0.30799999833106995,
+        -0.03200000151991844,
+        0.4729999899864197
+      ],
+      "world_bbox_max": [
+        -0.24399998784065247,
+        0.03200000151991844,
+        0.5370000004768372
+      ],
+      "world_bbox_center": [
+        -0.2759999930858612,
+        0.0,
+        0.5049999952316284
+      ]
+    }
+  ]
+}

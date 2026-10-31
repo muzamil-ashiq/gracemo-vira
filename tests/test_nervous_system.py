@@ -13,6 +13,7 @@ import time
 import json
 import threading
 import requests
+import pytest
 from pathlib import Path
 
 # Add adapters/sdk to sys.path
@@ -39,7 +40,7 @@ def test_kernel_live_loop():
     except Exception as e:
         print(f"  ✗ Failed to connect to Kernel: {e}")
         print("  👉 Please ensure 'cargo run -p gracemo-kernel' is running.")
-        return False
+        pytest.skip(f"Kernel offline: {e}")
 
     # 2. Test SSE Action Listener in Background Thread
     actions_received = []

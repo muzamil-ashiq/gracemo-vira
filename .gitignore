@@ -96,3 +96,11 @@ graceemo_interaction/.venv/
 /vira_interaction/.venv
 vira_interaction/.venv/
 
+# Credentials and sensitive archives (Fail-Safe Preservation)
+env.zip
+vira_interaction/env.zip
+GRaCEmo_ViRa_STM32_Firmware_and_Antigravity_Prompt.zip
+
+# Pre-integration staging and backup archives (preserved locally, excluded from git baseline)
+backup_pre_blender_integration/
+staging_blender_integration/

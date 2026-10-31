@@ -14,6 +14,7 @@ Validates the complete hierarchy:
 import unittest
 import sys
 import os
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -30,6 +31,13 @@ class TestEndToEndCognitiveLoop(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.client = KClient()
+        cls.kernel_available = False
+        try:
+            req = urllib.request.Request("http://127.0.0.1:7780/health")
+            with urllib.request.urlopen(req, timeout=1.0) as resp:
+                cls.kernel_available = (resp.status == 200)
+        except Exception:
+            cls.kernel_available = False
 
     def test_01_agent_intent_decomposition(self):
         """Verify Level 4 Agent decomposes human intents into valid K pipelines."""
@@ -46,6 +54,8 @@ class TestEndToEndCognitiveLoop(unittest.TestCase):
 
     def test_02_k_engine_pipeline_execution(self):
         """Verify native Rust K engine receives, validates, and executes the pipeline."""
+        if not self.kernel_available:
+            self.skipTest("MNSE Kernel is offline at http://127.0.0.1:7780")
         pipe = 'graph::locate[entity: "Master Bedroom"] | nav::reach'
         result = self.client.execute(pipe)
         self.assertTrue(result.get("success"), f"K execution failed: {result.get('error')}")
@@ -55,6 +65,8 @@ class TestEndToEndCognitiveLoop(unittest.TestCase):
 
     def test_03_graph_resolution_and_pathfinding(self):
         """Verify Navigation Skill resolves the entity from graph and plans a path."""
+        if not self.kernel_available:
+            self.skipTest("MNSE Kernel is offline at http://127.0.0.1:7780")
         nav = NavigationSkill()
         # Seed test node in graph if needed
         nav.client.emit(
