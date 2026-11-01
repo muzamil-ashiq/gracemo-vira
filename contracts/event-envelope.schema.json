@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vira.robotics/schemas/event-envelope.schema.json",
+  "title": "VIRA Canonical Event Envelope",
+  "description": "Universal event envelope matching the Rust gracemo-kernel EventBus and gracemo-types.",
+  "type": "object",
+  "required": ["id", "timestamp", "source", "observed_by", "event_type"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique UUIDv4 identifying this event instance."
+    },
+    "trace_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Distributed correlation ID tracing an interaction from acoustic input to motor/screen actuation."
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Identifier for the continuous human-robot interactive session."
+    },
+    "timestamp": {
+      "type": "integer",
+      "description": "Unix epoch timestamp in seconds (or milliseconds when specified in schema_version 2.0)."
+    },
+    "timestamp_iso": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC representation of event creation time."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "RobotBridge",
+        "Vision",
+        "Voice",
+        "Interaction",
+        "Sensor",
+        "Brain",
+        "SafetyGateway",
+        "System"
+      ],
+      "description": "Originating subsystem producing the event."
+    },
+    "observed_by": {
+      "type": "string",
+      "description": "Component or node name that captured or synthesized the observation."
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonically increasing sequence number per source."
+    },
+    "parent_event_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Causal parent event ID establishing provenance in the append-only ledger."
+    },
+    "event_type": {
+      "type": "object",
+      "required": ["type", "data"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Canonical EventType matching gracemo-types enum."
+        },
+        "data": {
+          "type": "object",
+          "description": "Strongly typed payload associated with the event type."
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

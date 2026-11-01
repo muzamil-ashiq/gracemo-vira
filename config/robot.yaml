@@ -4,8 +4,12 @@
 
 kinematics:
   type: "differential_drive"
+  # [UNVERIFIED CONFLICT]: wheel_separation_m 0.32m conflicts with 0.34m in URDF (gracemo_vira.urdf.xacro:11)
+  # and hardware_params.yaml. Physical caliper measurement required before live hardware activation.
+  # See docs/hardware_verification_checklist.md.
   wheel_separation_m: 0.32       # Distance between left and right drive wheels in meters
   wheel_radius_m: 0.065          # Drive wheel radius in meters
+  # [SAFETY LIMIT]: 0.8 m/s is for simulation only; mcu_transport.py clamps hardware to 0.35 m/s until tuned.
   max_linear_velocity_mps: 0.8   # Max forward/backward speed (m/s)
   max_angular_velocity_radps: 1.5 # Max turn speed (rad/s)
 

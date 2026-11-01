@@ -1,0 +1,315 @@
+<?xml version="1.0" ?>
+<!--
+  GRaCEmo ViRa Prototype — Multi-Room Simulated Apartment Facility
+  Coordinates match prototypes/gracemo_integrated_v1/config/destinations.json:
+    - Central Hallway: (0.0, 0.0)
+    - Kitchen & Dining: (-5.0, -2.5)
+    - Master Bedroom:   (-5.0, +2.2)
+    - Home Study:       (+4.5, +3.0)
+    - Living Room:      (+4.0, -2.5)
+-->
+<sdf version="1.6">
+  <world name="gracemo_apartment">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.002</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- World System Plugins -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact"/>
+
+    <scene>
+      <ambient>0.6 0.6 0.6 1.0</ambient>
+      <background>0.3 0.35 0.4 1.0</background>
+      <shadows>false</shadows>
+    </scene>
+
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose>0.0 -7.0 12.0 0 1.0 1.57</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+
+    <!-- Sun Light -->
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 15 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.3 0.2 -0.9</direction>
+    </light>
+
+    <!-- Ground Plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>30 30</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.0</mu>
+                <mu2>1.0</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>30 30</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.85 0.85 0.88 1.0</ambient>
+            <diffuse>0.85 0.85 0.88 1.0</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- Apartment Walls & Partitions                                         -->
+    <!-- Outer Envelope: X in [-8.0, 8.0], Y in [-5.5, 5.5]                   -->
+    <!-- Hallway: Y in [-1.2, 1.2], X from -7.0 to 7.0                        -->
+    <!-- ==================================================================== -->
+    <model name="apartment_walls">
+      <static>true</static>
+
+      <!-- North Wall -->
+      <link name="wall_north">
+        <pose>0.0 5.5 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>16.2 0.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>16.2 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.72 0.75 1</ambient><diffuse>0.7 0.72 0.75 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- South Wall -->
+      <link name="wall_south">
+        <pose>0.0 -5.5 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>16.2 0.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>16.2 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.72 0.75 1</ambient><diffuse>0.7 0.72 0.75 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- West Wall -->
+      <link name="wall_west">
+        <pose>-8.0 0.0 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.2 11.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 11.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.72 0.75 1</ambient><diffuse>0.7 0.72 0.75 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- East Wall -->
+      <link name="wall_east">
+        <pose>8.0 0.0 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.2 11.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 11.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.72 0.75 1</ambient><diffuse>0.7 0.72 0.75 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- Hallway North Dividing Wall (West Section: -8.0 to -6.0) -->
+      <link name="hallway_north_west">
+        <pose>-7.0 1.2 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>2.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.6 0.65 0.7 1</ambient><diffuse>0.6 0.65 0.7 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- Hallway North Dividing Wall (Center Section: -3.8 to 3.5) -->
+      <link name="hallway_north_center">
+        <pose>-0.15 1.2 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>7.3 0.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>7.3 0.2 2.0</size></box></geometry>
+          <material><ambient>0.6 0.65 0.7 1</ambient><diffuse>0.6 0.65 0.7 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- Hallway North Dividing Wall (East Section: 5.5 to 8.0) -->
+      <link name="hallway_north_east">
+        <pose>6.75 1.2 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>2.5 0.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.5 0.2 2.0</size></box></geometry>
+          <material><ambient>0.6 0.65 0.7 1</ambient><diffuse>0.6 0.65 0.7 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- Hallway South Dividing Wall (West Section: -8.0 to -6.0) -->
+      <link name="hallway_south_west">
+        <pose>-7.0 -1.2 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>2.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.6 0.65 0.7 1</ambient><diffuse>0.6 0.65 0.7 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- Hallway South Dividing Wall (Center Section: -3.8 to 3.0) -->
+      <link name="hallway_south_center">
+        <pose>-0.4 -1.2 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>6.8 0.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>6.8 0.2 2.0</size></box></geometry>
+          <material><ambient>0.6 0.65 0.7 1</ambient><diffuse>0.6 0.65 0.7 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- Hallway South Dividing Wall (East Section: 5.2 to 8.0) -->
+      <link name="hallway_south_east">
+        <pose>6.6 -1.2 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>2.8 0.2 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.8 0.2 2.0</size></box></geometry>
+          <material><ambient>0.6 0.65 0.7 1</ambient><diffuse>0.6 0.65 0.7 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- North Divider between Bedroom and Study (at X=0.0, Y: 1.2 to 5.5) -->
+      <link name="divider_north">
+        <pose>0.0 3.35 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.2 4.3 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 4.3 2.0</size></box></geometry>
+          <material><ambient>0.6 0.65 0.7 1</ambient><diffuse>0.6 0.65 0.7 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- South Divider between Kitchen and Living Room (at X=0.0, Y: -5.5 to -1.2) -->
+      <link name="divider_south">
+        <pose>0.0 -3.35 1.0 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.2 4.3 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 4.3 2.0</size></box></geometry>
+          <material><ambient>0.6 0.65 0.7 1</ambient><diffuse>0.6 0.65 0.7 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- Furniture Obstacles for LiDAR Perception & Obstacle Avoidance        -->
+    <!-- ==================================================================== -->
+    <!-- Kitchen Dining Table -->
+    <model name="kitchen_table">
+      <static>true</static>
+      <pose>-6.0 -3.5 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>1.6 1.0 0.8</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.6 1.0 0.8</size></box></geometry>
+          <material><ambient>0.4 0.25 0.15 1</ambient><diffuse>0.5 0.3 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Master Bedroom Bed -->
+    <model name="bedroom_bed">
+      <static>true</static>
+      <pose>-6.2 3.5 0.35 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.2 1.8 0.7</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.2 1.8 0.7</size></box></geometry>
+          <material><ambient>0.2 0.3 0.5 1</ambient><diffuse>0.25 0.35 0.6 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Living Room Sofa -->
+    <model name="living_sofa">
+      <static>true</static>
+      <pose>5.5 -3.8 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2.4 1.0 0.8</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2.4 1.0 0.8</size></box></geometry>
+          <material><ambient>0.3 0.2 0.2 1</ambient><diffuse>0.4 0.25 0.25 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Study Desk -->
+    <model name="study_desk">
+      <static>true</static>
+      <pose>5.8 4.0 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>1.8 0.9 0.8</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.8 0.9 0.8</size></box></geometry>
+          <material><ambient>0.25 0.25 0.3 1</ambient><diffuse>0.3 0.3 0.35 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Corridor Column / Landmark Obstacle -->
+    <model name="hallway_pillar">
+      <static>true</static>
+      <pose>2.5 0.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.25</radius><length>2.0</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.25</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.8 0.5 0.2 1</ambient><diffuse>0.8 0.5 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- Terrain Awareness Test Feature: Inclined Ramp & Uneven Surface      -->
+    <!-- ==================================================================== -->
+    <model name="terrain_test_ramp">
+      <static>true</static>
+      <pose>0.0 2.2 0.12 0.14 0 0</pose>
+      <link name="link">
+        <collision name="c">
+          <geometry><box><size>1.6 1.8 0.10</size></box></geometry>
+        </collision>
+        <visual name="v">
+          <geometry><box><size>1.6 1.8 0.10</size></box></geometry>
+          <material>
+            <ambient>0.6 0.4 0.2 1</ambient>
+            <diffuse>0.7 0.5 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==================================================================== -->
+    <!-- Dynamic Simulated Obstacle for Dynamic Avoidance Scenarios          -->
+    <!-- ==================================================================== -->
+    <model name="dynamic_obstacle">
+      <static>false</static>
+      <pose>1.0 0.0 0.4 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>10.0</mass>
+          <inertia>
+            <ixx>0.5</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.5</iyy><iyz>0</iyz><izz>0.2</izz>
+          </inertia>
+        </inertial>
+        <collision name="c">
+          <geometry><cylinder><radius>0.22</radius><length>0.8</length></cylinder></geometry>
+        </collision>
+        <visual name="v">
+          <geometry><cylinder><radius>0.22</radius><length>0.8</length></cylinder></geometry>
+          <material>
+            <ambient>0.9 0.1 0.1 1</ambient>
+            <diffuse>0.9 0.2 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

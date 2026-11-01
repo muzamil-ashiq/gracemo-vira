@@ -36,7 +36,7 @@ GRaCEmo ViRa decouples high-level reasoning and physical body control using an *
 ## 📁 Repository Layout
 
 - `kernel/` — Core Rust workspace: EventBus, types, ledger, graph, and MCP interfaces.
-- `adapters/` — Python perception and actuation bridge adapters (Vision, Voice, Robot Bridge, LLM).
+- `adapters/` — Python perception and actuation bridge adapters (Vision, Voice, Robot Bridge LLM).
 - `simulation/` — Dockerized ROS2 Jazzy + Gazebo simulation workspace for hardware-free development.
 - `config/` — Declarative TOML/YAML runtime configurations.
 - `docs/` — Architecture documentation, hardware interfaces, and API references.
@@ -50,12 +50,19 @@ GRaCEmo ViRa decouples high-level reasoning and physical body control using an *
    - Python 3.10+ / `uv`
    - Docker (for ROS2 / Gazebo simulation)
 
+
+
 2. **Run Kernel**:
    ```bash
    cd kernel && cargo run -p gracemo-kernel
    ```
 
+
+
 3. **Connect Adapters**:
    ```bash
    cd adapters/robot-bridge && python3 -m gracemo_bridge.bridge
    ```
+  
+
+  

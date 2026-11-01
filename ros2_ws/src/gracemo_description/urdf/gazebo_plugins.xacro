@@ -191,6 +191,32 @@
   </gazebo>
 
   <gazebo>
+    <!-- 2-DOF Active Head / Neck Joint Position Controllers -->
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>neck_pan_joint</joint_name>
+      <topic>/head/pan/cmd_pos</topic>
+      <initial_position>0.0</initial_position>
+      <p_gain>180</p_gain>
+      <i_gain>2</i_gain>
+      <d_gain>12</d_gain>
+      <cmd_max>20</cmd_max>
+      <cmd_min>-20</cmd_min>
+    </plugin>
+    <plugin
+      filename="gz-sim-joint-position-controller-system"
+      name="gz::sim::systems::JointPositionController">
+      <joint_name>neck_tilt_joint</joint_name>
+      <topic>/head/tilt/cmd_pos</topic>
+      <initial_position>0.0</initial_position>
+      <p_gain>180</p_gain>
+      <i_gain>2</i_gain>
+      <d_gain>12</d_gain>
+      <cmd_max>20</cmd_max>
+      <cmd_min>-20</cmd_min>
+    </plugin>
+
     <!-- 6-DOF Right Arm Joint Position Controllers (Milestones M2 / M3) -->
     <plugin
       filename="gz-sim-joint-position-controller-system"

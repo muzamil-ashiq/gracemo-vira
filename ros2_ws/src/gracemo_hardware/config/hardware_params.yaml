@@ -1,0 +1,27 @@
+# GRaCEmo ViRa — Hardware Parameters
+# =====================================
+# Used by gracemo_hardware nodes in HARDWARE mode.
+# All values marked [PENDING] require confirmation on physical hardware.
+
+gracemo_mcu_bridge:
+  ros__parameters:
+    hardware_mode: "hardware"     # "sim" or "hardware"
+    transport_type: "mock"        # "mock" (testing) or "serial" (real STM32)
+    # [PENDING] Confirm port by running: ls -la /dev/ttyUSB* /dev/ttyACM* on Jetson
+    mcu_port: "/dev/ttyUSB0"
+    # [PENDING] Confirm with STM32 firmware team
+    mcu_baud_rate: 115200
+    wheel_separation_m: 0.34       # Confirmed from URDF: wheelbase = 0.34m
+    wheel_radius_m: 0.065          # Confirmed from URDF: wheel_radius = 0.065m
+    cmd_vel_watchdog_sec: 0.5
+    publish_odom_tf: true
+    odom_frame_id: "odom"
+    base_frame_id: "base_footprint"
+
+gracemo_hardware_status:
+  ros__parameters:
+    hardware_mode: "hardware"
+    scan_timeout_sec: 2.0
+    imu_timeout_sec: 2.0
+    odom_timeout_sec: 1.0
+    publish_rate_hz: 2.0

@@ -53,10 +53,10 @@
       <material name="dark_grey" />
     </visual>
 
-    <collision>
-      <origin xyz="0 0 ${chassis_height/2.0 + 0.01}" rpy="0 0 0" />
+    <collision name="base_link_collision">
+      <origin xyz="0 0 0.08" rpy="0 0 0" />
       <geometry>
-        <box size="0.24 0.20 ${chassis_height}" />
+        <cylinder radius="${chassis_radius}" length="0.12" />
       </geometry>
     </collision>
 
@@ -249,6 +249,12 @@
       </geometry>
       <material name="camera_lens_black" />
     </visual>
+    <collision name="torso_collision">
+      <origin xyz="0 0 ${torso_height/2.0}" rpy="0 0 0" />
+      <geometry>
+        <box size="${torso_depth} ${torso_width} ${torso_height}" />
+      </geometry>
+    </collision>
     <inertial>
       <origin xyz="0 0 0.05" rpy="0 0 0" />
       <mass value="0.3" />
@@ -280,6 +286,12 @@
       </geometry>
       <material name="lidar_orange" />
     </visual>
+    <collision name="lidar_collision">
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.045" length="0.03" />
+      </geometry>
+    </collision>
     <inertial>
       <origin xyz="0 0 0.02" rpy="0 0 0" />
       <mass value="0.2" />
@@ -294,9 +306,20 @@
   </joint>
 
   <!-- ======================================================================== -->
-  <!-- Humanoid Head & Camera                                                   -->
+  <!-- 2-DOF Active Articulated Head & Neck Assembly                            -->
   <!-- ======================================================================== -->
-  <link name="head_link">
+  <!-- Joint 1: Neck Pan Joint (Yaw around vertical Z-axis, ±120°) -->
+  <joint name="neck_pan_joint" type="revolute">
+    <parent link="torso_link" />
+    <child link="neck_pan_link" />
+    <origin xyz="0 0 ${torso_height}" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+    <limit lower="-2.0944" upper="2.0944" effort="25.0" velocity="3.0" />
+    <dynamics damping="0.2" friction="0.05" />
+  </joint>
+
+  <!-- Intermediate Neck Pan Turntable Collar Link -->
+  <link name="neck_pan_link">
     <visual>
       <origin xyz="0 0 0.02" rpy="0 0 0" />
       <geometry>
@@ -304,32 +327,60 @@
       </geometry>
       <material name="dark_grey" />
     </visual>
+    <collision name="neck_pan_collision">
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.035" length="0.04" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <mass value="0.15" />
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
+    </inertial>
+  </link>
+
+  <!-- Joint 2: Neck Tilt Joint (Pitch around lateral Y-axis, ±45°) -->
+  <joint name="neck_tilt_joint" type="revolute">
+    <parent link="neck_pan_link" />
+    <child link="head_link" />
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.7854" upper="0.7854" effort="25.0" velocity="3.0" />
+    <dynamics damping="0.2" friction="0.05" />
+  </joint>
+
+  <!-- Articulated Humanoid Head Body Link -->
+  <link name="head_link">
+    <!-- Head Visual Shell -->
     <visual>
-      <origin xyz="0.01 0 0.09" rpy="0 0 0" />
+      <origin xyz="0.01 0 0.05" rpy="0 0 0" />
       <geometry>
         <box size="0.14 0.16 0.11" />
       </geometry>
       <material name="chassis_blue" />
     </visual>
+    <!-- Front Sensor Visor Display Face -->
     <visual>
-      <origin xyz="0.081 0 0.09" rpy="0 0 0" />
+      <origin xyz="0.081 0 0.05" rpy="0 0 0" />
       <geometry>
         <box size="0.006 0.13 0.07" />
       </geometry>
       <material name="camera_lens_black" />
     </visual>
+    <!-- Preserved Head Collision Geometry -->
+    <collision name="head_collision">
+      <origin xyz="0.01 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.16 0.11" />
+      </geometry>
+    </collision>
     <inertial>
-      <origin xyz="0.01 0 0.08" rpy="0 0 0" />
-      <mass value="0.5" />
+      <origin xyz="0.01 0 0.04" rpy="0 0 0" />
+      <mass value="0.40" />
       <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
     </inertial>
   </link>
-
-  <joint name="head_joint" type="fixed">
-    <parent link="torso_link" />
-    <child link="head_link" />
-    <origin xyz="0 0 ${torso_height}" rpy="0 0 0" />
-  </joint>
 
   <link name="camera_link">
     <visual>
@@ -339,12 +390,18 @@
       </geometry>
       <material name="metallic_silver" />
     </visual>
+    <collision name="camera_collision">
+      <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+    </collision>
   </link>
 
   <joint name="camera_joint" type="fixed">
     <parent link="head_link" />
     <child link="camera_link" />
-    <origin xyz="0.085 0 0.09" rpy="0 0 0" />
+    <origin xyz="0.085 0 0.05" rpy="0 0 0" />
   </joint>
 
   <link name="camera_optical_link" />
@@ -367,6 +424,12 @@
       </geometry>
       <material name="metallic_silver" />
     </visual>
+    <collision name="left_arm_collision">
+      <origin xyz="0 0 -0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.035 0.18" />
+      </geometry>
+    </collision>
     <inertial>
       <origin xyz="0 0 -0.09" rpy="0 0 0" />
       <mass value="0.2" />
@@ -401,6 +464,12 @@
       </geometry>
       <material name="dark_grey" />
     </visual>
+    <collision name="right_shoulder_yaw_collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.038" />
+      </geometry>
+    </collision>
     <inertial>
       <mass value="0.15" />
       <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
@@ -434,6 +503,12 @@
       </geometry>
       <material name="matte_dark_titanium" />
     </visual>
+    <collision name="right_shoulder_pitch_collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.034" />
+      </geometry>
+    </collision>
     <inertial>
       <mass value="0.15" />
       <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
@@ -568,6 +643,12 @@
       </geometry>
       <material name="metallic_silver" />
     </visual>
+    <collision name="right_wrist_pitch_collision">
+      <origin xyz="0 0 0" rpy="0 ${pi/2} 0" />
+      <geometry>
+        <cylinder radius="0.020" length="0.025" />
+      </geometry>
+    </collision>
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <mass value="0.05" />
@@ -593,6 +674,12 @@
       </geometry>
       <material name="matte_dark_titanium" />
     </visual>
+    <collision name="right_wrist_yaw_collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.020" />
+      </geometry>
+    </collision>
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <mass value="0.04" />

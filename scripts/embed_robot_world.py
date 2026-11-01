@@ -3,10 +3,13 @@ import subprocess
 import os
 import re
 
-# 1. Convert xacro to URDF
-xacro_file = "/home/mab/Applications/lpu-project/gracemo-vira/ros2_ws/src/gracemo_description/urdf/gracemo_vira.urdf.xacro"
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+xacro_file = str(ROOT_DIR / "ros2_ws" / "src" / "gracemo_description" / "urdf" / "gracemo_vira.urdf.xacro")
+install_setup = str(ROOT_DIR / "ros2_ws" / "install" / "setup.bash")
 urdf_file = "/tmp/robot.urdf"
-cmd = f"source /opt/ros/humble/setup.bash && source /home/mab/Applications/lpu-project/gracemo-vira/ros2_ws/install/setup.bash 2>/dev/null && xacro {xacro_file} -o {urdf_file}"
+cmd = f"source /opt/ros/humble/setup.bash && source {install_setup} 2>/dev/null && xacro {xacro_file} -o {urdf_file}"
 subprocess.run(["bash", "-c", cmd], check=True)
 
 # 2. Convert URDF to SDF
@@ -20,20 +23,46 @@ robot_model_xml = robot_sdf[start:end]
 # 2a. Inject initial pose (default: central hallway (0,0) for navigation missions; or bedroom for manipulation)
 import sys
 spawn_pose = "0.0 0.0 0.025 0 0 0"
-if len(sys.argv) > 1 and "bedroom" in sys.argv[1].lower():
+if len(sys.argv) > 1 and "multi_room" in sys.argv[1].lower():
+    spawn_pose = "-5.0 2.2 0.025 0 0 -1.570796"
+elif len(sys.argv) > 1 and "bedroom" in sys.argv[1].lower():
     spawn_pose = "-4.322 2.50 0.025 0 0 1.570796"
 pose_tag = f"    <pose>{spawn_pose}</pose>\n"
 tag_end = robot_model_xml.find(">") + 1
 robot_model_xml = robot_model_xml[:tag_end] + "\n" + pose_tag + robot_model_xml[tag_end:]
 
 # 2b. Fix contact sensor collision name mismatch caused by gz sdf -p link lumping
-robot_model_xml = robot_model_xml.replace(
-    "<collision>finger_left_collision</collision>",
-    "<collision>finger_left_link_fixed_joint_lump__finger_left_collision_collision</collision>"
-)
-robot_model_xml = robot_model_xml.replace(
-    "<collision>finger_right_collision</collision>",
-    "<collision>finger_right_link_fixed_joint_lump__finger_right_collision_collision</collision>"
+m_bumper = re.search(r"<collision name='([^']*bumper_collision[^']*)'>", robot_model_xml)
+if m_bumper:
+    actual_bumper_collision = m_bumper.group(1)
+    robot_model_xml = robot_model_xml.replace(
+        "<collision>bumper_collision</collision>",
+        f"<collision>{actual_bumper_collision}</collision>"
+    )
+    print(f"Patched bumper contact collision to: {actual_bumper_collision}")
+
+m_left = re.search(r"<collision name='([^']*finger_left_collision[^']*)'>", robot_model_xml)
+if m_left:
+    actual_left = m_left.group(1)
+    robot_model_xml = robot_model_xml.replace(
+        "<collision>finger_left_collision</collision>",
+        f"<collision>{actual_left}</collision>"
+    )
+
+m_right = re.search(r"<collision name='([^']*finger_right_collision[^']*)'>", robot_model_xml)
+if m_right:
+    actual_right = m_right.group(1)
+    robot_model_xml = robot_model_xml.replace(
+        "<collision>finger_right_collision</collision>",
+        f"<collision>{actual_right}</collision>"
+    )
+
+# Ensure bumper_contact sensor in <contact> uses /bumper/contacts topic
+robot_model_xml = re.sub(
+    r"(<sensor name='bumper_contact'[^>]*>.*?<contact>.*?<topic>)[^<]*(</topic>)",
+    r"\1/bumper/contacts\2",
+    robot_model_xml,
+    flags=re.DOTALL
 )
 
 # 2c. Inject high-friction physical contact surfaces into finger links
@@ -65,7 +94,7 @@ robot_model_xml = re.sub(
 )
 
 # 3. Read apartment_floor.world
-world_file = "/home/mab/Applications/lpu-project/gracemo-vira/ros2_ws/src/gracemo_gazebo/worlds/apartment_floor.world"
+world_file = str(ROOT_DIR / "ros2_ws" / "src" / "gracemo_gazebo" / "worlds" / "apartment_floor.world")
 with open(world_file, "r") as f:
     world_content = f.read()
 
@@ -91,7 +120,7 @@ new_world = re.sub(
 with open(world_file, "w") as f:
     f.write(new_world)
 
-install_world = "/home/mab/Applications/lpu-project/gracemo-vira/ros2_ws/install/gracemo_gazebo/share/gracemo_gazebo/worlds/apartment_floor.world"
+install_world = str(ROOT_DIR / "ros2_ws" / "install" / "gracemo_gazebo" / "share" / "gracemo_gazebo" / "worlds" / "apartment_floor.world")
 if os.path.exists(install_world):
     with open(install_world, "w") as f:
         f.write(new_world)

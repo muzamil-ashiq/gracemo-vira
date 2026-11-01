@@ -34,7 +34,15 @@
   </material>
 
   <material name="safety_orange">
-    <color rgba="1.0 0.40 0.0 1.0"/>
+    <color rgba="1.0 0.4745 0.0 1.0"/>
+  </material>
+
+  <material name="accent_orange">
+    <color rgba="1.0 0.4745 0.0 1.0"/>
+  </material>
+
+  <material name="pure_white">
+    <color rgba="0.96 0.96 0.96 1.0"/>
   </material>
 
 </robot>

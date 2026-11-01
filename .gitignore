@@ -54,6 +54,12 @@ blueprints/
 .blueprint/
 /*.jpg
 /*.png
+scripts/*_debug_frame.jpg
+scratch/
+*IMPLEMENTATION_REPORT*.md
+!docs/UI_UX_IMPLEMENTATION_REPORT.md
+*IMPLEMENTATION_PLAN*.md
+
 
 # IDE & OS
 .vscode/
@@ -62,3 +68,40 @@ blueprints/
 *.swo
 .DS_Store
 Thumbs.db
+
+# Explicit local virtual environments
+/.venv/
+/venv/
+/venv_train/
+**/.venv/
+**/venv/
+**/venv_train/
+
+# Python bytecode and runtime lock files
+**/__pycache__/
+*.pyc
+agent_bridge/tasks/*.lock
+
+# Local MCP configuration may contain machine-specific settings
+.agents/mcp_config.json
+
+# Explicit virtual environment paths
+.venv/
+venv/
+venv_train/
+graceemo_interaction/.venv/
+
+# Exclude shared external virtual-environment symlinks
+/.venv
+/graceemo_interaction/.venv
+/vira_interaction/.venv
+vira_interaction/.venv/
+
+# Credentials and sensitive archives (Fail-Safe Preservation)
+env.zip
+vira_interaction/env.zip
+GRaCEmo_ViRa_STM32_Firmware_and_Antigravity_Prompt.zip
+
+# Pre-integration staging and backup archives (preserved locally, excluded from git baseline)
+backup_pre_blender_integration/
+staging_blender_integration/

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vira.robotics/schemas/navigation.schema.json",
+  "title": "VIRA Navigation Specification Schema",
+  "description": "Contracts for spatial path execution, goal specification, and topological room navigation.",
+  "type": "object",
+  "required": ["goal_type", "target"],
+  "properties": {
+    "goal_type": {
+      "type": "string",
+      "enum": ["COORDINATES", "ROOM", "WAYPOINT_PATH", "ENTITY_FOLLOW"]
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "yaw": { "type": ["number", "null"] },
+        "room_name": { "type": "string" },
+        "entity_id": { "type": "string" }
+      }
+    },
+    "path_waypoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["x", "y"],
+        "properties": {
+          "x": { "type": "number" },
+          "y": { "type": "number" },
+          "reach_tolerance_m": { "type": "number", "default": 0.3 }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "max_linear_vel_mps": { "type": "number", "minimum": 0.05, "maximum": 0.8, "default": 0.35 },
+        "max_angular_vel_radps": { "type": "number", "minimum": 0.1, "maximum": 1.5, "default": 0.75 },
+        "goal_tolerance_m": { "type": "number", "minimum": 0.05, "maximum": 1.0, "default": 0.25 },
+        "goal_yaw_tolerance_rad": { "type": "number", "minimum": 0.02, "maximum": 0.5, "default": 0.1 },
+        "doorway_slowdown_enabled": { "type": "boolean", "default": true },
+        "timeout_sec": { "type": "number", "minimum": 5.0, "maximum": 300.0, "default": 60.0 }
+      },
+      "additionalProperties": false
+    },
+    "recovery_policy": {
+      "type": "object",
+      "properties": {
+        "max_retries": { "type": "integer", "default": 3 },
+        "backup_distance_m": { "type": "number", "default": 0.25 },
+        "in_place_spin_clean": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

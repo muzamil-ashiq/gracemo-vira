@@ -68,6 +68,7 @@ class BaseController:
             self.node.subscribe(GzPoseV, "/world/gracemo_home/dynamic_pose/info", self._on_pose_v)
         if GzContacts is not None:
             self.node.subscribe(GzContacts, "/bumper/contacts", self._on_contacts)
+            self.node.subscribe(GzContacts, "/world/gracemo_home/model/gracemo_vira/link/base_footprint/sensor/bumper_contact/contact", self._on_contacts)
         self.node.subscribe(GzLaserScan, "/tof/front_left", self._on_tof_fl)
         self.node.subscribe(GzLaserScan, "/tof/front_right", self._on_tof_fr)
         self.node.subscribe(GzLaserScan, "/tof/rear", self._on_tof_rear)

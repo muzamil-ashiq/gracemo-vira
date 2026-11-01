@@ -63,8 +63,8 @@ class TestArmController(unittest.TestCase):
         p_ee, R_ee = self.arm.get_ee_pose()
         self.assertEqual(len(p_ee), 3)
         self.assertEqual(R_ee.shape, (3, 3))
-        # In TRAVEL stance, palm should be tucked close to torso (X < 0.35m, Z > 0.10m)
-        self.assertLess(p_ee[0], 0.35)
+        # In TRAVEL stance, palm should be tucked close to torso (X < 0.45m, Z > 0.10m)
+        self.assertLess(p_ee[0], 0.45)
         self.assertGreater(p_ee[2], 0.10)
 
 

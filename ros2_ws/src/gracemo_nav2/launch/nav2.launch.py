@@ -31,7 +31,7 @@ def generate_launch_description():
         # 2. Nav2 Navigation Stack (Path Planning & DWB Obstacle Avoidance)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                os.path.join(pkg_nav2_bringup, "launch", "navigation_launch.py")
+                os.path.join(pkg_gracemo_nav2, "launch", "navigation_launch.py")
             ),
             launch_arguments={
                 "use_sim_time": use_sim_time,
@@ -40,7 +40,16 @@ def generate_launch_description():
             }.items()
         ),
 
-        # 3. RViz2 Visualizer with Nav2 & 2D Goal Pose Tool
+        # 3. Command Velocity Multiplexer / Arbiter (Priority: Teleop > Nav2)
+        Node(
+            package="gracemo_nav2",
+            executable="cmd_vel_mux_node.py",
+            name="cmd_vel_mux",
+            output="screen",
+            parameters=[nav2_params_file, {"use_sim_time": use_sim_time}],
+        ),
+
+        # 4. RViz2 Visualizer with Nav2 & 2D Goal Pose Tool
         Node(
             package="rviz2",
             executable="rviz2",
