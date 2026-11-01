@@ -41,7 +41,9 @@ class ClosedLoopNavigator(Node):
         self.waypoints = ROOM_WAYPOINTS[self.target_room]
         self.current_wp_idx = 0
 
-        self.cmd_pub = self.create_publisher(Twist, "/cmd_vel", 10)
+        self.declare_parameter("cmd_topic", "/cmd_vel_teleop")
+        cmd_topic = self.get_parameter("cmd_topic").get_parameter_value().string_value
+        self.cmd_pub = self.create_publisher(Twist, cmd_topic, 10)
         self.odom_sub = self.create_subscription(Odometry, "/odom", self._on_odom, 10)
         self.scan_sub = self.create_subscription(LaserScan, "/scan", self._on_scan, 10)
 

@@ -58,4 +58,22 @@ def generate_launch_description():
                 "kernel_url": kernel_url,
             }]
         ),
+
+        # 4. Command Coordinator & Terrain Safety Monitor
+        Node(
+            package="gracemo_nav2",
+            executable="coordinator_node.py",
+            name="gracemo_command_coordinator",
+            output="screen",
+            condition=IfCondition(launch_nav2),
+            parameters=[{"use_sim_time": use_sim_time}],
+        ),
+        Node(
+            package="gracemo_nav2",
+            executable="terrain_monitor_node.py",
+            name="gracemo_terrain_monitor",
+            output="screen",
+            condition=IfCondition(launch_nav2),
+            parameters=[{"use_sim_time": use_sim_time}],
+        ),
     ])

@@ -33,8 +33,8 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     pkg_hardware = get_package_share_directory("gracemo_hardware")
-    pkg_nav = get_package_share_directory("gracemo_navigation")
-    pkg_robot_desc = get_package_share_directory("gracemo_robot_description")
+    pkg_nav = get_package_share_directory("gracemo_nav2")
+    pkg_robot_desc = get_package_share_directory("gracemo_description")
 
     transport_type = LaunchConfiguration("transport_type")
     mcu_port = LaunchConfiguration("mcu_port")
@@ -46,8 +46,8 @@ def generate_launch_description():
     xacro_file = os.path.join(pkg_robot_desc, "urdf", "gracemo_vira.urdf.xacro")
     robot_description = ParameterValue(Command(["xacro ", xacro_file]), value_type=str)
 
-    default_map = os.path.join(pkg_nav, "maps", "sim_apartment_map.yaml")
-    default_params = os.path.join(pkg_nav, "config", "nav2_params_hardware.yaml")
+    default_map = os.path.join(pkg_nav, "maps", "physical_lab_map.yaml")
+    default_params = os.path.join(pkg_nav, "config", "nav2_physical_params.yaml")
     hw_params = os.path.join(pkg_hardware, "config", "hardware_params.yaml")
     pkg_nav2_bringup = get_package_share_directory("nav2_bringup")
     rviz_config = os.path.join(pkg_nav2_bringup, "rviz", "nav2_default_view.rviz")
@@ -184,8 +184,8 @@ def generate_launch_description():
             period=5.0,
             actions=[
                 Node(
-                    package="gracemo_command_coordinator",
-                    executable="coordinator_node",
+                    package="gracemo_nav2",
+                    executable="coordinator_node.py",
                     name="gracemo_command_coordinator",
                     output="screen",
                     parameters=[{"use_sim_time": False}]
