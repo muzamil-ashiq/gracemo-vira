@@ -1,0 +1,80 @@
+"""
+Design System Tokens for GRaCEmo ViRa Unified Control Center.
+Professional Robotics Engineering Workstation Design Specification.
+"""
+
+# Foundational Surfaces & Backgrounds
+COLOR_BG_MAIN = "#F5F6F8"
+COLOR_BG_DARK = "#F5F6F8"  # Kept for backward compatibility
+COLOR_SURFACE = "#FFFFFF"
+COLOR_PANEL_MAIN = "#FFFFFF"  # Primary content cards
+COLOR_SURFACE_ALT = "#F0F3F6"
+COLOR_PANEL_SECONDARY = "#F8FAFC"  # Secondary panels/wells
+COLOR_PANEL_ELEVATED = "#FFFFFF"
+
+# Sidebar Tokens (Dark Slate)
+COLOR_SIDEBAR_BG = "#17212B"
+COLOR_SIDEBAR_ACTIVE = "#233241"
+COLOR_SIDEBAR_HOVER = "#1D2A37"
+COLOR_TEXT_SIDEBAR = "#D6E0EA"
+COLOR_TEXT_SIDEBAR_MUTED = "#8696A6"
+
+# Text & Content Colors
+COLOR_TEXT_PRIMARY = "#202B36"
+COLOR_TEXT_SECONDARY = "#687583"
+COLOR_TEXT_MUTED = "#9AA6B2"
+COLOR_TEXT_DARK = "#202B36"
+COLOR_TEXT_LIGHT = "#FFFFFF"
+
+# Borders & Dividers
+COLOR_BORDER = "#E3E7EB"
+COLOR_BORDER_LIGHT = "#EEF1F4"
+COLOR_BORDER_FOCUS = "#2463A6"
+
+# Semantic Accents & Actions
+COLOR_ACCENT_PRIMARY = "#2463A6"
+COLOR_ACCENT_HOVER = "#1B4E85"
+COLOR_ACCENT_ACTIVE = "#153E6B"
+COLOR_ACCENT_WHITE = "#FFFFFF"
+
+# Brand Identity (Restrained GRaCEmo Orange)
+COLOR_BRAND_ORANGE = "#E65100"
+COLOR_ACCENT_ORANGE = "#E65100"  # Alias
+COLOR_ACCENT_ORANGE_HOVER = "#FF6D00"
+COLOR_ACCENT_ORANGE_DIM = "#FFE0B2"
+
+# Status States & Badges
+COLOR_SUCCESS = "#23865B"
+COLOR_SUCCESS_BG = "#EBF5F0"
+COLOR_SUCCESS_BORDER = "#BCE3D0"
+
+COLOR_WARNING = "#D99A2B"
+COLOR_WARNING_BG = "#FBF4E8"
+COLOR_WARNING_BORDER = "#F5DFB5"
+
+COLOR_ERROR = "#C74747"
+COLOR_ERROR_BG = "#FAECEC"
+COLOR_ERROR_BORDER = "#F2B8B8"
+
+COLOR_INFO = "#2463A6"
+COLOR_INFO_BG = "#EAF2FA"
+COLOR_INFO_BORDER = "#BAD4EE"
+
+COLOR_OFFLINE = "#8896A4"
+COLOR_OFFLINE_BG = "#EDF0F3"
+COLOR_OFFLINE_BORDER = "#D2D9E0"
+
+# Typography Families
+FONT_FAMILY_PRIMARY = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+FONT_FAMILY_MONO = "'JetBrains Mono', 'Fira Code', 'DejaVu Sans Mono', Consolas, monospace"
+
+# Metrics & Spacing
+BORDER_RADIUS_SM = 4
+BORDER_RADIUS_MD = 6
+BORDER_RADIUS_LG = 8
+
+SPACING_XS = 4
+SPACING_SM = 8
+SPACING_MD = 12
+SPACING_LG = 16
+SPACING_XL = 24

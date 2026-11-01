@@ -57,6 +57,7 @@ blueprints/
 scripts/*_debug_frame.jpg
 scratch/
 *IMPLEMENTATION_REPORT*.md
+!docs/UI_UX_IMPLEMENTATION_REPORT.md
 *IMPLEMENTATION_PLAN*.md
 
 
